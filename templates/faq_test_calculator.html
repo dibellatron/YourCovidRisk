@@ -1,0 +1,315 @@
+<h2 style="margin-top: 3rem; margin-bottom: 2rem; color: #0891b2; border-bottom: 3px solid #cffafe; padding-bottom: 0.75rem; position: relative; font-size: 1.75rem;">
+      🧪 Test Calculator
+      <span style="position: absolute; bottom: -3px; left: 0; width: 60px; height: 3px; background: linear-gradient(90deg, #0891b2 0%, #06b6d4 100%); border-radius: 2px;"></span>
+    </h2>
+    <div id="faq-container">
+    <div class="faq-item">
+      <button type="button" class="faq-question" id="test-how-calculated" onclick="toggleFaqAnswer(this)">
+        How is the probability I have Covid calculated?
+      </button>
+      <div class="faq-answer">
+        <p>Your likelihood of a Covid infection is estimated by combining epidemiological data with your individual test results using principles from probability. Here’s how the calculation works in different scenarios:</p>
+        <h4>1. Initial Risk Based on Symptoms and Local Conditions</h4>
+        <ul>
+          <li><strong>For Symptomatic Users:</strong> If you report having symptoms, the app uses your local test positivity rate as the starting probability. This comes from the <a href="https://www.walgreens.com/healthcare-solutions/covid-19-index" target="_blank" rel="noopener">Walgreens Respiratory Index</a>, which provides state-level data. If you select a state, we use that state's rate; otherwise we use the national rate. If positivity data isn't available for your state, we fall back to the national rate.</li>
+          <li><strong>For Asymptomatic Users:</strong> When you don't have symptoms, we use a more complex calculation that combines Covid prevalence estimates from <a href="https://www.pmc19.com/data/index.php" target="_blank" rel="noopener">the PMC model</a> with local positivity rates. The calculation accounts for the fact that <a href="https://europepmc.org/article/PMC/PMC9321237" target="_blank" rel="noopener">about 32% of currently infected individuals are asymptomatic</a>. We derive the total number of symptomatic people in the population using the positivity rate, then calculate what fraction of asymptomatic people are likely infected. This gives a more accurate prior probability than simply using overall prevalence.</li>
+        </ul>
+        <h4>2. Adjustment for Covid Exposure Level</h4>
+        <p>Your recent behavior also influences your risk. The app asks you to rate your recent potential Covid exposure compared to the average person. This helps adjust your baseline risk based on your actual activities and exposure patterns.</p>
+        <p>The baseline estimate is your calculated risk assuming average exposure levels. Your selection adjusts this baseline as follows:</p>
+        <ul style="margin: 0; padding-left: 20px;">
+          <li><strong>Much more:</strong> You had significantly more high-risk exposure than typical (e.g., large gatherings, travel, minimal precautions). Your risk is adjusted to <strong>5 times</strong> the baseline estimate.</li>
+          <li><strong>Somewhat more:</strong> You had more social contact or fewer precautions than average (e.g., attended events, dined indoors frequently). Your risk is adjusted to <strong>2 times</strong> the baseline estimate.</li>
+          <li><strong>About average:</strong> Your activities and precautions were typical for most people in your area. This <strong>baseline risk estimate is used directly</strong> without adjustment.</li>
+          <li><strong>Somewhat less:</strong> You took more precautions than average but still engaged in most normal activities with some safety measures. Your risk is adjusted to <strong>50%</strong> of the baseline estimate.</li>
+          <li><strong>Much less:</strong> You had significantly fewer high-risk activities than most people (e.g., avoided crowds, masked consistently, limited indoor activities). Your risk is adjusted to <strong>10%</strong> of the baseline estimate.</li>
+          <li><strong>Almost none:</strong> You had minimal contact with others and took maximum precautions (e.g., stayed home, fit-tested N95 when out, avoided indoor spaces). Your risk is adjusted to <strong>1%</strong> of the baseline estimate.</li>
+        </ul>
+        <p><em>Note:</em> If you do not find any of these predefined risk categories or operationalizations appropriate for your situation, you can manually enter your own prior probability in the Advanced settings.</p>
+        <h4>3. Updating Risk with Test Results Using Bayes’ Theorem</h4>
+        <p>For every test you enter, the app updates your risk using Bayes’ theorem. Each test has its own sensitivity (true positive rate) and specificity (true negative rate), which may differ based on whether you have symptoms.</p>
+        <ul class="formula-list">
+          <li>
+            <span class="formula-label"><strong>Positive Test Result:</strong></span>
+            <div class="formula-wrapper">Posterior Risk = <span class="faq-fraction">
+              <span class="faq-numerator">sensitivity × prior risk</span>
+              <span class="faq-denominator">sensitivity × prior risk + (1 - specificity) × (1 - prior risk)</span>
+            </span></div>
+          </li>
+          <li>
+            <span class="formula-label"><strong>Negative Test Result:</strong></span>
+            <div class="formula-wrapper">Posterior Risk = <span class="faq-fraction">
+              <span class="faq-numerator">(1 - sensitivity) × prior risk</span>
+              <span class="faq-denominator">(1 - sensitivity) × prior risk + specificity × (1 - prior risk)</span>
+            </span></div>
+          </li>
+        </ul>
+        <h4>4. Advanced Settings: Manual Data Entry</h4>
+        <p>The advanced mode lets you manually enter local Covid prevalence and positivity rates, overriding the automatic data lookup from PMC and Walgreens. This is useful if you have more recent or specific data for your situation.
+ You can also manually set your own prior probability, which will bypass all other calculations and use only your test results to update the risk using Bayes’ theorem.</p>
+      </div>
+    </div>
+    
+    <div class="faq-item">
+      <button type="button" class="faq-question" onclick="toggleFaqAnswer(this)">
+        I don't have symptoms but tested positive. Why is my infection probability so low?
+      </button>
+      <div class="faq-answer">
+        <p>This counterintuitive result illustrates a fundamental principle in medical testing: <strong>even excellent tests can't overcome very low baseline probabilities</strong>. Here's why this happens:</p>
+        
+        <p><strong>Starting Point Matters:</strong> When you're asymptomatic, your starting probability of having COVID is much lower than if you had symptoms. For example, in the Spring—historically the lowest COVID activity period—an asymptomatic person in California starts with only about 0.3% probability of infection. Compare this to a symptomatic person who starts with about 25% probability (the current positivity rate in California as of May 24, 2025).</p>
+        
+        <p><strong>Exposure Level Effects:</strong> Your exposure level dramatically affects these calculations. COVID-cautious people who select "much less" or "somewhat less" exposure will have even lower infection probabilities with a positive test. The calculator accounts for how your behavior compares to the average person.</p>
+        
+        <p><strong>Test Performance vs. Baseline Risk:</strong> Even the best home tests like Metrix or Pluslife have some false positive rate (about 0.8% for Metrix). When your true infection risk is very low, false positives become proportionally more likely than true positives. If 1,000 uninfected asymptomatic people take a Metrix test, about 8 will get false positive results. But if only 3 people out of 1,000 are actually infected, the test might detect 2-3 of them. So you could have 8 false positives and only 2-3 true positives—meaning most positive results are false!</p>
+        
+        <p><strong>Seasonal and Prevalence Effects:</strong> The time of year dramatically affects these calculations. During peak season in early January, when national prevalence reaches around 2.5%, an average asymptomatic person with a positive Metrix test would have just over 50% probability of infection. But counterintuitively, during lower prevalence periods (like Spring), the average asymptomatic person who tests positive is more likely not infected than infected—even with high-quality tests like Metrix or Pluslife.</p>
+        
+        <p><strong>Symptoms Change Everything:</strong> Having COVID-like symptoms completely transforms the calculation. A symptomatic person with the same positive test would have a <em>much</em> higher probability of infection, because they start with a much higher baseline probability.</p>
+        
+        <div style="background-color: #fef2f2; border-left: 4px solid #dc2626; padding: 1rem; margin: 1rem 0; border-radius: 4px;">
+          <p style="margin: 0;"><strong style="color: #dc2626;">⚠️ Important: Still Act as if You Have COVID!</strong> This analysis absolutely does not mean you should ignore a positive test result. Even if there's only a 25% chance you have COVID, that's still <em>much higher</em> than your baseline risk. There's significant risk of bad outcomes to you and others if you act as though you don't have COVID.</p>
+        </div>
+        
+        <p><strong>Learning Tool:</strong> Try experimenting with the test calculator—change your symptoms, location, exposure level, or test type to see how dramatically these factors affect your results. After calculating your probability, click "Explain calculation" to see the detailed mathematical explanation of exactly how Bayes' theorem combines all these factors. This demonstrates why context is crucial in medical testing and why the same test result can mean very different things for different people.</p>
+      </div>
+    </div>
+    
+    <div class="faq-item">
+      <button type="button" class="faq-question" onclick="toggleFaqAnswer(this)">
+        I don't see my test in the list. What should I do?
+      </button>
+      <div class="faq-answer">
+        <p>I'm gradually adding more test data to the calculator as new studies become available and as I have time to review the literature. If you don't see your specific test in the dropdown list, you can select <strong>"Other RAT (Rapid Antigen Test)"</strong> for reasonably accurate results.</p>
+        
+        <p>The "Other RAT" option uses average performance characteristics across multiple rapid antigen tests, so while it won't be as precise as test-specific data, it will still give you a good estimate of your infection probability based on your test results.</p>
+      </div>
+    </div>
+    
+    <div class="faq-item">
+      <button type="button" class="faq-question" id="uncertainty-ranges" onclick="toggleFaqAnswer(this)">
+        How are the uncertainty ranges calculated?
+      </button>
+      <div class="faq-answer">
+        <p>The uncertainty ranges account for multiple sources of uncertainty that affect your risk calculation. We use a statistical technique called <a href="https://en.wikipedia.org/wiki/Monte_Carlo_method" target="_blank" rel="noopener">Monte Carlo simulation</a>, running 10,000 different scenarios that sample from the following uncertainty sources:</p>
+        
+        <p><strong>Test Performance Uncertainty:</strong> Each test's sensitivity and specificity have their own uncertainties based on the clinical studies that validated them. We use <a href="https://en.wikipedia.org/wiki/Beta_distribution" target="_blank" rel="noopener">Beta distributions</a> that properly reflect this uncertainty—tests validated on larger study populations have tighter uncertainty bounds than those validated on smaller groups.</p>
+        
+        <p><strong>Positivity Rate Uncertainty:</strong> Local positivity rates from testing sites also have uncertainty based on the volume of testing in your region. Areas with more testing provide more precise positivity rate estimates.</p>
+        
+        <p><strong>Prevalence Uncertainty:</strong> For asymptomatic users, prevalence point estimates come from <a href="https://www.pmc19.com/data/index.php" target="_blank" rel="noopener">the PMC model</a>, but PMC does not provide uncertainty intervals. To quantify prevalence uncertainty, the calculator uses a custom Bayesian hierarchical wastewater model calibrated against <a href="https://www.healthdata.org/research-analysis/library/forecasting-trajectory-covid-19-pandemic-2023-under-plausible-variant-and" target="_blank" rel="noopener">IHME's framework</a> that accounts for: (1) biological variability in how long infected people shed virus using <a href="https://pubmed.ncbi.nlm.nih.gov/35853589/" target="_blank" rel="noopener">Omicron</a> and <a href="https://pubmed.ncbi.nlm.nih.gov/35988572/" target="_blank" rel="noopener">pre-Omicron</a> infectiousness duration data, (2) differences between COVID variants in transmission patterns, (3) uncertainty in converting wastewater viral levels to prevalence estimates, and (4) measurement noise in wastewater surveillance data. This provides much more realistic uncertainty bounds than using fixed prevalence estimates.</p>
+        
+        <p>For each simulation, we sample values from all these uncertainty sources, calculate your probability of infection, then examine the spread of results. The "probable" range shows where your actual risk most likely falls (51% of scenarios), while the "almost certain" range covers 99% of plausible scenarios. This comprehensive approach gives you a realistic sense of how confident we can be in the calculated probability, rather than presenting a single number that might seem more precise than it actually is.</p>
+      </div>
+    </div>
+    <div class="faq-item">
+      <button type="button" class="faq-question" id="test-sensitivities-specificities" onclick="toggleFaqAnswer(this)">
+        What are the sensitivities and specificities of the different tests?
+      </button>
+      <div class="faq-answer">
+        <p>
+          The <strong>sensitivity</strong> of a test is the probability that the test is positive if the person is <em>infected</em>. The <strong>specificity</strong> of a test is the probability that the test is negative if the person is <em>not</em> infected. As the table below shows, the sensitivity and specificity of a given test can depend (sometimes dramatically) on whether it is administered to someone who is symptomatic or asymptomatic.
+          <br><br>
+          The table below presents performance data for various tests during the Omicron period specifically. This is because test sensitivities—especially those of RATs (Rapid Antigen Tests)—<a href="https://www.cidrap.umn.edu/covid-19/study-covid-19-rapid-home-tests-not-highly-sensitive-omicron" target="_blank">dramatically decreased with the emergence of Omicron</a>. So, earlier testing data—e.g., data from the FDA in 2020-2021—has become much less relevant.
+          <br><br>
+          <strong>Important:</strong> The values in this table represent the sensitivity and specificity used for the <em>first</em> test result only. When you enter multiple test results, the calculator uses a more sophisticated approach with an "effective" sensitivity and specificity that changes based on previous test results. See <a href="#multiple-test-question">"How does the calculator handle multiple test results?"</a> for details.
+        </p>
+        <div class="faq-table-container">
+        <table class="faq-table">
+          <colgroup>
+          <col />
+          <col />
+          <col />
+          <col />
+          <col />
+          <col />
+          </colgroup>
+          <thead>
+            <tr>
+              <th>Test</th>
+              <th>Symptomatic Sensitivity <br>(95% CI)</th>
+              <th>Symptomatic Specificity <br>(95% CI)</th>
+              <th>Asymptomatic Sensitivity <br>(95% CI)</th>
+              <th>Asymptomatic Specificity <br>(95% CI)</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>BinaxNOW</strong></td>
+              <td>74.0% <br>(66.8%–80.4%)</td>
+              <td>99.2% <br>(95.4%–99.9%)</td>
+              <td>49.6% <br>(40.5%–58.6%)</td>
+              <td>99.4% <br>(97.7%–99.9%)</td>
+              <td>
+                <ul>
+                  <li><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC8943844/">This study</a> found that BinaxNOW detected infections in 64 people out of 121 PCR-positive samples that included 113 asymptomatic people and 8 people whose symptoms started more than 7 days prior—i.e., a sensitivity of 52.5% (95% CI: 43.2%–61.6%) in this combined group. The study does not disaggregate sensitivity among the two sub-groups. However, even if BinaxNOW detected infections among all of the late-infection symptomatic individuals (whom the study noted had relatively low viral load), it would still have a sensitivity of at least 49.6% (95% CI: 40.9%–59.1%) for asymptomatic individuals. It is likely slightly higher than this—and at most 56.6% (95% CI: 47.4%–65.4%), if none of the late-infection symptomatic individuals were detected by BinaxNOW—but I will use the lower estimate here to be safe.</li>
+                </ul>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>CorDx (Covid & Flu)</strong></td>
+              <td>89.1% <br>(81.9%–93.6%)</td>
+              <td>99.8% <br>(99.1%–100%)</td>
+              <td>25.2% <br>(21.5%–29.3%)</td>
+              <td>99.8% <br>(99.1%–100%)</td>
+              <td>
+                <ul>
+                  <li><a href="https://www.fda.gov/media/177301/download?attachment=">FDA symptomatic testing data</a></li>
+                  <li>I couldn't find any data on CorDx (Covid & Flu)'s sensitivity or specificity for asymptomatic people during Omicron, so I assumed its asymptomatic sensitivity was typical of RATs in the Omicron period (see "Other RAT" row) and its asymptomatic specificity was the same as its symptomatic specificity. While sensitivity varies immensely by symptom status for RATs, specificity does not.</li>
+                </ul>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>FlowFlex (Covid-only)</strong></td>
+              <td>84.7% <br>(79.7%–88.6%)</td>
+              <td>99.3% <br>(98.5%–99.8%)</td>
+              <td>27.5% <br>(21.3%–34.3%)</td>
+              <td>99.8% <br>(99.6%–99.9%)</td>
+              <td>
+                <ul>
+                  <li><a href="https://pubmed.ncbi.nlm.nih.gov/36790832/">Symptomatic testing data (sensitivity pooled from sources therein)</a></li>
+                  <li><a href="https://www.clinicalmicrobiologyandinfection.com/article/S1198-743X(22)00570-5/fulltext">Asymptomatic testing data</a></li>
+
+                </ul>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>FlowFlex Plus (Covid & Flu)</strong></td>
+              <td>90.6% <br>(85.4%–94.4%)</td>
+              <td>99.3% <br>(98.2%–99.8%)</td>
+              <td>27.5% <br>(21.3%–34.3%)</td>
+              <td>99.3% <br>(98.2%–99.8%)</td>
+              <td>
+                <ul>
+                  <li><a href="https://www.fda.gov/media/180806/download?attachment=">FDA symptomatic testing data</a></li>
+                  <li>I couldn't find data on FlowFlex Plus's sensitivity for asymptomatic people during Omicron, but I assumed it's the same as the Covid-only FlowFlex test. Additionally, I couldn't find data on FlowFlex Plus's specificity for asymptomatic people during Omicron, but I assumed it's the same as for symptomatic people. While sensitivity varies immensely by symptom status for RATs, specificity does not.</li>
+                </ul>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>iHealth (Covid-only)</strong></td>
+              <td>72.5% <br>(63.6%–80.3%)</td>
+              <td>98.4% <br>(96.8%–99.2%)</td>
+              <td>25.2% <br>(21.5%–29.3%)</td>
+              <td>98.4% <br>(96.8%–99.2%)</td>
+              <td>
+                <ul>
+                  <li><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9927253/">Symptomatic testing data</a></li>
+                  <li>While the above study measured a specificity of 100.0% (95% CI: 89.1–100.0%), it was only based on a small sample of 32 PCR-negative tests. The actual specificity is likely very close to 100%. So, I will assume it is the same as the iHealth (Covid & Flu) test (see below).</li>
+                  <li>I couldn't find any data on iHealth (Covid-only)'s sensitivity for asymptomatic people during Omicron, so I assumed its asymptomatic sensitivity was typical of RATs in the Omicron period (see "Other RAT" row). Additionally, I am using the FDA specificity figures for <a href="https://www.fda.gov/media/178553/download?attachment=">iHealth (Covid & Plus)</a> here. While sensitivity varies immensely by symptom status for RATs, specificity does not.</li>
+                </ul>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>iHealth (Covid & Flu)</strong></td>
+              <td>84.2% <br>(75.6%–90.2%)</td>
+              <td>98.4% <br>(96.8%–99.2%)</td>
+              <td>25.2% <br>(21.5%–29.3%)</td>
+              <td>98.4% <br>(96.8%–99.2%)</td>
+              <td>
+                <ul>
+                  <li><a href="https://www.fda.gov/media/178553/download?attachment=">FDA symptomatic testing data</a></li>
+                  <li>I couldn't find any data on iHealth (Covid & Flu)'s sensitivity or specificity for asymptomatic people during Omicron, so I assumed its asymptomatic sensitivity was typical of RATs in the Omicron period (see "Other RAT" row) and its asymptomatic specificity was the same as its symptomatic specificity. While sensitivity varies immensely by symptom status for RATs, specificity does not.</li>
+                </ul>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Lucira</strong></td>
+              <td>88.3% <br>(80.2%–93.3%)</td>
+              <td>99.9% <br>(99.6%–100%)</td>
+              <td>84.0% <br>(75.1%–90.3%)</td>
+              <td>98.2% <br>(95.2%–99.5%)</td>
+              <td>
+                <ul>
+                  <li><a href="https://www.fda.gov/media/163458/download?attachment=">FDA symptomatic testing data</a></li>
+                  <li>Although the linked study measured a specificity of 100% (95% CI: 99.6%–100%), no test is perfectly specific, so I am using 99.9% as the point estimate for its specificity. <br><br> Additionally, although there is no published data on Lucira’s sensitivity or specificity for asymptomatic people in the Omicron era, the <a href="https://www.fda.gov/media/147494/download?attachment">FDA study of the original Lucira “Check It” test</a> (long since discontinued) found that the sensitivity for symptomatic infections was 94.1% (95% CI: 84.1%–98.0%) but only 90.1% (95% CI: 81.7%–94.9%) for asymptomatic infections. So, in line with this reduction, I am somewhat artificially reducing Lucira’s sensitivity by about 4 percentage points. The old study found a specificity of 98.2% (95% CI: 95.5%–99.3%) for asymptomatic people, so I am using that for the specificity for asymptomatic people.</li>
+                </ul>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Metrix</strong></td>
+              <td>95.0% <br>(83.5%–98.6%)</td>
+              <td>97.1% <br>(85.5%–99.5%)</td>
+              <td>94.0% <br>(84.5%–100%)</td>
+              <td>99.2% <br>(97.2%–99.8%)</td>
+              <td>
+                <ul>
+                  <li><a href="https://www.fda.gov/media/162403/download?attachment=">FDA testing data</a></li>
+                  <li>Although Metrix had a measured sensitivity of 100% among asymptomatic people in its FDA study, that study only involved 21 infected asymptomatic people. So, on purely statistical grounds, it is very unlikely that Metrix’s sensitivity for asymptomatic people is actually 100%. Moreover, there is evidence that the viral load in asymptomatic people tends to be lower than in symptomatic people. So, theoretically, infections should be more difficult to detect in asymptomatic people than in symptomatic people. For this reason, I am somewhat artificially using 94% as my point estimate of Metrix’s sensitivity for asymptomatic people. However, you can explore the full range of plausible estimates by clicking the “How certain is this result?” button after calculating probability of infection.</li>
+                </ul>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>OSOM (Covid & Flu)</strong></td>
+              <td>59.7% <br>(51.6%–67.4%)</td>
+              <td>99.1% <br>(97.9%–99.6%)</td>
+              <td>25.2% <br>(21.5%–29.3%)</td>
+              <td>99.1% <br>(97.9%–99.6%)</td>
+              <td>
+                <ul>
+                  <li><a href="https://www.fda.gov/media/176719/download?attachment=">FDA symptomatic data</a></li>
+                  <li>I couldn't find any data on OSOM (Covid & Flu)'s sensitivity or specificity for asymptomatic people during Omicron, so I assumed its asymptomatic sensitivity was typical of RATs in the Omicron period (see "Other RAT" row) and its asymptomatic specificity was the same as its symptomatic specificity. While sensitivity varies immensely by symptom status for RATs, specificity does not.</li>
+                </ul>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Other RAT (Rapid Antigen Test)</strong></td>
+              <td>87.4% <br>(83.7%–90.4%)</td>
+              <td>99.9% <br>(99.7%–99.9%)</td>
+              <td>25.2% <br>(21.5%–29.3%)</td>
+              <td>99.8% <br>(99.6%–99.9%)</td>
+              <td>
+                <ul>
+                  <li><a href="https://pubmed.ncbi.nlm.nih.gov/36790832/">Symptomatic testing data pooled over many RATs</a></li>
+                  <li><a href="https://www.clinicalmicrobiologyandinfection.com/article/S1198-743X(22)00570-5/fulltext">Asymptomatic testing data pooled over multiple RATs</a></li>
+                </ul>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Pluslife</strong></td>
+              <td>98.7% <br>(93.1%–99.8%)</td>
+              <td>99.3% <br>(98.7%–99.6%)</td>
+              <td>97.3% <br>(86.2%–99.5%)</td>
+              <td>99.3% <br>(98.7%–99.6%)</td>
+              <td>
+                <ul>
+                  <li>In my opinion, <a href="https://publichealth.jmir.org/2023/1/e48107">this</a> is the most comprehensive clinical study of Pluslife and one that was done in a way that’s most directly comparable to the rigorous FDA studies of various other test brands. It found a sensitivity of 98.3% (95% CI: 93.9%–99.5%) and specificity of 99.3% (95% CI: 98.7%–99.6%). However, as with every other published Pluslife study, it does not break down testing data by symptom status. (Unlike these other studies, it does indicate that it included both symptomatic and asymptomatic participants.) Since specificity generally does not vary much by symptom status, it’s reasonable to treat this specificity as that for both symptomatic and asymptomatic people. But, since asymptomatic infections are generally more difficult to detect than symptomatic infections, it’s reasonable to treat the sensitivity for symptomatic infections as greater than 98.3% and the sensitivity for asymptomatic infections as less than 98.3%. So, while it’s somewhat artificial, I think it’s reasonable to put Pluslife’s sensitivity for symptomatic people at about 99%. Since the aforementioned study involved 115 PCR-positive individuals, if we make the assumption that about <a href="https://europepmc.org/article/PMC/PMC9321237">32% of currently infected individuals do not show symptoms</a>, it follows that about 78 of them were symptomatic and 37 of them were not. This yields a sensitivity of 98.7% (95% CI: 93.1%–99.8%) for symptomatic people and a sensitivity of 97.3% (95% CI: 86.2%–99.5%) for asymptomatic individuals.</li>
+                </ul>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>WELLLife (Covid & Flu)</strong></td>
+              <td>87.5% <br>(80.7%–92.2%)</td>
+              <td>99.7% <br>(98.9%–99.9%)</td>
+              <td>25.2% <br>(21.5%–29.3%)</td>
+              <td>99.7% <br>(98.9%–99.9%)</td>
+              <td>
+                <ul>
+                  <li><a href="https://www.fda.gov/media/177984/download?attachment=">FDA symptomatic testing data</a></li>
+                  <li>I couldn't find any data on WELLLife (Covid & Flu)'s sensitivity or specificity for asymptomatic people during Omicron, so I assumed its asymptomatic sensitivity was typical of RATs in the Omicron period (see "Other RAT" row) and its asymptomatic specificity was the same as its symptomatic specificity. While sensitivity varies immensely by symptom status for RATs, specificity does not.</li>
+                </ul>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+      </div>
+    </div>
+    
+    <div class="faq-item">
+      <button type="button" class="faq-question" id="multiple-test-question" onclick="toggleFaqAnswer(this)">
+        How does the calculator handle multiple test results?
+      </button>
+      <div class="faq-answer">
+        <p>When you enter multiple test results taken <strong>at around the same time</strong> (within a few hours), the calculator uses an advanced statistical model that accounts for correlations between tests. Instead of simply applying Bayes' theorem repeatedly with fixed test performance values, the model uses an "effective" sensitivity and specificity for each subsequent test based on previous results.</p>
+        
+        <p>For example, if you get 3 negative tests in a row during the same testing session, the model recognizes that if you are infected with a typical viral load, you probably would have tested positive by now. So the effective sensitivity for the 4th test drops substantially, reflecting the fact that additional negative tests provide diminishing evidence against infection.</p>
+        
+        <p>This correlation modeling only works when tests are taken at around the same time because it assumes you have approximately the same viral load and testing conditions for all tests. For tests taken days apart, your viral load could have changed dramatically (infection progresses from low to high to declining levels), you could have acquired or cleared infection, or systematic error sources (like contamination or poor technique) might no longer persist between tests.</p>
+        
+        <p>The model tracks the probability distribution of your viral load (if infected) and the probability of systematic testing errors, then uses these to calculate appropriate effective test performance characteristics for each new test result.</p>
+        
+        <p><em>Note: I plan to write a more detailed explanation of the methodology at a later time. I also plan to add the ability to enter tests from multiple days (with appropriate statistical modeling for each scenario).</em></p>
+      </div>
+    </div>

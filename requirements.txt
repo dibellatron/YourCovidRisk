@@ -1,0 +1,28 @@
+Flask==3.0.2
+flask-talisman==1.1.0
+Flask-Limiter==3.5.0
+# Application dependencies
+gunicorn==20.1.0
+numpy>=1.26.0  # Required for Monte Carlo risk calculations and wastewater prevalence modeling
+scipy>=1.12.0  # Required for Beta distributions and statistical functions
+# Add requests library for Walgreens data fetching
+requests>=2.31.0
+# Add Tesseract OCR for automated text extraction from PMC charts
+pytesseract>=0.3.10
+Pillow>=10.0.0
+# Enhanced prevalence uncertainty dependencies (from wastewater modeling)
+pandas>=2.2  # Required for wastewater data processing
+matplotlib>=3.9  # Required for PrevalenceEstimator and enhanced uncertainty analysis
+seaborn>=0.12  # Required for PrevalenceEstimator statistical visualizations
+# Optional dependencies for advanced wastewater modeling (not required for basic functionality)
+# cmdstanpy>=1.2  # For Stan-based Bayesian modeling (optional)
+# arviz>=0.17  # For Bayesian model diagnostics (optional)
+# pyarrow>=10.0.1  # For efficient data I/O (optional)
+# Standard library modules that are used but don't need to be specified
+# but included as comments for documentation:
+# webbrowser
+# threading
+# subprocess
+# os
+# itertools
+# math

@@ -1,0 +1,57 @@
+{
+  "version": "1.0.0",
+  "queries": [
+    {
+      "Query": {
+        "Commands": [
+          {
+            "SemanticQueryDataShapeCommand": {
+              "Query": {
+                "Version": 2,
+                "From": [
+                  { "Name": "t", "Entity": "Tracker_Aggregation", "Type": 0 },
+                  { "Name": "v", "Entity": "View Selection", "Type": 0 }
+                ],
+                "Select": [
+                  {
+                    "Measure": {
+                      "Expression": { "SourceRef": { "Source": "t" } },
+                      "Property": "Positivity Presumed5"
+                    },
+                    "Name": "Tracker_Aggregation.Positivity Presumed5",
+                    "NativeReferenceName": "Positivity Presumed5"
+                  }
+                ],
+                "Where": [
+                  {
+                    "Condition": {
+                      "In": {
+                        "Expressions": [
+                          { "Column": { "Expression": { "SourceRef": { "Source": "v" } }, "Property": "Range3" } }
+                        ],
+                        "Values": [ [ { "Literal": { "Value": "'Changes from prior week'" } } ] ]
+                      }
+                    }
+                  }
+                ]
+              },
+              "Binding": {
+                "Primary": { "Groupings": [ { "Projections": [0] } ] },
+                "DataReduction": { "DataVolume": 3, "Primary": { "Top": {} } },
+                "Version": 1
+              },
+              "ExecutionMetricsKind": 1
+            }
+          }
+        ]
+      },
+      "QueryId": "",
+      "ApplicationContext": {
+        "DatasetId": "72ea3724-d9a9-4c3d-8ba9-2cc94606a1a9",
+        "Sources": [ { "ReportId": "74786277-bd89-4734-9456-07295ed58615", "VisualId": "YIK02W6ZFBCWF8AJDVH9" } ]
+      }
+    }
+  ],
+  "cancelQueries": [],
+  "modelId": 14351198
+}

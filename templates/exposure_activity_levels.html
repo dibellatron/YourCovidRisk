@@ -1,0 +1,35 @@
+{# Partial: Activity Levels section #}
+{{ ctrl.slider('activity_level_slider', 'What were you doing?',
+    0, 4, 1,
+    request.form.get('activity_level_index', '0'),
+    'five-options',
+    [
+      {'value':'1','display':'Sitting'},
+      {'value':'1.2','display':'Standing'},
+      {'value':'2.7','display':'Light Exercise'},
+      {'value':'5.8','display':'Moderate Exercise'},
+      {'value':'11','display':'Intense Exercise'}
+    ],
+    'activity_level_index','activity_level','activity_level_display') }}
+{{ ctrl.slider('physical_intensity_slider', 'What were others doing?',
+    0, 4, 1,
+    request.form.get('physical_intensity_index', '0'),
+    'five-options',
+    [
+      {'value':'Resting','display':'Sitting'},
+      {'value':'Standing','display':'Standing'},
+      {'value':'Light exercise','display':'Light Exercise'},
+      {'value':'Moderate exercise','display':'Moderate Exercise'},
+      {'value':'Heavy exercise','display':'Intense Exercise'}
+    ],
+    'physical_intensity_index','physical_intensity','physical_intensity_display') }}
+{{ ctrl.slider('vocalization_slider', 'Vocal activity of others',
+    0, 2, 1,
+    request.form.get('vocalization_index', '0'),
+    'three-options',
+    [
+      {'value':'Just breathing','display':'Just breathing'},
+      {'value':'Speaking','display':'Speaking'},
+      {'value':'Loud speaking','display':'Loud speaking'}
+    ],
+    'vocalization_index','vocalization','vocalization_display') }}

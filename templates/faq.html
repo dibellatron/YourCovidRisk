@@ -1,0 +1,493 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  {% include 'base_analytics.html' %}
+  <title>FAQ - CovidRisk</title>
+  <!-- Favicon -->
+  <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml">
+  <link rel="icon" href="{{ url_for('static', filename='favicon-32x32.png') }}" type="image/png">
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='fontawesome/css/all.min.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <!-- Global styles -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <style>
+    /* Page‑specific overrides */
+    body {
+      min-height: 100vh;
+    }
+
+    /* heading styles moved to global stylesheet */
+
+    h4 {
+      color: var(--primary);
+      margin-top: 1.5rem;
+    }
+
+    a {
+      color: var(--primary);
+      transition: all 0.3s;
+      text-decoration: none;
+      position: relative;
+    }
+
+    a::after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 1px;
+      bottom: -2px;
+      left: 0;
+      background: var(--primary);
+      transform: scaleX(0);
+      transform-origin: center;
+      transition: transform 0.3s ease;
+    }
+
+    a:hover {
+      color: var(--primary-dark);
+    }
+
+    a:hover::after {
+      transform: scaleX(1);
+    }
+
+    /* nav styles moved to global stylesheet */
+
+    .container {
+      background: linear-gradient(135deg, #ffffff 0%, #fefefe 100%);
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      padding: 2.5rem;
+      margin: 0 2rem 2.5rem 2rem;
+      border: 1px solid rgba(229, 231, 235, 0.6);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #0369a1 0%, #0891b2 50%, #0f766e 100%);
+    }
+
+    .container:hover {
+      box-shadow: 0 8px 30px rgba(79, 70, 229, 0.12);
+    }
+
+    .faq-item {
+      margin-bottom: 1.5rem;
+      transition: all 0.3s ease;
+    }
+
+    .faq-question {
+      width: 100%;
+      text-align: left;
+      background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+      border: 1px solid rgba(229, 231, 235, 0.8);
+      font-size: 1.1rem;
+      font-weight: 600;
+      padding: 1.25rem;
+      cursor: pointer;
+      border-radius: var(--border-radius);
+      margin-bottom: 0.75rem;
+      box-shadow: var(--shadow);
+      transition: all 0.3s ease;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .faq-question::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: linear-gradient(180deg, var(--primary) 0%, #8b5cf6 100%);
+      transform: scaleY(0);
+      transform-origin: bottom;
+      transition: transform 0.3s ease;
+    }
+
+    .faq-question:hover::before {
+      transform: scaleY(1);
+    }
+
+    .faq-question::after {
+      content: '+';
+      font-size: 1.5rem;
+      font-weight: 400;
+      color: var(--primary);
+      transition: all 0.3s ease;
+      background: rgba(79, 70, 229, 0.1);
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .faq-question.active::after {
+      content: '−';
+      transform: rotate(180deg);
+      background: rgba(79, 70, 229, 0.2);
+    }
+
+    .faq-question:hover {
+      background: linear-gradient(135deg, rgba(79, 70, 229, 0.03) 0%, rgba(99, 102, 241, 0.05) 100%);
+      box-shadow: 0 8px 25px rgba(79, 70, 229, 0.15);
+      border-color: rgba(79, 70, 229, 0.2);
+    }
+
+    .faq-answer {
+      display: none;
+      padding: 2rem;
+      background: linear-gradient(135deg, #ffffff 0%, #fafbff 100%);
+      border-left: 4px solid var(--primary);
+      border-radius: var(--border-radius);
+      margin-bottom: 1rem;
+      box-shadow: 0 4px 15px rgba(79, 70, 229, 0.08);
+      animation: fadeIn 0.5s ease-out;
+      position: relative;
+    }
+    
+    /* Highlight effect for targeted FAQ questions */
+    .faq-question:target {
+      animation: highlightPulse 2s ease-out;
+    }
+    
+    /* Add scroll padding to targeted questions for better positioning */
+    .faq-question:target {
+      scroll-margin-top: 100px;
+    }
+    
+    @keyframes highlightPulse {
+      0% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.4); }
+      50% { box-shadow: 0 0 0 10px rgba(79, 70, 229, 0.1); }
+      100% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0); }
+    }
+
+    .faq-answer::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 60px;
+      height: 60px;
+      background: radial-gradient(circle, rgba(79, 70, 229, 0.05) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+
+    /* fadeIn animation moved to global stylesheet */
+
+    table.faq-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1.25rem;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    table.faq-table th, table.faq-table td {
+      border: 1px solid #e5e7eb;
+      padding: 0.75rem 1rem;
+      text-align: left;
+    }
+
+    table.faq-table td:last-child, table.faq-table th:last-child {
+      padding-left: 1rem;
+    }
+
+    table.faq-table th {
+      background: linear-gradient(to right, rgba(79, 70, 229, 0.1), rgba(79, 70, 229, 0.05));
+      color: var(--primary-dark);
+      font-weight: 600;
+    }
+
+    table.faq-table tr:nth-child(even) {
+      background-color: #f9fafb;
+    }
+
+    table.faq-table tr:hover {
+      background-color: rgba(79, 70, 229, 0.05);
+    }
+
+    /* LaTeX-like fraction styling */
+    .faq-fraction {
+      display: inline-block;
+      vertical-align: middle;
+      text-align: center;
+      font-family: 'Courier New', monospace;
+      margin: 0 4px;
+      background-color: rgba(248, 250, 252, 0.6);
+      border-radius: 4px;
+      padding: 2px 0;
+    }
+
+    .faq-numerator, .faq-denominator {
+      display: block;
+      padding: 0 8px;
+      text-align: center;
+      min-width: max-content;
+    }
+
+    .faq-numerator {
+      border-bottom: 1px solid #000;
+      margin-bottom: 2px;
+      padding-bottom: 2px;
+    }
+    
+    .formula-label {
+      margin-right: 8px;
+      font-weight: 600;
+    }
+
+    /* Responsive styles for all devices */
+    @media only screen and (max-width: 820px) {
+      body {
+        font-size: 16px;
+      }
+
+      .container {
+        padding: 1.5rem;
+        margin: 0 1rem 1.5rem 1rem;
+      }
+
+      h1 {
+        font-size: 2rem;
+      }
+
+      nav {
+        margin: 0 0 1rem 0;
+        padding: 1rem;
+      }
+
+      nav a {
+        font-size: 16px; /* Keep font size reduction only for mobile */
+        margin-right: 1rem;
+      }
+
+      .faq-question {
+        font-size: 1rem;
+        padding: 1rem;
+      }
+
+      table.faq-table th, table.faq-table td {
+        font-size: 14px;
+        padding: 0.5rem;
+      }
+
+      table.faq-table {
+        min-width: 600px;
+        table-layout: auto;
+      }
+
+      table.faq-table col:last-child {
+        min-width: 500px;
+      }
+      
+      /* Adjust fractions for mobile */
+      .faq-fraction {
+        font-size: 0.9em;
+      }
+      
+      .formula-list li {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .formula-label {
+        margin-bottom: 5px;
+        display: block;
+        width: 100%;
+      }
+      
+      .formula-wrapper {
+        width: 100%;
+        overflow-x: auto;
+      }
+    }
+
+    .faq-table-container {
+      width: 100%;
+      overflow-x: auto;
+      margin: 1.5rem 0;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    @media only screen and (max-width: 600px) {
+      .faq-table-container {
+        margin: 1rem 0;
+      }
+      
+      /* Further adjust fractions for very small screens */
+      .faq-fraction {
+        font-size: 0.85em;
+      }
+    }
+
+    /* List styling */
+    ul, ol {
+      padding-left: 1.5rem;
+    }
+
+    li {
+      margin-bottom: 0.5rem;
+    }
+
+    /* Formula list styling */
+    .formula-list {
+      padding: 10px 15px;
+      background-color: #f0f4ff;
+      border-radius: 8px;
+      margin: 15px 0;
+      border-left: 3px solid var(--primary);
+    }
+    
+    .formula-list li {
+      margin-bottom: 15px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+    }
+    
+    .formula-list li:last-child {
+      margin-bottom: 0;
+    }
+    
+    .formula-wrapper {
+      display: inline-block;
+      margin-top: 5px;
+      background-color: rgba(255, 255, 255, 0.5);
+      padding: 5px 8px;
+      border-radius: 4px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+    
+    /* For the detailed FAQ sections */
+    .faq-answer p {
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body data-page-type="faq">
+  <nav>
+    <a href="{{ url_for('index') }}"><i class="fas fa-home"></i> Home</a>
+    <a href="https://ko-fi.com/yourcovidrisk" target="_blank" rel="noopener"><i class="fas fa-heart"></i> Donate</a>
+  </nav>
+
+  <div class="container">
+    <h1 style="background: linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #06b6d4 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-size: 2.5rem; margin-bottom: 2rem; text-align: center;">
+      Frequently Asked Questions
+    </h1>
+
+    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.75rem 1.5rem; margin: 1.5rem auto; max-width: 600px; text-align: center; font-size: 0.9rem; color: #64748b;">
+      <a href="https://ko-fi.com/yourcovidrisk" target="_blank" rel="noopener" style="color: #4f46e5; text-decoration: none; font-weight: 500;">Donate to support this project →</a>
+    </div>
+    
+    {% include 'faq_exposure_calculator.html' %}
+    
+    {% include 'faq_test_calculator.html' %}
+    
+    {% include 'faq_general.html' %}
+    
+    <script>
+    function toggleFaqAnswer(button) {
+      var answer = button.nextElementSibling;
+      var questionTitle = button.textContent.trim();
+      
+      if (answer.style.display === "none" || answer.style.display === "") {
+        // Track FAQ open
+        if (typeof analytics !== 'undefined') {
+          analytics.trackFAQInteraction(questionTitle, 'open');
+        }
+        
+        // Close any currently open answers
+        var openAnswers = document.querySelectorAll('.faq-answer[style="display: block;"]');
+        var activeButtons = document.querySelectorAll('.faq-question.active');
+
+        for (var i = 0; i < openAnswers.length; i++) {
+          openAnswers[i].style.display = "none";
+        }
+
+        for (var i = 0; i < activeButtons.length; i++) {
+          activeButtons[i].classList.remove('active');
+        }
+
+        // Open this answer
+        answer.style.display = "block";
+        button.classList.add('active');
+
+        // Smooth scroll to the question if it's not fully visible
+        setTimeout(function() {
+          var rect = button.getBoundingClientRect();
+          if (rect.top < 0 || rect.bottom > window.innerHeight) {
+            button.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }, 100);
+      } else {
+        // Track FAQ close
+        if (typeof analytics !== 'undefined') {
+          analytics.trackFAQInteraction(questionTitle, 'close');
+        }
+        
+        answer.style.display = "none";
+        button.classList.remove('active');
+      }
+    }
+
+    // Open specific FAQ item based on URL hash anchor
+    document.addEventListener('DOMContentLoaded', function() {
+      const hash = window.location.hash.substring(1); // Remove # from hash
+      
+      if (hash) {
+        // Find the FAQ question with this ID and open it
+        const targetFaqButton = document.getElementById(hash);
+        if (targetFaqButton && targetFaqButton.classList.contains('faq-question')) {
+          toggleFaqAnswer(targetFaqButton);
+          // Scroll to the question after a brief delay to ensure it's opened
+          setTimeout(() => {
+            targetFaqButton.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }, 100);
+        }
+      }
+    });
+    
+    // Also handle hash changes (if user navigates using browser back/forward)
+    window.addEventListener('hashchange', function() {
+      const hash = window.location.hash.substring(1);
+      if (hash) {
+        const targetFaqButton = document.getElementById(hash);
+        if (targetFaqButton && targetFaqButton.classList.contains('faq-question')) {
+          // Close any currently open answers first
+          const openAnswers = document.querySelectorAll('.faq-answer[style="display: block;"]');
+          const activeButtons = document.querySelectorAll('.faq-question.active');
+          openAnswers.forEach(answer => answer.style.display = 'none');
+          activeButtons.forEach(button => button.classList.remove('active'));
+          
+          // Open the target FAQ
+          toggleFaqAnswer(targetFaqButton);
+          setTimeout(() => {
+            targetFaqButton.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }, 100);
+        }
+      }
+    });
+  </script>
+  </div>
+</body>
+</html>

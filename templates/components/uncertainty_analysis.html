@@ -1,0 +1,689 @@
+<!--
+Uncertainty Analysis Component
+
+Reusable component for displaying Monte Carlo uncertainty analysis in the exposure calculator.
+Includes toggle button and visualization container that can be populated with risk distribution data.
+
+Usage in main template:
+{# {% include 'components/uncertainty_analysis.html' %} #}
+
+Required variables from backend:
+- risk_distribution_data (optional): JSON data for visualization
+- risk (required): main risk estimate for fallback display
+-->
+
+<!-- Toggle Button -->
+<button 
+    id="uncertaintyToggleBtn" 
+    type="button" 
+    class="uncertainty-toggle-btn secondary-btn"
+    onclick="handleUncertaintyToggle(this)"
+    aria-expanded="false"
+    aria-controls="uncertaintyAnalysisContainer"
+>
+    <i class="fas fa-chart-bar"></i>
+    How certain is this result?
+</button>
+
+<script>
+console.log('🚀 Uncertainty component script loaded');
+
+function handleUncertaintyToggle(button) {
+    console.log('🎯 handleUncertaintyToggle called');
+    
+    var container = document.getElementById('uncertaintyAnalysisContainer');
+    var dataScript = document.getElementById('riskDistributionData');
+    
+    console.log('Elements found:', { 
+        container: !!container, 
+        dataScript: !!dataScript,
+        chartJs: typeof Chart 
+    });
+    
+    if (!container) {
+        alert('Container not found');
+        return;
+    }
+    
+    if (container.style.display === 'none' || container.style.display === '') {
+        // Show uncertainty analysis
+        container.style.display = 'block';
+        button.innerHTML = '<i class="fas fa-eye-slash"></i> Hide uncertainty analysis';
+        
+        if (dataScript) {
+            try {
+                var data = JSON.parse(dataScript.textContent);
+                console.log('📊 Data parsed, histogram bins:', data.histogram.counts.length);
+                
+                // Create the HTML content with chart canvas
+                var htmlContent = '<div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb;">' +
+                    '<h4 style="margin-top: 0; color: #374151;"><i class="fas fa-chart-bar" style="color: #4f46e5; margin-right: 8px;"></i>Risk Distribution Analysis</h4>' +
+                    '<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin: 15px 0; padding: 15px; background: #f9fafb; border-radius: 6px;">' +
+                    '<div style="text-align: center;"><div style="font-size: 0.85rem; color: #6b7280; margin-bottom: 4px;">Mean Risk</div><div style="font-size: 1.1rem; font-weight: 700; color: #374151;">' + (data.statistics.mean * 100).toFixed(2) + '%</div></div>' +
+                    '<div style="text-align: center;"><div style="font-size: 0.85rem; color: #6b7280; margin-bottom: 4px;">Median Risk</div><div style="font-size: 1.1rem; font-weight: 700; color: #374151;">' + (data.statistics.median * 100).toFixed(2) + '%</div></div>' +
+                    '<div style="text-align: center;"><div style="font-size: 0.85rem; color: #6b7280; margin-bottom: 4px;">Typical Range</div><div style="font-size: 1.1rem; font-weight: 700; color: #374151;">' + data.interpretation.typical_range + '</div></div>' +
+                    '</div>' +
+                    '<div style="position: relative; height: 350px; margin: 20px 0; background: #fafbfc; border-radius: 6px; border: 1px solid #e5e7eb;">' +
+                    '<canvas id="uncertaintyChart" style="display: block; box-sizing: border-box; height: 350px; width: 100%;"></canvas>' +
+                    '</div>' +
+                    '<p style="margin: 15px 0; color: #4b5563;"><strong>What this shows:</strong> ' + data.interpretation.summary + '</p>' +
+                    '<p style="margin: 0; font-size: 0.9rem; color: #6b7280; font-style: italic; background: #f8fafc; padding: 12px; border-radius: 6px;">This analysis represents ' + (data.statistics.simulation_count || 'thousands of') + ' Monte Carlo simulations accounting for biological variability and epidemiological uncertainty.</p>' +
+                    '</div>';
+                
+                container.innerHTML = htmlContent;
+                
+                // Create the chart after a short delay
+                setTimeout(function() {
+                    createUncertaintyHistogram(data);
+                }, 200);
+                
+            } catch(e) {
+                console.error('❌ Error parsing data:', e);
+                container.innerHTML = '<div style="color: #dc2626; padding: 20px;">Error loading uncertainty data: ' + e.message + '</div>';
+            }
+        } else {
+            console.log('ℹ️ No data script found');
+            container.innerHTML = '<div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb;"><p>No uncertainty data available for this calculation.</p></div>';
+        }
+    } else {
+        // Hide uncertainty analysis
+        container.style.display = 'none';
+        button.innerHTML = '<i class="fas fa-chart-bar"></i> How certain is this result?';
+    }
+}
+
+function createUncertaintyHistogram(data) {
+    console.log('📊 Creating uncertainty histogram');
+    
+    // Check if Chart.js is available
+    if (typeof Chart === 'undefined') {
+        console.error('❌ Chart.js not available');
+        return;
+    }
+    
+    const canvas = document.getElementById('uncertaintyChart');
+    if (!canvas) {
+        console.error('❌ Chart canvas not found');
+        return;
+    }
+    
+    const ctx = canvas.getContext('2d');
+    const { histogram, statistics } = data;
+    const { counts, edges } = histogram;
+    
+    // Prepare chart data - convert to percentages
+    const labels = [];
+    const backgroundColors = [];
+    
+    for (let i = 0; i < counts.length; i++) {
+        const binMidpoint = (edges[i] + edges[i + 1]) / 2;
+        labels.push((binMidpoint * 100).toFixed(1));
+        
+        // Color-code based on risk level percentiles
+        if (binMidpoint < statistics.p25) {
+            backgroundColors.push('rgba(34, 197, 94, 0.8)'); // Green - lower quartile
+        } else if (binMidpoint < statistics.p75) {
+            backgroundColors.push('rgba(59, 130, 246, 0.8)'); // Blue - middle quartiles
+        } else {
+            backgroundColors.push('rgba(239, 68, 68, 0.8)'); // Red - upper quartile
+        }
+    }
+    
+    // Create the chart
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Number of Scenarios',
+                data: counts,
+                backgroundColor: backgroundColors,
+                borderColor: 'rgba(79, 70, 229, 0.3)',
+                borderWidth: 1,
+                borderRadius: 2,
+                borderSkipped: false
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Risk Distribution (' + (statistics.simulation_count || counts.reduce((a,b) => a+b, 0)) + ' Monte Carlo Simulations)',
+                    font: { size: 16, weight: 'bold' },
+                    color: '#374151',
+                    padding: { bottom: 20 }
+                },
+                legend: { 
+                    display: false 
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    titleColor: 'white',
+                    bodyColor: 'white',
+                    borderColor: 'rgba(79, 70, 229, 0.5)',
+                    borderWidth: 1,
+                    callbacks: {
+                        label: (context) => {
+                            const scenarios = context.parsed.y;
+                            const total = counts.reduce((a,b) => a+b, 0);
+                            const percentage = ((scenarios / total) * 100).toFixed(1);
+                            return scenarios + ' scenarios (' + percentage + '% of simulations)';
+                        },
+                        title: (context) => 'Risk Range: ' + context[0].label + '%'
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    title: { 
+                        display: true, 
+                        text: 'Infection Risk (%)', 
+                        font: { size: 14, weight: 'bold' }, 
+                        color: '#374151' 
+                    },
+                    grid: { 
+                        display: false 
+                    },
+                    ticks: {
+                        color: '#6b7280',
+                        font: { size: 11 }
+                    }
+                },
+                y: {
+                    title: { 
+                        display: true, 
+                        text: 'Number of Scenarios', 
+                        font: { size: 14, weight: 'bold' }, 
+                        color: '#374151' 
+                    },
+                    grid: { 
+                        color: 'rgba(0, 0, 0, 0.1)' 
+                    },
+                    ticks: {
+                        color: '#6b7280',
+                        font: { size: 11 }
+                    },
+                    beginAtZero: true
+                }
+            },
+            animation: {
+                duration: 1000,
+                easing: 'easeOutQuart'
+            },
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            }
+        }
+    });
+    
+    console.log('✅ Uncertainty histogram created successfully');
+}
+
+function toggleUncertaintyDirect(button) {
+    console.log('🎯 Direct toggle function called');
+    var container = document.getElementById('uncertaintyAnalysisContainer');
+    console.log('Container found:', !!container);
+    
+    if (!container) {
+        alert('Uncertainty container not found');
+        return;
+    }
+    
+    if (container.style.display === 'none' || container.style.display === '') {
+        container.style.display = 'block';
+        button.innerHTML = '<i class="fas fa-eye-slash"></i> Hide uncertainty analysis';
+        console.log('✅ Showing uncertainty container');
+        
+        // Add content if empty
+        if (!container.innerHTML.trim() || container.innerHTML.includes('Loading')) {
+            var dataScript = document.getElementById('riskDistributionData');
+            if (dataScript) {
+                try {
+                    var data = JSON.parse(dataScript.textContent);
+                    container.innerHTML = 
+                        '<div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb;">' +
+                        '<h4 style="margin-top: 0; color: #374151;"><i class="fas fa-chart-bar" style="color: #4f46e5; margin-right: 8px;"></i>Risk Distribution Analysis</h4>' +
+                        '<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin: 15px 0; padding: 15px; background: #f9fafb; border-radius: 6px;">' +
+                        '<div style="text-align: center;"><div style="font-size: 0.85rem; color: #6b7280; margin-bottom: 4px;">Mean Risk</div><div style="font-size: 1.1rem; font-weight: 700; color: #374151;">' + (data.statistics.mean * 100).toFixed(2) + '%</div></div>' +
+                        '<div style="text-align: center;"><div style="font-size: 0.85rem; color: #6b7280; margin-bottom: 4px;">Median Risk</div><div style="font-size: 1.1rem; font-weight: 700; color: #374151;">' + (data.statistics.median * 100).toFixed(2) + '%</div></div>' +
+                        '<div style="text-align: center;"><div style="font-size: 0.85rem; color: #6b7280; margin-bottom: 4px;">Typical Range</div><div style="font-size: 1.1rem; font-weight: 700; color: #374151;">' + data.interpretation.typical_range + '</div></div>' +
+                        '</div>' +
+                        '<p style="margin: 15px 0; color: #4b5563;"><strong>What this shows:</strong> ' + data.interpretation.summary + '</p>' +
+                        '<p style="margin: 0; font-size: 0.9rem; color: #6b7280; font-style: italic; background: #f8fafc; padding: 12px; border-radius: 6px;">This analysis represents ' + (data.statistics.simulation_count || 'thousands of') + ' Monte Carlo simulations accounting for biological variability and epidemiological uncertainty.</p>' +
+                        '</div>';
+                    console.log('✅ Content added from uncertainty data');
+                } catch (e) {
+                    container.innerHTML = '<div style="color: #dc2626; padding: 20px;">Error loading uncertainty data: ' + e.message + '</div>';
+                }
+            } else {
+                container.innerHTML = '<div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb;"><p>No uncertainty data available for this calculation.</p></div>';
+            }
+        }
+    } else {
+        container.style.display = 'none';
+        button.innerHTML = '<i class="fas fa-chart-bar"></i> How certain is this result?';
+        console.log('✅ Hiding uncertainty container');
+    }
+}
+</script>
+
+<!-- Uncertainty Analysis Container (Hidden by Default) -->
+<div 
+    id="uncertaintyAnalysisContainer" 
+    class="uncertainty-analysis"
+    style="display: none;"
+    aria-labelledby="uncertaintyToggleBtn"
+    role="region"
+>
+    <div id="uncertaintyContent">
+        {% if result.risk_distribution_data %}
+            <!-- Data available: Will be populated by JavaScript -->
+            <div class="uncertainty-loading">
+                <i class="fas fa-spinner fa-spin"></i>
+                Generating uncertainty visualization...
+            </div>
+            
+            <!-- Hidden data for JavaScript -->
+            <script type="application/json" id="riskDistributionData">
+                {{ result.risk_distribution_data | tojson }}
+            </script>
+        {% else %}
+            <!-- Fallback content when no distribution data available -->
+            <div class="uncertainty-fallback">
+                <h4 style="margin-top: 0; color: #374151;">
+                    <i class="fas fa-info-circle" style="color: #4f46e5; margin-right: 0.5rem;"></i>
+                    Understanding Uncertainty
+                </h4>
+                <p>
+                    This risk estimate is based on thousands of simulations that account for biological variability 
+                    and epidemiological uncertainty. The actual range of possible outcomes depends on factors like:
+                </p>
+                <ul style="margin: 1rem 0; padding-left: 2rem; line-height: 1.6;">
+                    <li><strong>Viral load variation:</strong> Infected people can have 100-fold differences in how much virus they emit</li>
+                    <li><strong>Individual differences:</strong> Breathing patterns, mask fit, and immune status vary between people</li>
+                    <li><strong>Environmental factors:</strong> Actual ventilation, temperature, and humidity may differ from estimates</li>
+                    <li><strong>Omicron transmissibility:</strong> Scientific estimates range from 2× to 6× more transmissible than original variants</li>
+                </ul>
+                <p style="margin-bottom: 0; font-style: italic; color: #6b7280;">
+                    While the point estimate of <strong>{{ (result.risk * 100) | round(1) }}%</strong> represents the most likely outcome, 
+                    the true risk could reasonably be 2-3 times higher or lower due to these sources of uncertainty.
+                </p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+// Immediate debug - run as soon as script loads
+console.log('📜 Uncertainty analysis script loaded');
+
+/**
+ * Toggle uncertainty visualization - clean implementation
+ */
+window.toggleUncertainty = function() {
+    const button = document.getElementById('uncertaintyToggleBtn');
+    const container = document.getElementById('uncertaintyAnalysisContainer');
+    const dataScript = document.getElementById('riskDistributionData');
+    
+    if (!container) return;
+    
+    if (container.style.display === 'none') {
+        // Show
+        container.style.display = 'block';
+        button.innerHTML = '<i class="fas fa-eye-slash"></i> Hide uncertainty analysis';
+        
+        // Add content if not already loaded
+        if (!container.hasAttribute('data-loaded') && dataScript) {
+            try {
+                const data = JSON.parse(dataScript.textContent);
+                container.innerHTML = 
+                    '<div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb;">' +
+                    '<h4 style="margin-top: 0; color: #374151;"><i class="fas fa-chart-bar" style="color: #4f46e5; margin-right: 8px;"></i>Risk Distribution Analysis</h4>' +
+                    '<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin: 15px 0; padding: 15px; background: #f9fafb; border-radius: 6px;">' +
+                    '<div style="text-align: center;"><div style="font-size: 0.85rem; color: #6b7280; margin-bottom: 4px;">Mean Risk</div><div style="font-size: 1.1rem; font-weight: 700; color: #374151;">' + (data.statistics.mean * 100).toFixed(2) + '%</div></div>' +
+                    '<div style="text-align: center;"><div style="font-size: 0.85rem; color: #6b7280; margin-bottom: 4px;">Median Risk</div><div style="font-size: 1.1rem; font-weight: 700; color: #374151;">' + (data.statistics.median * 100).toFixed(2) + '%</div></div>' +
+                    '<div style="text-align: center;"><div style="font-size: 0.85rem; color: #6b7280; margin-bottom: 4px;">Typical Range</div><div style="font-size: 1.1rem; font-weight: 700; color: #374151;">' + data.interpretation.typical_range + '</div></div>' +
+                    '</div>' +
+                    '<p style="margin: 15px 0; color: #4b5563;"><strong>What this shows:</strong> ' + data.interpretation.summary + '</p>' +
+                    '<p style="margin: 0; font-size: 0.9rem; color: #6b7280; font-style: italic; background: #f8fafc; padding: 12px; border-radius: 6px;">This analysis represents ' + (data.statistics.simulation_count || 'thousands of') + ' Monte Carlo simulations accounting for biological variability and epidemiological uncertainty.</p>' +
+                    '</div>';
+                container.setAttribute('data-loaded', 'true');
+            } catch (e) {
+                container.innerHTML = '<div style="color: #dc2626; padding: 20px;">Error loading uncertainty data</div>';
+            }
+        }
+    } else {
+        // Hide
+        container.style.display = 'none';
+        button.innerHTML = '<i class="fas fa-chart-bar"></i> How certain is this result?';
+    }
+}
+
+/**
+ * Create the uncertainty visualization
+ */
+function createUncertaintyVisualization(container, dataScript) {
+    try {
+        const data = JSON.parse(dataScript.textContent);
+        
+        const chartHTML = `
+            <div style="background: white; padding: 20px; border-radius: 8px; margin: 10px 0; border: 1px solid #e5e7eb;">
+                <h4 style="margin-top: 0; color: #374151; display: flex; align-items: center;">
+                    <i class="fas fa-chart-bar" style="color: #4f46e5; margin-right: 8px;"></i>
+                    Risk Distribution Analysis
+                </h4>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; margin: 15px 0; padding: 15px; background: #f9fafb; border-radius: 6px;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.85rem; color: #6b7280; margin-bottom: 4px;">Mean Risk</div>
+                        <div style="font-size: 1.1rem; font-weight: 700; color: #374151;">${(data.statistics.mean * 100).toFixed(2)}%</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.85rem; color: #6b7280; margin-bottom: 4px;">Median Risk</div>
+                        <div style="font-size: 1.1rem; font-weight: 700; color: #374151;">${(data.statistics.median * 100).toFixed(2)}%</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.85rem; color: #6b7280; margin-bottom: 4px;">Typical Range</div>
+                        <div style="font-size: 1.1rem; font-weight: 700; color: #374151;">${data.interpretation.typical_range}</div>
+                    </div>
+                </div>
+                <div style="position: relative; height: 300px; margin: 15px 0;">
+                    <canvas id="riskChart"></canvas>
+                </div>
+                <div style="margin: 15px 0; line-height: 1.6;">
+                    <p style="margin-bottom: 10px; color: #4b5563;"><strong>What this shows:</strong> ${data.interpretation.summary}</p>
+                    <p style="margin-bottom: 0; font-size: 0.9rem; color: #6b7280; font-style: italic; background: #f8fafc; padding: 12px; border-radius: 6px; border-left: 3px solid #d1d5db;">
+                        ${data.interpretation.uncertainty_explanation || 'This distribution represents thousands of simulations accounting for biological variability and epidemiological uncertainty.'}
+                    </p>
+                </div>
+            </div>
+        `;
+        
+        container.innerHTML = chartHTML;
+        
+        // Create Chart.js histogram
+        if (typeof Chart !== 'undefined') {
+            setTimeout(() => createChart(data), 100);
+        } else {
+            container.innerHTML += '<p style="color: #dc2626; font-style: italic; text-align: center;">Chart.js not loaded - showing data only</p>';
+        }
+        
+    } catch (e) {
+        container.innerHTML = '<div style="color: #dc2626; padding: 20px; text-align: center;">Error loading uncertainty data: ' + e.message + '</div>';
+    }
+}
+
+/**
+ * Create the Chart.js visualization
+ */
+function createChart(data) {
+    const canvas = document.getElementById('riskChart');
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    const counts = data.histogram.counts;
+    const edges = data.histogram.edges;
+    const labels = [];
+    const colors = [];
+    
+    for (let i = 0; i < counts.length; i++) {
+        const binMidpoint = (edges[i] + edges[i + 1]) / 2;
+        labels.push((binMidpoint * 100).toFixed(3));
+        
+        if (binMidpoint < data.statistics.p25) {
+            colors.push('rgba(16, 185, 129, 0.7)');
+        } else if (binMidpoint < data.statistics.p75) {
+            colors.push('rgba(96, 165, 250, 0.7)');
+        } else {
+            colors.push('rgba(239, 68, 68, 0.7)');
+        }
+    }
+    
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Number of Scenarios',
+                data: counts,
+                backgroundColor: colors,
+                borderColor: '#4f46e5',
+                borderWidth: 1,
+                borderRadius: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: `Risk Distribution (${data.statistics.simulation_count || counts.reduce((a,b) => a+b, 0)} simulations)`,
+                    font: { size: 14, weight: 'bold' },
+                    color: '#374151'
+                },
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: (context) => {
+                            const scenarios = context.parsed.y;
+                            const total = counts.reduce((a,b) => a+b, 0);
+                            const percentage = ((scenarios / total) * 100).toFixed(1);
+                            return `${scenarios} scenarios (${percentage}%)`;
+                        },
+                        title: (context) => `Risk: ${context[0].label}%`
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    title: { display: true, text: 'Infection Risk (%)', font: { weight: 'bold' }, color: '#374151' },
+                    grid: { display: false }
+                },
+                y: {
+                    title: { display: true, text: 'Number of Scenarios', font: { weight: 'bold' }, color: '#374151' },
+                    grid: { color: 'rgba(0, 0, 0, 0.1)' },
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+/**
+ * Initialize uncertainty analysis when the toggle button is clicked
+ */
+function initializeUncertaintyAnalysis() {
+    console.log('🔧 Initializing uncertainty analysis...');
+    
+    // Debug function availability
+    console.log('🔍 Function availability check:', {
+        'Chart': typeof Chart,
+        'createRiskDistributionChart': typeof createRiskDistributionChart
+    });
+    
+    const dataScript = document.getElementById('riskDistributionData');
+    const container = document.getElementById('uncertaintyAnalysisContainer');
+    const content = document.getElementById('uncertaintyContent');
+    
+    console.log('🔍 DOM elements:', {
+        dataScript: !!dataScript,
+        container: !!container,
+        content: !!content
+    });
+    
+    if (dataScript && container && content) {
+        try {
+            // Parse the distribution data
+            console.log('📊 Parsing distribution data...');
+            const distributionData = JSON.parse(dataScript.textContent);
+            console.log('✅ Distribution data parsed:', distributionData);
+            
+            // Clear loading content
+            content.innerHTML = '';
+            
+            // Create chart container
+            const chartContainer = document.createElement('div');
+            chartContainer.id = 'riskDistributionChart';
+            content.appendChild(chartContainer);
+            console.log('📈 Chart container created');
+            
+            // Create the visualization
+            if (typeof createRiskDistributionChart === 'function') {
+                console.log('🎨 Creating visualization...');
+                createRiskDistributionChart('riskDistributionChart', distributionData);
+                console.log('✅ Visualization created successfully');
+            } else {
+                console.error('❌ Risk distribution visualization library not loaded');
+                showUncertaintyError('Visualization library not available');
+            }
+            
+        } catch (error) {
+            console.error('❌ Failed to initialize uncertainty analysis:', error);
+            showUncertaintyError('Failed to load uncertainty data: ' + error.message);
+        }
+    } else {
+        console.error('❌ Missing required DOM elements for uncertainty analysis');
+        if (!dataScript) console.error('  - Missing riskDistributionData script');
+        if (!container) console.error('  - Missing uncertaintyAnalysisContainer');
+        if (!content) console.error('  - Missing uncertaintyContent');
+    }
+}
+
+/**
+ * Show error message in uncertainty container
+ */
+function showUncertaintyError(message) {
+    const content = document.getElementById('uncertaintyContent');
+    if (content) {
+        content.innerHTML = `
+            <div class="uncertainty-error">
+                <i class="fas fa-exclamation-triangle"></i>
+                <strong>Error:</strong> ${message}
+                <br><small>Please try refreshing the page or contact support if the problem persists.</small>
+            </div>
+        `;
+    }
+}
+
+/**
+ * Enhanced toggle function that initializes visualization on first show
+ */
+function toggleUncertaintyAnalysis(buttonId, containerId) {
+    console.log('🎯 toggleUncertaintyAnalysis called with:', buttonId, containerId);
+    
+    const button = document.getElementById(buttonId);
+    const container = document.getElementById(containerId);
+    
+    console.log('🔍 Elements found:', { button: !!button, container: !!container });
+    
+    if (!button || !container) {
+        console.error('❌ Uncertainty analysis elements not found');
+        return;
+    }
+    
+    const isVisible = container.style.display !== 'none';
+    const hasData = document.getElementById('riskDistributionData');
+    
+    console.log('📊 Current state:', { isVisible, hasData: !!hasData });
+    
+    if (isVisible) {
+        // Hide
+        console.log('📴 Hiding uncertainty analysis');
+        container.style.display = 'none';
+        button.innerHTML = '<i class="fas fa-chart-bar"></i> How certain is this result?';
+        button.classList.remove('active');
+        button.setAttribute('aria-expanded', 'false');
+    } else {
+        // Show
+        console.log('📱 Showing uncertainty analysis');
+        container.style.display = 'block';
+        button.innerHTML = '<i class="fas fa-eye-slash"></i> Hide uncertainty analysis';
+        button.classList.add('active');
+        button.setAttribute('aria-expanded', 'true');
+        
+        // Initialize visualization if we have data and haven't initialized yet
+        if (hasData && !container.getAttribute('data-initialized')) {
+            console.log('🚀 Initializing uncertainty visualization...');
+            initializeUncertaintyAnalysis();
+            container.setAttribute('data-initialized', 'true');
+        } else if (!hasData) {
+            console.log('⚠️ No risk distribution data found');
+        } else {
+            console.log('ℹ️ Already initialized');
+        }
+        
+        // Track analytics if available
+        if (typeof analytics !== 'undefined' && analytics.trackButtonClick) {
+            analytics.trackButtonClick('uncertainty_analysis_toggle', 'show');
+        }
+    }
+}
+
+// Auto-initialize if Chart.js is already loaded
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 Uncertainty analysis DOMContentLoaded fired');
+    
+    // Set up the button click handler
+    const button = document.getElementById('uncertaintyToggleBtn');
+    if (button) {
+        console.log('🔘 Found uncertainty button, attaching event listener');
+        
+        button.addEventListener('click', function(event) {
+            console.log('🎯 Uncertainty button clicked - event fired');
+            event.preventDefault();
+            
+            if (typeof window.toggleUncertainty === 'function') {
+                console.log('✅ Calling window.toggleUncertainty()');
+                try {
+                    window.toggleUncertainty();
+                } catch (error) {
+                    console.error('❌ Error calling toggleUncertainty:', error);
+                    alert('Error: ' + error.message);
+                }
+            } else {
+                console.error('❌ toggleUncertainty function not found, type:', typeof window.toggleUncertainty);
+                alert('Uncertainty analysis function is not available (function not found)');
+            }
+        });
+        console.log('✅ Button event listener attached successfully');
+    } else {
+        console.error('❌ Uncertainty toggle button not found in DOM');
+    }
+    
+    // Check if Chart.js is available
+    if (typeof Chart === 'undefined') {
+        console.error('❌ Chart.js not loaded - uncertainty visualization will not be available');
+    } else {
+        console.log('✅ Chart.js is loaded successfully');
+    }
+    
+    // Check if our risk distribution function is available
+    if (typeof createRiskDistributionChart === 'undefined') {
+        console.error('❌ Risk distribution chart function not loaded');
+    } else {
+        console.log('✅ Risk distribution chart function is available');
+    }
+    
+    // Debug container and data presence
+    const container = document.getElementById('uncertaintyAnalysisContainer');
+    const dataScript = document.getElementById('riskDistributionData');
+    
+    console.log('🔍 DOM element check:', {
+        button: !!button,
+        container: !!container,
+        dataScript: !!dataScript
+    });
+    
+    if (dataScript) {
+        try {
+            const data = JSON.parse(dataScript.textContent);
+            console.log('📊 Risk distribution data found:', Object.keys(data));
+        } catch (e) {
+            console.error('❌ Failed to parse risk distribution data:', e);
+        }
+    }
+});
+</script>

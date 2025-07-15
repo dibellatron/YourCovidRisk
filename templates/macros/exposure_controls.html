@@ -1,0 +1,156 @@
+{#
+  Macro definitions for exposure calculator form controls
+#}
+{% macro dropdown(name, label, options) -%}
+<div>
+  <label for="{{ name }}">{{ label }}</label>
+  <div class="select-wrapper">
+    <select name="{{ name }}" id="{{ name }}" required form="exposureForm" class="dropdown-styled">
+      <option value="" {% if not request.form.get(name) %}selected{% endif %}></option>
+      {%- for opt in options %}
+        <option value="{{ opt.value }}" {% if request.form.get(name) == opt.value %}selected{% endif %}>{{ opt.label }}</option>
+      {%- endfor %}
+    </select>
+    <span class="validation-message">Please select an option</span>
+  </div>
+</div>
+{%- endmacro %}
+
+{% macro slider(id, label, min, max, step, default_value, options_count, options, index_field=None, value_field=None, display_field=None) -%}
+<div>
+  <label for="{{ id }}">{{ label }}</label>
+  <div class="slider-container">
+    <input type="range" class="slider" id="{{ id }}" min="{{ min }}" max="{{ max }}" step="{{ step }}" value="{{ request.form.get(index_field, default_value) }}" required>
+    <div class="slider-ticks">
+      {% for i in range(options|length) %}
+      <span class="tick" style="left: {{ (i / (options|length - 1) * 100)|round }}%"></span>
+      {% endfor %}
+    </div>
+    <div class="slider-labels {{ options_count }}">
+      {% for option in options %}
+      <span class="{{ 'active' if request.form.get(index_field, default_value)|int == loop.index0 }}">{{ option.display|safe }}</span>
+      {% endfor %}
+    </div>
+  </div>
+  {% if value_field %}
+  <input type="hidden" name="{{ value_field }}" id="{{ value_field }}" value="{{ request.form.get(value_field, options[default_value|int].value) }}">
+  {% endif %}
+  {% if index_field %}
+  <input type="hidden" name="{{ index_field }}" id="{{ index_field }}" value="{{ request.form.get(index_field, default_value) }}">
+  {% endif %}
+  {% if display_field %}
+  <input type="hidden" name="{{ display_field }}" id="{{ display_field }}" value="{{ request.form.get(display_field, options[default_value|int].display) }}">
+  {% endif %}
+</div>
+{%- endmacro %}
+
+{% macro time_slider(id, label, display_text, default_month=6) -%}
+<div id="{{ id }}_container" style="display: none; margin-top: 10px;">
+  <label for="{{ id }}" style="display: flex; align-items: center;">
+    <span style="flex: 1;">{{ label }} <span class="slider-value-label">{{ request.form.get(id, default_month|string + ' months ago') }}</span></span>
+  </label>
+  <div class="slider-container time-slider-container">
+    <input type="range" class="slider time-slider" name="{{ id }}" id="{{ id }}" min="1" max="12" step="1" 
+           value="{{ request.form.get(id, default_month|string)|replace(' month ago', '')|replace(' months ago', '') }}" 
+           required oninput="update{{ id|capitalize }}Label(this.value)">
+
+    <!-- Position ticks at month positions (all with same styling) -->
+    <div class="slider-ticks">
+      <span class="tick" style="left: 0%"></span>
+      <span class="tick" style="left: 9.09%"></span>
+      <span class="tick" style="left: 18.18%"></span> <!-- 3 months -->
+      <span class="tick" style="left: 27.27%"></span>
+      <span class="tick" style="left: 36.36%"></span>
+      <span class="tick" style="left: 45.45%"></span> <!-- 6 months -->
+      <span class="tick" style="left: 54.54%"></span>
+      <span class="tick" style="left: 63.63%"></span>
+      <span class="tick" style="left: 72.72%"></span> <!-- 9 months -->
+      <span class="tick" style="left: 81.81%"></span>
+      <span class="tick" style="left: 90.90%"></span>
+      <span class="tick" style="left: 100%"></span> <!-- 12 months -->
+    </div>
+
+    <!-- Precisely positioned labels for alignment with slider thumb - 1 month label removed -->
+    <div class="slider-labels four-options">
+      <!-- Hidden span for 1 month position to maintain functionality -->
+      <span style="position: absolute; left: 0.5%; transform: translateX(0%); text-align: center; visibility: hidden;" 
+            class="{{ 'active' if request.form.get(id, default_month|string) == '1' }}" data-month-value="1"></span>
+      <span style="position: absolute; left: 18.18%; transform: translateX(-50%); text-align: center;" 
+            class="{{ 'active' if request.form.get(id, default_month|string) == '3' }}" data-month-value="3">3<br>months<br>ago</span>
+      <span style="position: absolute; left: 45.45%; transform: translateX(-50%); text-align: center;" 
+            class="{{ 'active' if request.form.get(id, default_month|string) == '6' }}" data-month-value="6">6<br>months<br>ago</span>
+      <span style="position: absolute; left: 72.72%; transform: translateX(-50%); text-align: center;" 
+            class="{{ 'active' if request.form.get(id, default_month|string) == '9' }}" data-month-value="9">9<br>months<br>ago</span>
+      <span style="position: absolute; left: 102%; transform: translateX(-100%); text-align: center;" 
+            class="{{ 'active' if request.form.get(id, default_month|string) == '12' }}" data-month-value="12">12<br>months<br>ago</span>
+    </div>
+  </div>
+  <input type="hidden" id="{{ id }}_display" name="{{ id }}_display" value="{{ request.form.get(id + '_display', default_month|string + ' months ago') }}">
+</div>
+{%- endmacro %}
+
+{% macro info_box(id, content) -%}
+<div id="{{ id }}" style="display: none; padding: 14px 16px; color: #475569; font-size: 1em; line-height: 1.5; margin-bottom: 16px; background-color: #f8fafc; border-left: 4px solid var(--primary); border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.04);">
+  {{ content|safe }}
+</div>
+{%- endmacro %}
+
+{#
+  Card wrapper macro: use call syntax to wrap a block in a titled card.
+  Example:
+  {% call ctrl.card('About You') %}
+    ... form controls ...
+  {% endcall %}
+#}
+{% macro card(title, icon='') -%}
+<div class="form-card">
+  <h2>
+    {% if icon %}
+    <i class="fas {{ icon }}" style="margin-right: 8px; color: var(--primary);"></i>
+    {% endif %}
+    {{ title }}
+  </h2>
+  {{ caller() }}
+</div>
+{%- endmacro %}
+
+{% macro time_selector(hours_value='', minutes_value='', seconds_value='') -%}
+<div class="time-selector-container" style="margin-top: 5px; margin-left: 10px;">
+  <div class="time-selector-group">
+    <div class="time-unit-container">
+      <div style="font-size: 14px; color: #555; margin-bottom: 4px;">Hours</div>
+      <div class="select-wrapper">
+        <select name="exposure_hours" id="exposure_hours" class="time-select">
+          <option value="" {% if hours_value == '' %}selected{% endif %}></option>
+          {% for i in range(0, 24) %}
+          <option value="{{ i }}" {% if hours_value != '' and hours_value|int == i %}selected{% endif %}>{{ i }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+    <div class="time-unit-container">
+      <div style="font-size: 14px; color: #555; margin-bottom: 4px;">Minutes</div>
+      <div class="select-wrapper">
+        <select name="exposure_minutes" id="exposure_minutes" class="time-select">
+          <option value="" {% if minutes_value == '' %}selected{% endif %}></option>
+          {% for i in range(0, 60) %}
+          <option value="{{ i }}" {% if minutes_value != '' and minutes_value|int == i %}selected{% endif %}>{{ i }}</option>
+          {% endfor %}
+        </select>
+        <span class="validation-message time-validation-message">Please enter a time duration</span>
+      </div>
+    </div>
+    <div class="time-unit-container">
+      <div style="font-size: 14px; color: #555; margin-bottom: 4px;">Seconds</div>
+      <div class="select-wrapper">
+        <select name="exposure_seconds" id="exposure_seconds" class="time-select">
+          <option value="" {% if seconds_value == '' %}selected{% endif %}></option>
+          {% for i in range(0, 60) %}
+          <option value="{{ i }}" {% if seconds_value != '' and seconds_value|int == i %}selected{% endif %}>{{ i }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+  </div>
+</div>
+{%- endmacro %}

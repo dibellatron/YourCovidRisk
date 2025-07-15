@@ -1,0 +1,50 @@
+<!-- Google Analytics Base Template -->
+<!-- Include this in all pages for consistent tracking -->
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-QS2H07PT34"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-QS2H07PT34', {
+    // Enhanced tracking configuration
+    page_title: document.title,
+    page_location: window.location.href,
+    custom_map: {
+      'dimension1': 'calculator_type',
+      'dimension2': 'user_type',
+      'dimension3': 'page_section'
+    }
+  });
+</script>
+
+<!-- Analytics utility script -->
+<script src="{{ url_for('static', filename='js/utils/analytics.js') }}"></script>
+
+<!-- Auto-track page view with additional context -->
+<script>
+  // Set environment flag for analytics
+  window.ANALYTICS_DEBUG = {{ 'true' if is_development else 'false' }};
+  
+  document.addEventListener('DOMContentLoaded', function() {
+    // Track page view with context
+    if (typeof analytics !== 'undefined') {
+      const pageName = document.title;
+      const pageType = document.body.getAttribute('data-page-type') || 'unknown';
+      
+      analytics.trackPageView(pageName, {
+        page_type: pageType,
+        environment: '{{ FLASK_ENV }}'
+      });
+    }
+    
+    // Track navigation clicks
+    document.querySelectorAll('nav a, .nav-link').forEach(function(link) {
+      link.addEventListener('click', function(e) {
+        const destination = this.getAttribute('href') || this.textContent;
+        analytics.trackNavigation(destination, window.location.pathname);
+      });
+    });
+  });
+</script>

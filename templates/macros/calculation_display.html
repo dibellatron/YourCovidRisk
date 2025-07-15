@@ -1,0 +1,318 @@
+{# Simple calculation display template for the test calculator #}
+
+{% macro calculation_display() %}
+  <!-- Explain calculation button -->
+  <button id="toggleCalculation" type="button" onclick="toggleCalculationDisplay()" class="secondary-btn" style="min-width: 130px; white-space: nowrap;">
+    Explain calculation
+  </button>
+
+  <!-- Simple calculation steps panel -->
+  <div id="calculationPanel" style="display: none; margin-top: 20px; padding: 20px; background-color: #f8fafc; border-radius: 8px; border-left: 4px solid var(--primary); overflow: hidden; max-width: 100%;">
+    <h3 style="color: var(--primary); margin-top: 0;">How this probability was calculated:</h3>
+
+    <div class="calculation-section" style="margin-bottom: 20px;">
+      <h4 style="color: var(--primary-dark); margin-bottom: 5px;">1. Starting probability (prior)</h4>
+      <p id="step1Detail" style="margin-left: 15px;">Loading...</p>
+    </div>
+
+    <div class="calculation-section" style="margin-bottom: 20px;">
+      <h4 style="color: var(--primary-dark); margin-bottom: 5px;" id="step2Title">2. Adjustments based on exposure level</h4>
+      <p id="step2Detail" style="margin-left: 15px;">Loading...</p>
+    </div>
+
+    <div class="calculation-section" style="margin-bottom: 20px;">
+      <h4 style="color: var(--primary-dark); margin-bottom: 5px;" id="step3Title">3. Update based on test results</h4>
+      <div id="step3Detail" style="margin-left: 15px;">Loading...</div>
+    </div>
+
+    <div class="calculation-section">
+      <h4 style="color: var(--primary-dark); margin-bottom: 5px;" id="step4Title">4. Uncertainty analysis</h4>
+      <div id="step4Detail" style="margin-left: 15px;">Loading...</div>
+    </div>
+  </div>
+
+  <style>
+    /* General calculation styles */
+    .calculation-section {
+      margin-bottom: 25px;
+      border-bottom: 1px solid #e5e7eb;
+      padding-bottom: 15px;
+    }
+
+    .calculation-section:last-child {
+      border-bottom: none;
+    }
+
+    .calculation-intro {
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    /* Bayes formulas section */
+    .bayes-formulas {
+      background-color: #eef2ff;
+      border-radius: 8px;
+      padding: 15px;
+      margin: 15px 0;
+      border-left: 3px solid var(--primary);
+    }
+
+    .bayes-formulas h5 {
+      margin-top: 0;
+      color: var(--primary-dark);
+      margin-bottom: 12px;
+      font-size: 16px;
+    }
+
+    .bayes-formulas ul {
+      margin: 0;
+      padding-left: 20px;
+    }
+
+    .bayes-formulas li {
+      margin-bottom: 10px;
+      line-height: 1.6;
+    }
+
+    .bayes-formulas li:last-child {
+      margin-bottom: 0;
+    }
+
+    /* Test calculation styles */
+    .test-calculation {
+      margin-top: 20px;
+      padding: 15px;
+      border-left: 3px solid var(--primary);
+      background-color: #f8fafc;
+      border-radius: 6px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    .test-calculation h5 {
+      margin-top: 0;
+      color: var(--primary-dark);
+      margin-bottom: 10px;
+      border-bottom: 1px solid #e5e7eb;
+      padding-bottom: 5px;
+    }
+
+    .calculation-formula {
+      background-color: rgba(255, 255, 255, 0.7);
+      padding: 12px;
+      border-radius: 6px;
+      margin: 10px 0;
+      border: 1px solid #e5e7eb;
+      overflow-x: auto;
+    }
+
+    .bayes-formula {
+      margin: 0;
+      font-family: 'Courier New', monospace;
+      font-weight: 500;
+      font-size: 0.95em;
+      line-height: 1.5;
+      white-space: nowrap;
+    }
+
+    /* Math fraction styling similar to LaTeX */
+    .fraction {
+      display: inline-block;
+      vertical-align: middle;
+      text-align: center;
+      font-family: 'Courier New', monospace;
+    }
+
+    .numerator, .denominator {
+      display: block;
+      padding: 0 4px;
+    }
+
+    .numerator {
+      border-bottom: 1px solid #000;
+      margin-bottom: 1px;
+    }
+
+    /* When used within formulas */
+    .fraction-container {
+      display: inline-flex;
+      align-items: center;
+      vertical-align: middle;
+      margin: 0 4px;
+    }
+
+    .next-test-transition {
+      margin-top: 10px;
+      border-top: 1px dashed #d1d5db;
+      padding-top: 10px;
+      color: #4b5563;
+    }
+
+    /* Prevent awkward line breaks in test transition text */
+    .next-test-transition p {
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      hyphens: auto;
+    }
+
+    code {
+      background-color: rgba(226, 232, 240, 0.5);
+      padding: 2px 4px;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+    }
+
+    /* Responsive design for small screens */
+    @media (max-width: 820px) {
+      /* Make formulas scroll horizontally on small screens */
+      .calculation-formula {
+        overflow-x: auto;
+        white-space: nowrap;
+        padding: 10px;
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      /* Ensure all formula containers can scroll */
+      .bayes-formula,
+      .calculation-formula,
+      .test-calculation {
+        overflow-x: auto;
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      /* Ensure parent containers don't constrain width */
+      #step3Detail,
+      #step4Detail,
+      .calculation-section {
+        overflow-x: auto;
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      /* Adjust fraction display for smaller screens */
+      .fraction {
+        font-size: 0.9em;
+      }
+
+      /* Keep the formula centered and aligned */
+      .bayes-formula {
+        justify-content: flex-start;
+        flex-wrap: nowrap;
+        min-width: max-content;
+      }
+
+      /* Adjust spacing for smaller screens */
+      .calculation-section {
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+      }
+
+      /* Make test calculation blocks more compact and scrollable */
+      .test-calculation {
+        padding: 12px;
+        margin-top: 15px;
+        overflow-x: auto;
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      /* Adjust formula text size but ensure readability */
+      .bayes-formula {
+        font-size: 0.85em;
+        white-space: nowrap;
+      }
+
+      /* Make the calculation panel use full width */
+      #calculationPanel {
+        padding: 15px;
+        margin-left: 0;
+        margin-right: 0;
+        overflow-x: auto;
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      /* Make headings smaller */
+      #calculationPanel h4 {
+        font-size: 1rem;
+      }
+
+      .test-calculation h5 {
+        font-size: 0.95rem;
+      }
+
+      /* Adjust spacing in list items */
+      .bayes-formulas li {
+        margin-bottom: 12px;
+        line-height: 1.4;
+      }
+
+      /* Better handling of transition text on mobile */
+      .next-test-transition p {
+        font-size: 0.9rem;
+        line-height: 1.5;
+        text-align: left;
+        word-break: break-word;
+        overflow-wrap: break-word;
+      }
+
+      /* Prevent awkward breaks around test names and percentages */
+      .next-test-transition strong {
+        white-space: nowrap;
+      }
+    }
+
+    /* Extra adjustments for very small screens */
+    @media (max-width: 480px) {
+      /* Further reduce padding */
+      .test-calculation,
+      .calculation-formula,
+      #calculationPanel,
+      .bayes-formulas {
+        padding: 8px;
+      }
+
+      /* Remove left borders (brackets) to save space on small screens */
+      #calculationPanel {
+        border-left: none;
+        border-top: 4px solid var(--primary);
+      }
+
+      .bayes-formulas {
+        border-left: none;
+        border-top: 2px solid var(--primary);
+      }
+
+      .test-calculation {
+        border-left: none;
+        border-top: 2px solid var(--primary);
+      }
+
+      /* Reduce left margin since we removed the borders */
+      #step1Detail,
+      #step2Detail,
+      #step3Detail {
+        margin-left: 5px !important;
+      }
+
+      /* Better text handling for very small screens */
+      .next-test-transition p {
+        font-size: 0.85rem;
+        line-height: 1.4;
+        text-align: left;
+        word-break: break-word;
+        overflow-wrap: break-word;
+        margin-bottom: 10px;
+      }
+
+      /* Keep percentages and test names together */
+      .next-test-transition strong {
+        white-space: nowrap;
+        display: inline-block;
+      }
+
+      /* Note: Mobile full-width styling for #toggleCalculation is now handled in test_calculator.html */
+    }
+  </style>
+{% endmacro %}

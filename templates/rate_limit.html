@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rate Limit Exceeded - COVID Risk Calculator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <style>
+        .rate-limit-container {
+            max-width: 600px;
+            margin: 2rem auto;
+            padding: 2rem;
+            text-align: center;
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 0.5rem;
+        }
+        .rate-limit-icon {
+            font-size: 3rem;
+            color: #856404;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="rate-limit-container">
+        <div class="rate-limit-icon">⏳</div>
+        <h1>Please Slow Down</h1>
+        <p>You've made too many requests in a short time. This helps us keep the calculator running smoothly for everyone.</p>
+        <p><strong>Please wait a minute and try again.</strong></p>
+        <br>
+        <a href="/" class="btn btn-primary">Return to Calculator</a>
+    </div>
+</body>
+</html>

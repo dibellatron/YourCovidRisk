@@ -1,0 +1,1387 @@
+    /* Page‑specific variables */
+    :root {
+      --slider-height: 6px;
+      --slider-thumb-size: 20px;
+    }
+
+    /* h1 style moved to global stylesheet */
+
+    label {
+      display: inline-block;
+      width: 100%;
+      margin-bottom: 12px;
+      font-weight: 600;
+      color: #1e293b;
+      font-size: 1.05rem;
+      letter-spacing: -0.01em;
+    }
+
+    input[type="number"],
+    input[type="text"] {
+      font-size: 18px;
+      padding: 12px 18px;
+      margin-left: 10px;
+      width: calc(100% - 36px); /* Account for padding */
+      max-width: 150px;
+      min-width: 80px;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+      background-color: white;
+      font-family: 'Poppins', sans-serif;
+      transition: all 0.3s;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      height: auto; /* Remove fixed height */
+      min-height: 48px; /* Minimum height for consistency */
+    }
+
+    select {
+      font-size: 1rem;
+      padding: 12px 20px;
+      width: calc(100% - 40px); /* Account for padding */
+      max-width: 260px; /* Increased width to fit longer dropdown options */
+      min-width: 200px; /* Increased minimum width */
+      border-radius: 12px;
+      border: 1px solid #dbe4f0;
+      background-color: white;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 500;
+      transition: all 0.3s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      cursor: pointer;
+      background-color: #f9fafc;
+      padding-right: 40px;
+      position: relative;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      color: #334155;
+      margin-top: 4px;
+    }
+
+    /* select-wrapper styles moved to global stylesheet */
+
+    /* Add a subtle indicator that this is a dropdown */
+    select::before {
+      content: 'Select';
+      position: absolute;
+      top: -20px;
+      left: 0;
+      font-size: 12px;
+      color: #6b7280;
+    }
+
+    input[type="number"]:focus,
+    select:focus,
+    input[type="range"]:focus,
+    input[type="text"]:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+    }
+
+    /* Custom styles for fit factor input */
+    #fit_factor_input {
+      width: calc(100% - 40px); /* Account for padding */
+      max-width: 180px;
+      min-width: 120px;
+      min-height: 52px;
+      font-size: 1.1rem;
+      font-weight: 500;
+      padding: 12px 20px;
+      margin-top: 5px;
+      margin-bottom: 5px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    #fit_factor_container .input-wrapper {
+      margin-left: 10px;
+    }
+
+
+    /* Advanced field styles */
+    .advanced-field-row {
+      margin-bottom: 15px;
+      display: flex;
+      align-items: flex-start;
+      gap: 15px;
+    }
+
+    .advanced-label {
+      font-weight: 600;
+      color: #374151;
+      font-size: 16px;
+      min-width: 200px;
+      margin: 0;
+      padding-top: 10px; /* Align with input field top */
+    }
+
+    .advanced-input {
+      width: 100%;
+      max-width: 200px;
+      padding: 8px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 14px;
+      transition: all 0.2s;
+      min-height: 26px; /* Ensure consistent height */
+    }
+
+    .advanced-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+    }
+
+    .advanced-input-group {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    .advanced-input-wrapper {
+      flex: 1;
+    }
+
+    .unit-select {
+      width: auto;
+      min-width: 110px;
+      padding: 8px 16px;
+      font-size: 14px;
+      height: 42px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      background-color: white;
+      cursor: pointer;
+    }
+
+    /* Uncertainty display styles (matching test calculator) */
+    .confidence-interval-section {
+      background-color: #f8fafc;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-left: 3px solid var(--primary);
+    }
+
+    .confidence-interval-section h4 {
+      margin-top: 0;
+      margin-bottom: 10px;
+      color: var(--primary-dark);
+      font-size: 1rem;
+    }
+
+    .confidence-interval-explainer {
+      font-size: 0.9rem;
+      color: #64748b;
+      margin-bottom: 20px;
+    }
+
+    .mc-bound {
+      font-weight: 600;
+    }
+
+    /* Slider styles */
+    .slider-container {
+      position: relative;
+      width: 100%;
+      max-width: 100%; /* Full width with container constraints */
+      margin: 10px 0 50px; /* Increased bottom margin to accommodate label height */
+      box-sizing: border-box;
+      isolation: isolate; /* Create a new stacking context */
+      padding: 0 3px; /* Add a tiny bit of horizontal padding to prevent edge clipping */
+      overflow: visible; /* Allow labels to be visible but contained */
+    }
+    /* Extra bottom margin for time sliders (3-line labels) */
+    .slider-container.time-slider-container {
+      margin-bottom: 65px !important;
+    }
+
+    /* Custom adjustments for time slider thumb positioning */
+    .time-slider {
+      appearance: none;
+      -webkit-appearance: none;
+    }
+
+    /* Fix thumb alignment with labels for month values */
+    .time-slider[value="1"]::-webkit-slider-thumb {
+      margin-left: 0;
+    }
+    .time-slider[value="3"]::-webkit-slider-thumb {
+      margin-left: -5px; /* Adjust for 3 months */
+    }
+    .time-slider[value="6"]::-webkit-slider-thumb {
+      margin-left: -4px; /* Adjust for 6 months */
+    }
+    .time-slider[value="9"]::-webkit-slider-thumb {
+      margin-left: -3px; /* Adjust for 9 months */
+    }
+    .time-slider[value="12"]::-webkit-slider-thumb {
+      margin-left: 0; /* No adjustment needed for end position */
+    }
+
+    /* Firefox version */
+    .time-slider[value="1"]::-moz-range-thumb {
+      margin-left: 0;
+    }
+    .time-slider[value="3"]::-moz-range-thumb {
+      margin-left: -5px;
+    }
+    .time-slider[value="6"]::-moz-range-thumb {
+      margin-left: -4px;
+    }
+    .time-slider[value="9"]::-moz-range-thumb {
+      margin-left: -3px;
+    }
+    .time-slider[value="12"]::-moz-range-thumb {
+      margin-left: 0;
+    }
+
+/* ------------------------------------------------------------
+   Distance slider specific styles (moved from inline)
+------------------------------------------------------------ */
+.distance-labels {
+  position: relative;
+  width: 100%;
+  display: block;
+  min-height: 30px; /* Minimum height for the labels */
+  margin-top: 10px;
+}
+.distance-label {
+  position: absolute;
+  transform: translateX(-50%);
+  text-align: center;
+  font-size: 13px;
+  color: #64748b;
+  top: 5px;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+.distance-label:hover {
+  color: var(--primary-light);
+}
+/* Highlight active distance label */
+.distance-label.active {
+  color: var(--primary) !important;
+  font-weight: bold !important;
+}
+
+    .slider {
+      -webkit-appearance: none;
+      width: 100%;
+      height: var(--slider-height);
+      border-radius: 8px;
+      background: linear-gradient(to right, #e2e8f0, #f1f5f9);
+      outline: none;
+      transition: all 0.3s;
+      padding: 0;
+      margin: 0;
+      cursor: pointer;
+    }
+
+    /* The thumb is now centred via a transform (see global stylesheet) */
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: var(--slider-thumb-size);
+      height: var(--slider-thumb-size);
+      border-radius: 50%;
+      background: var(--primary);
+      cursor: pointer;
+      transition: transform 0.2s ease-out, background 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+      transform: translateY(0);
+      position: relative;
+      z-index: 2;
+      border: 2px solid white;
+    }
+
+    .slider::-moz-range-thumb {
+      width: var(--slider-thumb-size);
+      height: var(--slider-thumb-size);
+      border-radius: 50%;
+      background: var(--primary);
+      cursor: pointer;
+      transition: transform 0.2s ease-out, background 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+      position: relative;
+      z-index: 2;
+      border: 2px solid white;
+      transform: translateY(0);
+    }
+
+    .slider:hover::-webkit-slider-thumb {
+      background: var(--primary-dark);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+    }
+
+    .slider:hover::-moz-range-thumb {
+      background: var(--primary-dark);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+    }
+
+    .slider-value-container {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      margin-top: 8px;
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .slider-value {
+      min-width: 2em; /* Relative to font size */
+      font-size: 1.1em;
+    }
+
+    .slider-unit {
+      margin-left: 5px;
+      font-size: 0.9em;
+      color: #64748b;
+    }
+
+    .slider-ticks {
+      position: relative;
+      width: 100%;
+      height: 20px;
+      margin-top: 8px;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    .tick {
+      position: absolute;
+      transform: translateX(-50%);
+      color: #64748b;
+      font-size: 12px;
+      top: 0;
+      width: auto; /* Allow natural width to prevent text wrapping */
+      min-width: 20px; /* Minimum width for proper display */
+      text-align: center;
+      white-space: nowrap; /* Prevent text wrapping */
+    }
+    /* Make tick labels clickable */
+    .slider-ticks .tick {
+      cursor: pointer;
+    }
+
+    /* Thumb centring handled globally – no margin hack necessary */
+
+    /* Thumb centring for Firefox handled above */
+
+/* Subtle tick mark style */
+.tick::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: -5px;
+  transform: translateX(-50%);
+  width: 1px;
+  height: 8px;
+  background-color: #cbd5e1;
+  opacity: 0.4;
+  border-radius: 1px;
+}
+
+
+    /* Ensure proper alignment across elements */
+    .slider-container input[type="range"],
+    .slider-container .slider-ticks,
+    .slider-container .slider-labels {
+      width: 100%;
+      box-sizing: border-box;
+    }
+    /* Flex-layout for categorical sliders (3,4,5 options), exclude time sliders */
+    .slider-container:not(.time-slider-container) .slider-labels {
+      display: flex !important;
+      justify-content: space-between !important;
+      margin-top: 10px !important;
+      height: auto !important;
+      box-sizing: border-box;
+    }
+    .slider-container:not(.time-slider-container) .slider-labels span {
+      position: relative !important;
+      left: auto       !important;
+      transform: none  !important;
+      flex: 1          !important;
+      text-align: center !important;
+      padding: 0 2px   !important;
+    }
+    /* Override flex layout for month sliders to allow exact positioning */
+    .slider-container.time-slider-container .slider-labels {
+      position: relative;
+      margin-top: 10px !important;
+      min-height: 50px !important; /* Minimum height for months labels */
+      box-sizing: border-box !important;
+      display: block !important; /* Override flex display */
+    }
+
+    /* Override default positioning to allow absolute positioning */
+    .slider-container.time-slider-container .slider-labels span {
+      position: absolute !important; /* Keep position absolute */
+      padding: 0 2px !important;
+      /* Don't override left or transform - we need those for positioning */
+    }
+    /* Override hover: remove translate on flex-based labels */
+    .slider-container:not(.time-slider-container) .slider-labels span:hover {
+      transform: scale(1.08) !important;
+      transform-origin: center center !important;
+    }
+
+
+    /* Highlight active slider option */
+    .slider-labels span {
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: #64748b;
+      transition: all 0.2s ease;
+      padding: 4px 0;
+    }
+
+    .slider-labels span.active {
+      color: var(--primary);
+      font-weight: 700;
+      transform: scale(1.05);
+    }
+    /* Override nth-child hover shifts for all generic (non-time) slider labels */
+/* Reset any translateX offset on hover for all generic slider labels */
+.slider-container:not(.time-slider-container) .slider-labels span:nth-child(n):hover {
+  transform: scale(1.08) !important;
+  transform-origin: center center !important;
+  text-align: center !important;
+}
+
+/* Prevent five-option slider last label from shifting on hover */
+.slider-container:not(.time-slider-container) .slider-labels.five-options span:nth-child(5):hover,
+.slider-container:not(.time-slider-container) .slider-labels.four-options span:nth-child(5):hover {
+  transform: translateX(0) scale(1.08) !important;
+  transform-origin: right center !important;
+  text-align: center !important;
+}
+
+    /* Special styling for specific sliders */
+    #masked_percentage_container .slider-labels span.active,
+    #mask_fit_container .slider-labels span.active {
+      color: var(--primary) !important;
+      font-weight: bold !important;
+    }
+
+    .slider-value-label {
+      display: inline-block;
+      margin-left: 10px;
+      color: var(--primary);
+      font-weight: 600;
+      font-size: 1.1em;
+      white-space: nowrap;
+      background-color: rgba(255, 255, 255, 0.5);
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Add a subtle dropdown effect on hover */
+    select:hover {
+      border-color: var(--primary);
+      background-color: #f0f7ff;
+      box-shadow: 0 2px 5px rgba(79, 70, 229, 0.15);
+    }
+
+    /* More obvious styling for dropdowns */
+    .dropdown-styled {
+      background-color: white;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+      padding: 12px 36px 12px 16px;
+      position: relative;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      /* Custom styling without background image */
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+    }
+
+    /* Special width handling for environment-related dropdowns */
+    #indoor_outdoor, #exposure_location, #car_type {
+      width: 100%; /* Allow these to fill their container */
+      max-width: 300px; /* Even wider for these specific dropdowns */
+    }
+
+    /* Make environment type dropdown extra wide to accommodate long venue names */
+    #ACH {
+      width: 100%; /* Allow these to fill their container */
+      max-width: 500px; /* Extra wide for environment type specifically */
+    }
+
+    /* Make mask type dropdown wider to accommodate long mask names */
+    #mask_type {
+      width: 100%; /* Allow these to fill their container */
+      max-width: 360px; /* Wide enough for mask type specifically */
+    }
+
+
+    /* Add default text for empty selects */
+    select option:first-child {
+      color: #94a3b8;
+    }
+
+
+    /* More obvious hover for styled dropdowns */
+    .dropdown-styled:hover {
+      border-color: var(--primary);
+      box-shadow: 0 1px 4px rgba(79, 70, 229, 0.2);
+    }
+
+    /* Animations moved to global stylesheet */
+
+    /* Apply animation to containers that can be shown/hidden */
+    #mask_type_container,
+    #mask_fit_container,
+    #fit_factor_container,
+    #vaccination_time_container,
+    #infection_time_container,
+    #environment_container,
+    #car-type-container,
+    #airplane-type-container,
+    #masked_percentage_container,
+    #others_mask_type_container {
+      overflow: hidden;
+      transition: all 0.3s ease-in-out;
+      transform-origin: top center;
+    }
+
+    /* Selected options should be clearly visible */
+    select:valid {
+      color: #1e293b;
+      font-weight: 500;
+    }
+
+
+    select#ACH optgroup {
+      font-weight: bold !important;
+      color: #334155 !important;
+      text-transform: uppercase;
+      margin-top: 5px;
+      padding-bottom: 3px;
+      text-shadow: 0 0 0 #000 !important;
+      background-color: #f8fafc;
+    }
+
+    /* button styles moved to global stylesheet */
+
+    /* nav styles moved to global stylesheet */
+
+    /* Updated container styles for modern look */
+    .container {
+      background-color: white;
+      border-radius: 16px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+      padding: 2rem;
+      /* Full width, centered with clean margins */
+      width: 95%;
+      max-width: 1400px;
+      margin: 1.5rem auto;
+      border: none;
+      transition: all 0.3s ease;
+    }
+
+    .container:hover {
+      box-shadow: 0 12px 40px rgba(0,0,0,0.1);
+    }
+
+    .form-container {
+      /* Limit the form width and center it */
+      max-width: 1200px;
+      width: 95%;
+      margin: 0 auto;
+    }
+
+    /* Form sections with subtle dividers */
+    form > div {
+      margin-bottom: 1.25rem;
+      transition: all 0.3s ease;
+      padding: 0.75rem 0;
+      max-width: 100%;
+      overflow-x: hidden; /* Prevent horizontal scroll */
+    }
+
+    form > div:hover {
+      background-color: rgba(248, 250, 252, 0.5);
+      border-radius: 8px;
+    }
+
+    /* Updated result container */
+    .result-container {
+      margin-top: 10px;
+      padding: 1.5rem 0;
+      border-top: 1px solid #f1f5f9;
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    /* fadeIn animation moved to global stylesheet */
+
+    /* Responsive styles for all devices */
+    @media only screen and (max-width: 820px) {
+      /* Eliminate body margins that create the light blue space */
+      body {
+        font-size: 16px;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+
+      nav {
+        margin: 0 0 1rem 0;
+        padding: 0.5rem 1rem;
+      }
+
+      .container {
+        padding: 0.75rem 0.1rem 0.75rem 0.9rem !important; /* Improved left padding */
+        margin: 0.5rem auto;
+        width: 98%;
+        max-width: none !important; /* Override any max-width constraints */
+      }
+
+      .form-container {
+        width: 100%;
+        max-width: 100%;
+      }
+
+      .form-card {
+        padding: 1.25rem 0.25rem 1.25rem 1.2rem; /* Better left padding */
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+      }
+
+      /* Ensure labels and text wrap properly */
+      label {
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        white-space: normal;
+      }
+
+      h2, h3, p, div {
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+      }
+
+      h1 {
+        font-size: 2rem;
+      }
+
+      nav a {
+        font-size: 16px;
+        margin-right: 1rem;
+      }
+
+      /* Ensure form groups display properly */
+      #fit_factor_container {
+        flex-wrap: wrap;
+      }
+
+      /* Better spacing in form elements */
+      .input-wrapper, .select-wrapper {
+        margin-bottom: 10px;
+      }
+
+      /* Input type optimizations */
+      input[type="number"],
+      input[type="text"],
+      select {
+        font-size: 16px; /* Prevent iOS zoom on focus */
+        max-width: 100%;
+        min-width: 0;
+        width: 100%;
+      }
+
+      /* Make dropdowns wider and more readable on mobile */
+      select {
+        max-width: 100%;
+        min-width: 0;
+        width: 100%;
+      }
+
+      /* Fix slider container width and prevent overflow */
+      .slider-container {
+        width: 100%;
+        max-width: 100%;
+        overflow: visible;
+        padding: 0 0 0 2px; /* No right padding, minimal left */
+      }
+
+      /* Adjust slider labels for mobile to prevent cutoff */
+      .slider-labels span {
+        font-size: 0.9rem;
+      }
+
+      /* Shift the "Compared to average person" block specifically to the left */
+      #cautiousnessSection {
+        margin-left: -15px;
+        margin-right: 5px;
+      }
+
+      /* Move just the question text slightly to the right while keeping left-aligned */
+      #cautiousnessSection label {
+        margin-left: 10px;
+        margin-right: 10px;
+        text-align: left;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        white-space: normal;
+        width: calc(100% - 20px); /* Account for left and right margins */
+        box-sizing: border-box;
+      }
+
+      /* Apply heading size optimizations from iPhone 14 */
+      h1 {
+        font-size: 2rem;
+      }
+
+      h2 {
+        font-size: 1.6rem;
+      }
+
+      /* Apply slider spacing optimizations */
+      .slider-container {
+        padding: 0 1px 0 3px; /* Minimal padding for standard mobile */
+        margin: 10px 0 50px;
+      }
+    }
+
+    /* New breakpoint for small phones */
+    @media only screen and (max-width: 480px) {
+      /* Eliminate body margins that create the light blue space */
+      body {
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+      
+      .container {
+        padding: 0.5rem 0.05rem 0.5rem 1rem !important; /* Fine-tuned left padding for iPhone */
+        width: 100% !important;
+        margin: 0 !important;
+        max-width: none !important; /* Override inline max-width on test calculator and FAQ */
+      }
+
+      .form-card {
+        padding: 0.75rem 0.05rem 0.75rem 1.3rem; /* Fine-tuned left padding, minimal right */
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+      }
+
+      h1 {
+        font-size: 1.75rem;
+      }
+
+      h2 {
+        font-size: 1.4rem;
+      }
+
+      /* Better spacing in form elements */
+      .input-wrapper, .select-wrapper {
+        margin-bottom: 10px;
+      }
+
+      /* Make dropdowns wider and more readable on mobile */
+      select {
+        max-width: 100%;
+        min-width: 0;
+        width: 100%;
+      }
+
+      /* Tighter slider spacing - Maximum space for iPhone */
+      .slider-container {
+        padding: 0; /* No padding at all for maximum space */
+        margin: 10px 0 50px;
+      }
+
+      .slider-labels span {
+        font-size: 0.85rem;
+        padding: 0 2px;
+      }
+
+      /* Shift the "Compared to average person" block more aggressively for iPhone */
+      #cautiousnessSection {
+        margin-left: -20px;
+        margin-right: 10px;
+      }
+
+      /* Move just the question text slightly to the right while keeping left-aligned */
+      #cautiousnessSection label {
+        margin-left: 15px;
+        margin-right: 15px;
+        text-align: left;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        white-space: normal;
+        width: calc(100% - 30px); /* Account for left and right margins */
+        box-sizing: border-box;
+      }
+    }
+
+    /* Extra small phones */
+    @media only screen and (max-width: 375px) {
+      /* Eliminate body margins that create the light blue space */
+      body {
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+      
+      .container {
+        padding: 0.25rem 0.02rem 0.25rem 0.8rem !important; /* Consistent with iPhone 14 left padding */
+        width: 100% !important;
+        margin: 0 !important;
+        max-width: none !important; /* Override any max-width constraints */
+      }
+
+      input[type="number"],
+      input[type="text"],
+      select {
+        font-size: 16px; /* Prevent iOS zoom on focus */
+        max-width: 100%;
+        min-width: 0; /* Let select take its container width */
+        width: 100%; /* Full width on mobile */
+      }
+
+      .form-card {
+        padding: 0.65rem 0.03rem 0.65rem 1.1rem; /* Consistent with iPhone 14 optimizations */
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+      }
+
+      h1 {
+        font-size: 1.5rem;
+      }
+
+      h2 {
+        font-size: 1.25rem;
+      }
+
+      /* Remove side margins on smallest screens */
+      .form-container {
+        width: 100%;
+      }
+
+      /* Ensure form groups don't overflow */
+      .form-card > * {
+        max-width: 100%;
+        overflow-x: hidden;
+      }
+
+      /* Better spacing in form elements */
+      .input-wrapper, .select-wrapper {
+        margin-bottom: 10px;
+      }
+
+      /* Make dropdowns wider and more readable on mobile */
+      select {
+        max-width: 100%;
+        min-width: 0;
+        width: 100%;
+      }
+
+      /* Tighter slider spacing - Maximum space for very small phones */
+      .slider-container {
+        padding: 0; /* No padding at all for maximum space */
+        margin: 8px 0 40px;
+      }
+
+      .slider-labels span {
+        font-size: 0.75rem;
+        line-height: 1.1;
+        padding: 0 2px;
+      }
+
+      /* Shift the "Compared to average person" block more aggressively for very small phones */
+      #cautiousnessSection {
+        margin-left: -25px;
+        margin-right: 15px;
+      }
+
+      /* Move just the question text slightly to the right while keeping left-aligned */
+      #cautiousnessSection label {
+        margin-left: 20px;
+        margin-right: 20px;
+        text-align: left;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        white-space: normal;
+        width: calc(100% - 40px); /* Account for increased margins */
+        box-sizing: border-box;
+      }
+
+      /* Adjust absolute positioned labels to stay within bounds */
+      .slider-labels span[style*="left: 102%"] {
+        left: 98% !important;
+        transform: translateX(-100%) !important;
+      }
+      
+      /* Ensure time slider labels don't get cut off */
+      .time-slider-container .slider-labels {
+        overflow: visible;
+      }
+      
+      /* Fix text wrapping in slider labels */
+      .slider-labels span {
+        line-height: 1.2;
+        text-align: center;
+      }
+    }
+
+    /* Make the form more visually appealing */
+    div[style*="display: flex; justify-content: flex-start"] {
+      gap: 1rem;
+      margin-top: 2rem;
+      flex-wrap: wrap; /* Allow wrapping on small screens */
+    }
+
+    /* Advanced fields styling for better mobile experience */
+    .advanced-field-row {
+      display: flex;
+      flex-wrap: wrap;
+      margin-bottom: 15px;
+      align-items: flex-start;
+      width: 100%;
+    }
+
+    .advanced-label {
+      display: block;
+      width: 100%;
+      max-width: 320px;
+      white-space: normal;
+      margin-bottom: 5px;
+      flex: 1 1 250px;
+    }
+
+    .advanced-input {
+      width: calc(100% - 16px);
+      max-width: 100px;
+      min-width: 60px;
+      margin-left: 0;
+    }
+
+    .advanced-input-group {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    .unit-select {
+      width: auto;
+      min-width: 60px;
+      max-width: 80px;
+    }
+
+    .advanced-input-wrapper {
+      flex: 1;
+      min-width: 200px;
+    }
+
+    /* Additional styles for advanced section */
+    #advancedFields {
+      background-color: #f8fafc;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-top: 1.5rem;
+      margin-left: 0 !important;
+      border-left: 4px solid var(--primary);
+      transition: all 0.3s ease;
+    }
+
+    #advancedFields:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+  /* ----------------- Validation messages ----------------- */
+  /* Hide validation messages by default and position absolutely */
+  .validation-message {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    margin-top: 5px;
+    background-color: #ef4444;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    z-index: 10;
+    white-space: normal;
+    max-width: 90%; /* Proportion of parent */
+    width: auto;
+    line-height: 1.2;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  /* Style invalid fields with a red outline */
+  .validation-error {
+    border-color: #ef4444 !important;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2) !important;
+  }
+
+  /* Show message when select is invalid */
+  .select-wrapper {
+    position: relative;
+    display: inline-block;
+  }
+  .select-wrapper select.validation-error + .validation-message {
+    display: block;
+  }
+
+  /* Show message when input is invalid */
+  .input-wrapper {
+    position: relative;
+    display: inline-block;
+    margin-top: 5px;
+    vertical-align: middle;
+  }
+  .input-wrapper input.validation-error + .validation-message {
+    display: block;
+  }
+
+  /* Special styling for form containers */
+  #fit_factor_container,
+  .time-selector-container {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+  }
+
+  /* Time selector styling for better mobile layout */
+  .time-selector-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .time-unit-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 80px;
+    flex: 1;
+  }
+
+  .time-select {
+    width: 100%;
+    min-width: 60px;
+    max-width: 100px;
+  }
+  /* Time-specific validation message should never wrap */
+  .time-validation-message {
+    white-space: normal; /* Allow wrapping on small screens */
+    max-width: 90%; /* Allow text to fit on small screens */
+    /* center under the group of time selectors */
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+  }
+
+/* Two-column grid layout for exposure calculator cards */
+.two-column-grid {
+  display: grid;
+  /* Two equal-width columns with more space */
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 95%; /* More consistent width */
+}
+@media (max-width: 1400px) {
+  .two-column-grid {
+    grid-template-columns: 1fr 1fr;
+    width: 95%;
+  }
+}
+@media (max-width: 1000px) {
+  .two-column-grid {
+    grid-template-columns: 1fr;
+    width: 98%;
+    gap: 1.5rem;
+  }
+}
+@media (max-width: 820px) {
+  .two-column-grid {
+    width: 100%;
+    gap: 1rem;
+  }
+}
+@media (max-width: 480px) {
+  .two-column-grid {
+    width: 100%;
+    gap: 0.75rem;
+  }
+}
+
+/* Card styling for form sections */
+.form-card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+  padding: 2rem; /* Fixed padding for larger screens */
+  margin-bottom: 2rem;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(0,0,0,0.03);
+  width: 100%;
+  box-sizing: border-box;
+}
+.form-card:hover {
+  /* No hover effects - cards should be completely static */
+}
+.form-card > * {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+.form-card h2 {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+  color: #111827;
+  font-weight: 700;
+  border-bottom: 2px solid #f1f5f9;
+  padding-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  letter-spacing: -0.02em;
+}
+
+.form-card h2 i {
+  font-size: 1.25rem;
+  width: 1.5em; /* Relative to font size */
+  text-align: center;
+  margin-right: 10px;
+  opacity: 0.9;
+  transition: all 0.2s ease;
+}
+
+.form-card:hover h2 i {
+  /* No hover effects - icons should be completely static */
+}
+/* Special hover/active styles for month slider labels */
+.slider-container.time-slider-container .slider-labels span:hover {
+  color: var(--primary-light) !important;
+  cursor: pointer !important;
+}
+
+/* Time-slider active labels should be bold and colorful */
+.slider-container.time-slider-container .slider-labels span.active {
+  color: var(--primary) !important;
+  font-weight: 700 !important;
+}
+
+/* 1 month label (moved 2% left) */
+.slider-container.time-slider-container .slider-labels span[data-month-value="1"]:hover {
+  transform: scale(1.1) translateX(0) !important;
+}
+.slider-container.time-slider-container .slider-labels span[data-month-value="1"].active {
+  transform: scale(1.05) translateX(0) !important;
+}
+
+/* 3, 6, 9 month labels (need centered hover) */
+.slider-container.time-slider-container .slider-labels span[data-month-value="3"]:hover,
+.slider-container.time-slider-container .slider-labels span[data-month-value="6"]:hover,
+.slider-container.time-slider-container .slider-labels span[data-month-value="9"]:hover {
+  transform: scale(1.1) translateX(-50%) !important;
+}
+.slider-container.time-slider-container .slider-labels span[data-month-value="3"].active,
+.slider-container.time-slider-container .slider-labels span[data-month-value="6"].active,
+.slider-container.time-slider-container .slider-labels span[data-month-value="9"].active {
+  transform: scale(1.05) translateX(-50%) !important;
+}
+
+/* 12 month label (moved 2% right & right-aligned hover) */
+.slider-container.time-slider-container .slider-labels span[data-month-value="12"]:hover {
+  transform: scale(1.1) translateX(-100%) !important;
+}
+.slider-container.time-slider-container .slider-labels span[data-month-value="12"].active {
+  transform: scale(1.05) translateX(-100%) !important;
+}
+
+/* =============================================================================
+   COVID CAUTIOUS SLIDER THUMB POSITIONING
+   
+   Problem: The slider uses flex space-between layout for labels, but the slider
+   thumb uses percentage-based positioning. These don't align perfectly.
+   
+   Solution: Use CSS classes (added by JavaScript) to manually position the thumb
+   for each slider value, with responsive adjustments for different screen sizes.
+   ============================================================================= */
+
+/* DESKTOP/WIDE SCREENS (default) - Large adjustments needed */
+
+#covid_cautious_level.covid-level-1::-webkit-slider-thumb {
+  margin-left: 80px !important; /* "Much more" - align with leftmost label */
+}
+#covid_cautious_level.covid-level-1::-moz-range-thumb {
+  margin-left: 80px !important;
+}
+
+#covid_cautious_level.covid-level-2::-webkit-slider-thumb {
+  margin-left: 45px !important; /* "Somewhat more" - align with second label */
+}
+#covid_cautious_level.covid-level-2::-moz-range-thumb {
+  margin-left: 45px !important;
+}
+
+#covid_cautious_level.covid-level-3::-webkit-slider-thumb {
+  margin-left: 15px !important; /* "About average" - align with center label */
+}
+#covid_cautious_level.covid-level-3::-moz-range-thumb {
+  margin-left: 15px !important;
+}
+
+#covid_cautious_level.covid-level-4::-webkit-slider-thumb {
+  margin-left: -20px !important; /* "Somewhat less" - align with fourth label */
+}
+#covid_cautious_level.covid-level-4::-moz-range-thumb {
+  margin-left: -20px !important;
+}
+
+#covid_cautious_level.covid-level-5::-webkit-slider-thumb {
+  margin-left: -50px !important; /* "Much less" - align with fifth label */
+}
+#covid_cautious_level.covid-level-5::-moz-range-thumb {
+  margin-left: -50px !important;
+}
+
+#covid_cautious_level.covid-level-6::-webkit-slider-thumb {
+  margin-left: -85px !important; /* "Almost none" - align with rightmost label */
+}
+#covid_cautious_level.covid-level-6::-moz-range-thumb {
+  margin-left: -85px !important;
+}
+
+/* TABLETS & LARGE PHONES (≤820px) - Medium adjustments */
+@media only screen and (max-width: 820px) {
+  #covid_cautious_level.covid-level-1::-webkit-slider-thumb {
+    margin-left: 50px !important; /* "Much more" - smaller adjustment for narrower screen */
+  }
+  #covid_cautious_level.covid-level-1::-moz-range-thumb {
+    margin-left: 50px !important;
+  }
+
+  #covid_cautious_level.covid-level-2::-webkit-slider-thumb {
+    margin-left: 28px !important; /* "Somewhat more" */
+  }
+  #covid_cautious_level.covid-level-2::-moz-range-thumb {
+    margin-left: 28px !important;
+  }
+
+  #covid_cautious_level.covid-level-3::-webkit-slider-thumb {
+    margin-left: 12px !important; /* "About average" */
+  }
+  #covid_cautious_level.covid-level-3::-moz-range-thumb {
+    margin-left: 12px !important;
+  }
+
+  #covid_cautious_level.covid-level-4::-webkit-slider-thumb {
+    margin-left: -8px !important; /* "Somewhat less" */
+  }
+  #covid_cautious_level.covid-level-4::-moz-range-thumb {
+    margin-left: -8px !important;
+  }
+
+  #covid_cautious_level.covid-level-5::-webkit-slider-thumb {
+    margin-left: -32px !important; /* "Much less" */
+  }
+  #covid_cautious_level.covid-level-5::-moz-range-thumb {
+    margin-left: -32px !important;
+  }
+
+  #covid_cautious_level.covid-level-6::-webkit-slider-thumb {
+    margin-left: -52px !important; /* "Almost none" */
+  }
+  #covid_cautious_level.covid-level-6::-moz-range-thumb {
+    margin-left: -52px !important;
+  }
+}
+
+/* SMALL PHONES (≤480px) - Small adjustments */
+@media only screen and (max-width: 480px) {
+  #covid_cautious_level.covid-level-1::-webkit-slider-thumb {
+    margin-left: 10px !important; /* "Much more" */
+  }
+  #covid_cautious_level.covid-level-1::-moz-range-thumb {
+    margin-left: 10px !important;
+  }
+
+  #covid_cautious_level.covid-level-2::-webkit-slider-thumb {
+    margin-left: 5px !important; /* "Somewhat more" */
+  }
+  #covid_cautious_level.covid-level-2::-moz-range-thumb {
+    margin-left: 5px !important;
+  }
+
+  #covid_cautious_level.covid-level-3::-webkit-slider-thumb {
+    margin-left: 3px !important; /* "About average" */
+  }
+  #covid_cautious_level.covid-level-3::-moz-range-thumb {
+    margin-left: 3px !important;
+  }
+
+  #covid_cautious_level.covid-level-4::-webkit-slider-thumb {
+    margin-left: -2px !important; /* "Somewhat less" */
+  }
+  #covid_cautious_level.covid-level-4::-moz-range-thumb {
+    margin-left: -2px !important;
+  }
+
+  #covid_cautious_level.covid-level-5::-webkit-slider-thumb {
+    margin-left: -6px !important; /* "Much less" */
+  }
+  #covid_cautious_level.covid-level-5::-moz-range-thumb {
+    margin-left: -6px !important;
+  }
+
+  #covid_cautious_level.covid-level-6::-webkit-slider-thumb {
+    margin-left: -10px !important; /* "Almost none" */
+  }
+  #covid_cautious_level.covid-level-6::-moz-range-thumb {
+    margin-left: -10px !important;
+  }
+}
+
+/* EXTRA SMALL PHONES (≤375px) - Minimal adjustments */
+@media only screen and (max-width: 375px) {
+  #covid_cautious_level.covid-level-1::-webkit-slider-thumb {
+    margin-left: 8px !important; /* "Much more" */
+  }
+  #covid_cautious_level.covid-level-1::-moz-range-thumb {
+    margin-left: 8px !important;
+  }
+
+  #covid_cautious_level.covid-level-2::-webkit-slider-thumb {
+    margin-left: 4px !important; /* "Somewhat more" */
+  }
+  #covid_cautious_level.covid-level-2::-moz-range-thumb {
+    margin-left: 4px !important;
+  }
+
+  #covid_cautious_level.covid-level-3::-webkit-slider-thumb {
+    margin-left: 0px !important; /* "About average" - perfectly centered */
+  }
+  #covid_cautious_level.covid-level-3::-moz-range-thumb {
+    margin-left: 0px !important;
+  }
+
+  #covid_cautious_level.covid-level-4::-webkit-slider-thumb {
+    margin-left: -1px !important; /* "Somewhat less" */
+  }
+  #covid_cautious_level.covid-level-4::-moz-range-thumb {
+    margin-left: -1px !important;
+  }
+
+  #covid_cautious_level.covid-level-5::-webkit-slider-thumb {
+    margin-left: -4px !important; /* "Much less" */
+  }
+  #covid_cautious_level.covid-level-5::-moz-range-thumb {
+    margin-left: -4px !important;
+  }
+
+  #covid_cautious_level.covid-level-6::-webkit-slider-thumb {
+    margin-left: -7px !important; /* "Almost none" */
+  }
+  #covid_cautious_level.covid-level-6::-moz-range-thumb {
+    margin-left: -7px !important;
+  }
+}

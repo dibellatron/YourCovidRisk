@@ -1,0 +1,1050 @@
+/* --------------------------------------------------------------------
+   Global style‑sheet for YourCovidRisk.com
+   This file centralises the design‑system (colour palette, typography,
+   components) so individual templates only need to contain the CSS that
+   is truly page‑specific.
+--------------------------------------------------------------------- */
+
+/* Design tokens */
+:root {
+  /* Brand colours */
+  --primary: #4f46e5;
+  --primary-light: #818cf8;
+  --primary-dark: #3730a3;
+
+  --secondary: #06b6d4;
+  --secondary-light: #22d3ee;
+
+  --accent: #f97316;
+
+  /* Greys */
+  --dark: #0f172a;
+  --light: #f8fafc;
+
+  /* Effects */
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.12);
+  --shadow-glow: 0 0 20px rgba(79, 70, 229, 0.15);
+
+  /* Misc */
+  --glass: rgba(255, 255, 255, 0.1);
+  --glass-blur: 10px;
+  --border-radius: 16px;
+  --transition-bezier: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+  /* Slider defaults */
+  --slider-height: 8px;
+  --slider-thumb-size: 24px; /* More proportional size while still being touch-friendly */
+}
+
+/* CSS reset / base -------------------------------------------------- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: linear-gradient(135deg, #f8fafc 0%, #e0f2fe 100%);
+  color: var(--dark);
+  font-family: 'Poppins', sans-serif;
+  font-size: 18px;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Typography helpers ----------------------------------------------- */
+h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  background: linear-gradient(to right, var(--primary), var(--primary-dark));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+h2 {
+  font-size: 1.8rem;
+  color: var(--primary);
+}
+
+/* Buttons ----------------------------------------------------------- */
+.btn,
+button,
+button.primary-btn,
+button.secondary-btn {
+  font-family: 'Poppins', sans-serif;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.75rem;
+  background: var(--primary);
+  color: #fff;
+  border-radius: 50px;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: -100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.6s ease;
+}
+
+.btn:hover {
+  background: var(--primary-dark);
+  box-shadow: 0 6px 16px rgba(79, 70, 229, 0.4);
+}
+
+.btn:hover::after {
+  left: 100%;
+}
+
+/* <button> variants */
+button.primary-btn {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  color: #fff;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 50px;
+  font-size: 18px;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+button.primary-btn::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: -100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.6s ease;
+}
+
+button.primary-btn:hover {
+  box-shadow: 0 8px 20px rgba(79, 70, 229, 0.4);
+}
+
+button.primary-btn:hover::after {
+  left: 100%;
+}
+
+button.secondary-btn,
+button {
+  background-color: transparent;
+  color: var(--primary);
+  border: 1px solid var(--primary);
+  padding: 10px 20px;
+  border-radius: 50px;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+button.secondary-btn:hover,
+button:hover:not(.primary-btn) {
+  background-color: rgba(79, 70, 229, 0.1);
+  box-shadow: 0 2px 6px rgba(79, 70, 229, 0.15);
+}
+
+/* Animations -------------------------------------------------------- */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0);   }
+}
+
+@keyframes fadeInSlideDown {
+  from { opacity: 0; transform: translateY(-15px); max-height: 0; }
+  to   { opacity: 1; transform: translateY(0);    max-height: 1000px; }
+}
+
+@keyframes fadeOutSlideUp {
+  from { opacity: 1; transform: translateY(0);    max-height: 1000px; }
+  to   { opacity: 0; transform: translateY(-15px); max-height: 0; }
+}
+
+/* Select wrapper with custom caret --------------------------------- */
+.select-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.select-wrapper::after {
+  content: "\25BC"; /* ▼ */
+  font-size: 12px;
+  color: var(--primary);
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+/* Form controls ----------------------------------------------------- */
+/* hide number input spinners */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; margin:0; }
+input[type=number]{ -moz-appearance:textfield; }
+
+select,
+input[type="number"] {
+  font-size: 18px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background-color: #fff;
+  font-family: 'Poppins', sans-serif;
+  transition: all 0.3s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+select:hover,
+input[type="number"]:hover {
+  border-color: var(--primary);
+  box-shadow: 0 2px 5px rgba(79, 70, 229, 0.15);
+}
+
+select:focus,
+input[type="number"]:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+}
+
+/* Slider styles ----------------------------------------------------- */
+.slider-container {
+  position: relative;
+  width: 100%;
+  max-width: 100%; /* Full width with container constraints */
+  margin: 10px 0 45px;
+  isolation: isolate; /* new stacking context */
+}
+
+/* Specific style improvements for people slider */
+#N_slider + .slider-ticks .tick {
+  transition: transform 0.2s ease;
+}
+
+#N_slider + .slider-ticks .tick:hover {
+  transform: translateX(-50%) scale(1.1);
+  cursor: pointer;
+  color: var(--primary);
+}
+
+/* Fix N slider specifically for a logarithmic scale with proper visual alignment */
+#N_slider + .slider-ticks .tick[data-value="1"] { left: 0% !important; }
+#N_slider + .slider-ticks .tick[data-value="10"] { left: 36% !important; }
+#N_slider + .slider-ticks .tick[data-value="25"] { left: 47% !important; }
+#N_slider + .slider-ticks .tick[data-value="50"] { left: 66% !important; }
+#N_slider + .slider-ticks .tick[data-value="100"] { left: 73% !important; }
+#N_slider + .slider-ticks .tick[data-value="500"] { left: 89% !important; }
+#N_slider + .slider-ticks .tick[data-value="1000"] { left: 100% !important; }
+
+/* Make sliders more mobile-friendly at small sizes */
+@media only screen and (max-width: 480px) {
+  .slider-container {
+    margin: 10px 0 60px; /* More space for labels */
+  }
+
+  .slider-thumb-size {
+    --slider-thumb-size: 42px; /* Even larger on mobile */
+  }
+
+  /* More space between label text */
+  .slider-labels span {
+    font-size: 0.9rem;
+    max-width: 100px;
+  }
+
+  /* Adjust the people slider spacing for better mobile display */
+  #N_slider + .slider-ticks .tick[data-value="1"],
+  #N_slider + .slider-ticks .tick[data-value="10"],
+  #N_slider + .slider-ticks .tick[data-value="25"],
+  #N_slider + .slider-ticks .tick[data-value="50"],
+  #N_slider + .slider-ticks .tick[data-value="100"],
+  #N_slider + .slider-ticks .tick[data-value="500"],
+  #N_slider + .slider-ticks .tick[data-value="1000"] {
+    font-size: 0.8rem; /* Smaller font on mobile */
+    white-space: nowrap;
+    transform: translateX(-50%) scale(0.95); /* Slightly smaller for spacing */
+  }
+}
+
+@media only screen and (max-width: 375px) {
+  .slider-labels {
+    height: 70px; /* More height for potentially wrapping labels */
+  }
+}
+
+
+/* ------------------------------------------------------------------
+   Range slider -----------------------------------------------------
+   The slider track is rendered by the browser in the vertical centre
+   of the <input>.  To get the thumb perfectly centred on that line we
+   therefore make the <input> as tall as the thumb and *not* rely on
+   negative margin hacks that are fragile across browsers/OSes.
+
+   1.  Keep the actual track (the grey bar) thin by leaving the input
+       height controlled by --slider-height (8 px by default).
+   2.  Remove the previous margin‑top offset on the thumb and instead
+       let the browser centre it naturally.  This works for both the
+       -webkit‑ and -moz‑ engines so the thumb is now visually
+       symmetrical – an equal amount is shown above and below the line.
+------------------------------------------------------------------- */
+
+.slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: var(--slider-height); /* track thickness */
+  border-radius: 5px;
+  background: #e2e8f0;
+  outline: none;
+  transition: all 0.3s;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: var(--slider-thumb-size);
+  height: var(--slider-thumb-size);
+  border-radius: 50%;
+  background: var(--primary);
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  /* The user agent already centres the thumb vertically relative to
+     the range‑input; because we have deliberately set the input’s own
+     height to the track thickness, the default position is *already*
+     perfectly centred on the visible line.  No additional translation
+     is required.
+
+     We keep a transform declaration (set to translateY(0)) so that we
+     can still append a `scale()` on hover without having two separate
+     transform properties that might overwrite each other. */
+  transform: translateY(0);
+  position: relative;
+  z-index: 2;
+  border: none;
+}
+
+.slider::-moz-range-thumb {
+  width: var(--slider-thumb-size);
+  height: var(--slider-thumb-size);
+  border-radius: 50%;
+  background: var(--primary);
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  position: relative;
+  z-index: 2;
+  border: none;
+  /* Mirror the WebKit centring approach */
+  transform: translateY(0);
+}
+
+.slider:hover::-webkit-slider-thumb,
+.slider:hover::-moz-range-thumb {
+  background: var(--primary-dark);
+  /* Ensure the thumb stays centred while scaling */
+  transform: scale(1.1);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.25);
+}
+
+/* Decorative tick overlays: container passes events, individual ticks clickable */
+ .slider-container .slider-ticks {
+  pointer-events: none;
+}
+.slider-container .slider-ticks .tick {
+  pointer-events: auto;
+  cursor: pointer;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+/* Hover state for numeric people-slider ticks */
+.slider-container .slider-ticks .tick:hover {
+  color: var(--primary-light);
+  transform: translateX(-50%) scale(1.2);
+}
+/* Distance slider labels clickable */
+.distance-label {
+  cursor: pointer;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+.distance-label:hover {
+  color: var(--primary-light);
+  transform: translateX(-50%) scale(1.1);
+}
+.distance-label.active {
+  color: var(--primary);
+  font-weight: bold;
+}
+
+.slider-ticks {
+  position: relative;
+  width: 100%;
+  height: 20px;
+  margin-top: 8px;
+}
+
+.tick {
+  position: absolute;
+  transform: translateX(-50%);
+  top: 0;
+}
+
+.tick::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: -5px;
+  transform: translateX(-50%);
+  width: 1px;
+  height: 8px;
+  background: #cbd5e1;
+  opacity: .4;
+}
+
+.slider-labels {
+  display: block;
+  position: relative;
+  height: 60px; /* Increased height to accommodate 3-line labels */
+}
+
+ .slider-labels span {
+  position: absolute;
+  transform: translateX(-50%);
+  top: 0;
+  font-size: 13px; /* Slightly smaller font */
+  line-height: 1.1; /* Tighter line height */
+  color: #64748b;
+  white-space: normal;
+  max-width: 90%; /* Wider to prevent text cutoff on small screens */
+  width: auto;
+  transition: all 0.3s ease;
+  letter-spacing: -0.2px; /* Slightly condensed text */
+  text-align: center;
+  height: auto; /* Allow text to wrap naturally */
+}
+/* Hover state for categorical slider labels */
+.slider-labels span:hover {
+  color: var(--primary-light);
+  transform: scale(1.1);
+  transform-origin: center center;
+}
+
+/* Active label styling for selected slider options */
+.slider-labels span.active {
+  color: var(--primary);
+  font-weight: 600;
+  font-size: 15px; /* Slightly larger than regular labels but not too big */
+  transform: translateX(-50%) scale(1.08);
+  transform-origin: center center;
+  text-align: center;
+  z-index: 5; /* Bring active labels above other labels */
+}
+
+
+/* Positions for time slider labels (1,3,6,9,12 months)
+   The formula is: (month_value - min_value) / (max_value - min_value) * 100%
+   For our slider with min=1, max=12:
+   - 1 month:  (1-1)/(12-1) * 100% = 0%
+   - 3 months: (3-1)/(12-1) * 100% = 18.18%
+   - 6 months: (6-1)/(12-1) * 100% = 45.45%
+   - 9 months: (9-1)/(12-1) * 100% = 72.72%
+   - 12 months: (12-1)/(12-1) * 100% = 100%
+*/
+.slider-labels.five-options span:nth-child(2) { left:18.18%; text-align:center; }  /* 3 months position */
+.slider-labels.five-options span:nth-child(3) { left:45.45%; text-align:center; }  /* 6 months position */
+.slider-labels.five-options span:nth-child(4) { left:72.72%; text-align:center; }  /* 9 months position */
+
+/* Four-option slider positioning (for time sliders with hidden 1-month option) */
+.slider-labels.four-options span:nth-child(2) { left:18.18%; text-align:center; }  /* 3 months position */
+.slider-labels.four-options span:nth-child(3) { left:45.45%; text-align:center; }  /* 6 months position */
+.slider-labels.four-options span:nth-child(4) { left:72.72%; text-align:center; }  /* 9 months position */
+.slider-labels.four-options span:nth-child(5) { left:102%; text-align:right; }     /* 12 months position */
+
+/* Six-option slider positioning */
+.slider-labels.six-options span:nth-child(1) { left: 0%; text-align: left; }      /* Much more */
+.slider-labels.six-options span:nth-child(2) { left: 20%; text-align: center; }  /* Somewhat more */
+.slider-labels.six-options span:nth-child(3) { left: 40%; text-align: center; }  /* About average */
+.slider-labels.six-options span:nth-child(4) { left: 60%; text-align: center; }  /* Somewhat less */
+.slider-labels.six-options span:nth-child(5) { left: 80%; text-align: center; }  /* Much less */
+.slider-labels.six-options span:nth-child(6) { left: 100%; text-align: right; }  /* Almost none */
+
+/* Four-option slider positioning (mask fit slider) */
+
+/* Three-option slider positioning */
+
+
+.slider-value-label {
+  display: inline-block;
+  margin-left: 10px;
+  color: var(--primary);
+  font-weight: 600;
+  font-size: 1.1em;
+  white-space: nowrap;
+}
+
+/* Slider value editing controls */
+.slider-value-container {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.edit-value-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--primary-light);
+  color: var(--primary);
+  font-size: 12px;
+  padding: 3px 10px;
+  border-radius: 4px;
+  margin-left: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  min-width: 56px;
+  min-height: 36px; /* Increased for touch targets */
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.edit-value-btn .btn-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.edit-value-btn i {
+  margin-right: 4px;
+  font-size: 10px;
+}
+
+.edit-value-btn:hover {
+  background-color: rgba(79, 70, 229, 0.1);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.manual-input-container {
+  display: flex;
+  align-items: center;
+  margin-left: 8px;
+  animation: fadeInSlideDown 0.3s ease-out;
+}
+
+.manual-input {
+  width: calc(100% - 16px); /* Account for padding */
+  max-width: 70px;
+  min-width: 50px;
+  font-size: 14px;
+  padding: 4px 8px;
+  border: 1px solid var(--primary-light);
+  border-radius: 4px;
+  margin-right: 5px;
+}
+
+.manual-input.validation-error {
+  border-color: #ef4444;
+  background-color: rgba(239, 68, 68, 0.05);
+  animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+/* General validation error styles for input fields */
+input.validation-error, 
+select.validation-error {
+  border-color: #ef4444;
+  background-color: rgba(239, 68, 68, 0.05);
+  animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
+  20%, 40%, 60%, 80% { transform: translateX(2px); }
+}
+
+.apply-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 44px; /* Increased for better touch target */
+  height: 44px; /* Increased for better touch target */
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+
+.apply-btn:hover {
+  background: var(--primary-dark);
+  transform: scale(1.05);
+  box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+}
+
+.apply-btn::before {
+  content: "\2713"; /* Checkmark symbol */
+  display: block;
+  font-weight: bold;
+}
+
+/* Info panel -------------------------------------------------------- */
+#cautionInfo{
+  margin-top:.5rem;
+  line-height:1.5;
+  background:#f8fafc;
+  border:1px solid #e2e8f0;
+  border-radius:8px;
+  position:relative;
+  z-index:10;
+}
+
+/* Navigation -------------------------------------------------------- */
+nav {
+  background: var(--primary);
+  padding: 1rem 2rem;
+  color: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  gap: 1.5rem;
+}
+
+nav a {
+  color: rgba(255,255,255,0.9);
+  font-weight: 600;
+  text-decoration: none;
+  position: relative;
+}
+
+nav a::after {
+  content:'';
+  position:absolute;
+  left:0; bottom:-2px;
+  width:100%; height:2px;
+  background:var(--primary-light);
+  transform:scaleX(0);
+  transform-origin:center;
+  transition:transform .3s ease;
+}
+
+nav a:hover::after { transform:scaleX(1); }
+
+/* Clean navigation - all links consistent */
+nav a {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+nav a i {
+  font-size: 0.9em;
+  opacity: 0.9;
+}
+
+/* Time slider specific styles */
+/* Special class for month sliders */
+.time-slider {
+  /* Ensure accurate appearance on different browsers */
+  -webkit-appearance: none;
+  appearance: none;
+  /* Ensure exact positioning */
+  background-color: #e2e8f0;
+  background-image: none;
+  /* Disable default browser styling */
+  outline: none;
+  border: none;
+}
+
+/* Ensure accurate positioning of the thumb for time sliders */
+.time-slider::-webkit-slider-thumb {
+  /* Ensure the thumb is perfectly centered */
+  margin: 0;
+  /* Exact vertical alignment */
+  transform: translateY(0);
+}
+
+.time-slider::-moz-range-thumb {
+  /* Ensure the thumb is perfectly centered */
+  margin: 0;
+  /* Exact vertical alignment */
+  transform: translateY(0);
+}
+
+/* Ensure tick marks and labels are perfectly aligned with slider values */
+/* Increase bottom margin for time slider containers to fit the 3-line labels */
+.time-slider-container {
+  margin-bottom: 65px !important; /* Ensure enough space for the 3-line labels */
+}
+
+
+/* End of stylesheet ------------------------------------------------- */
+/* Stronger hover overrides for slider labels and ticks - scaled down to prevent overlap */
+.slider-labels span:hover {
+  color: var(--primary-dark) !important;
+  transform: scale(1.08) !important;
+  transform-origin: center center !important;
+}
+/* Prevent first/last labels from shifting off-track on hover */
+/* Five-option, four-option and six-option slider hover adjustments */
+.slider-labels.five-options span:hover,
+.slider-labels.four-options span:hover,
+.slider-labels.six-options span:hover,
+.slider-labels.two-options span:hover {
+  /* Center each label under its tick and scale */
+  transform: translateX(-50%) scale(1.08) !important;
+  transform-origin: center center !important;
+  text-align: center !important;
+}
+
+/* Four-option slider hover */
+.slider-labels.four-options span:nth-child(1):hover {
+  transform: translateX(0) scale(1.08) !important;
+  transform-origin: left center !important;
+  text-align: center !important;
+}
+.slider-labels.four-options span:nth-child(4):hover {
+  transform: translateX(-100%) scale(1.08) !important;
+  transform-origin: right center !important;
+  text-align: center !important;
+}
+
+/* Three-option slider hover */
+.slider-labels.three-options span:nth-child(1):hover {
+  transform: translateX(0) scale(1.08) !important;
+  transform-origin: left center !important;
+  text-align: center !important;
+}
+.slider-labels.three-options span:nth-child(3):hover {
+  transform: translateX(-100%) scale(1.08) !important;
+  transform-origin: right center !important;
+  text-align: center !important;
+}
+.slider-container .slider-ticks .tick:hover {
+  color: var(--primary-dark) !important;
+  transform: translateX(-50%) scale(1.3) !important;
+}
+.distance-label:hover {
+  color: var(--primary-dark) !important;
+  transform: translateX(-50%) scale(1.2) !important;
+}
+
+/* Slider styles moved here from test_calculator.html for global use */
+.slider-container {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+  margin: 10px 0 45px; /* Accommodate label height */
+  box-sizing: border-box;
+  isolation: isolate;
+}
+
+.slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: var(--slider-height);
+  border-radius: 5px;
+  background: #e2e8f0;
+  outline: none;
+  transition: all 0.3s;
+  padding: 0;
+  margin: 0;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: var(--slider-thumb-size);
+  height: var(--slider-thumb-size);
+  border-radius: 50%;
+  background: var(--primary);
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  transform: translateY(0);
+  position: relative;
+  z-index: 2;
+  border: none;
+}
+
+.slider::-moz-range-thumb {
+  width: var(--slider-thumb-size);
+  height: var(--slider-thumb-size);
+  border-radius: 50%;
+  background: var(--primary);
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  position: relative;
+  z-index: 2;
+  border: none;
+  transform: translateY(0);
+}
+
+.slider:hover::-webkit-slider-thumb {
+  background: var(--primary-dark);
+  transform: scale(1.1);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.25);
+}
+
+.slider:hover::-moz-range-thumb {
+  background: var(--primary-dark);
+  transform: scale(1.1);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.25);
+}
+
+.slider-value-container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-top: 8px;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.slider-value {
+  min-width: 30px;
+  font-size: 1.1em;
+}
+
+.slider-unit {
+  margin-left: 5px;
+  font-size: 0.9em;
+  color: #64748b;
+}
+
+.slider-ticks {
+  position: relative;
+  width: 100%;
+  height: 20px;
+  margin-top: 8px;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.tick {
+  position: absolute;
+  transform: translateX(-50%);
+  color: #64748b;
+  font-size: 12px;
+  top: 0;
+  width: 2px; /* Ensure centering */
+}
+
+/* Subtle tick mark style */
+.tick::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: -5px;
+  transform: translateX(-50%);
+  width: 1px;
+  height: 8px;
+  background-color: #cbd5e1;
+  opacity: 0.4;
+  border-radius: 1px;
+}
+
+/* Mobile fixes for FAQ and other pages that don't load exposure-calculator.css */
+@media only screen and (max-width: 820px) {
+  /* Eliminate body margins that create the light blue space */
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  .container {
+    padding: 0.75rem 0.1rem 0.75rem 0.9rem !important; /* Improved left padding for standard mobile */
+    width: 98% !important;
+    margin: 0.5rem auto !important;
+    max-width: none !important; /* Override any max-width constraints */
+  }
+
+  /* Better spacing in form elements */
+  .input-wrapper, .select-wrapper {
+    margin-bottom: 10px;
+  }
+
+  /* Input type optimizations */
+  input[type="number"],
+  input[type="text"],
+  select {
+    font-size: 16px; /* Prevent iOS zoom on focus */
+    max-width: 100%;
+    min-width: 0;
+    width: 100%;
+  }
+
+  /* Make dropdowns wider and more readable on mobile */
+  select {
+    max-width: 100%;
+    min-width: 0;
+    width: 100%;
+  }
+
+  /* Ensure labels and text wrap properly */
+  label {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+  }
+
+  h2, h3, p, div {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+
+  /* Apply heading size optimizations from iPhone 14 */
+  h1 {
+    font-size: 2rem;
+  }
+
+  h2 {
+    font-size: 1.6rem;
+  }
+}
+
+@media only screen and (max-width: 480px) {
+  /* Eliminate body margins that create the light blue space */
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  .container {
+    padding: 0.5rem 0.05rem 0.5rem 1rem !important; /* Fine-tuned left padding for iPhone */
+    width: 100% !important;
+    margin: 0 !important;
+    max-width: none !important; /* Override any max-width constraints */
+  }
+
+  /* Better spacing in form elements */
+  .input-wrapper, .select-wrapper {
+    margin-bottom: 10px;
+  }
+
+  /* Input type optimizations */
+  input[type="number"],
+  input[type="text"],
+  select {
+    font-size: 16px; /* Prevent iOS zoom on focus */
+    max-width: 100%;
+    min-width: 0;
+    width: 100%;
+  }
+
+  /* Make dropdowns wider and more readable on mobile */
+  select {
+    max-width: 100%;
+    min-width: 0;
+    width: 100%;
+  }
+
+  /* Ensure labels and text wrap properly */
+  label {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+  }
+
+  h2, h3, p, div {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+
+  /* Apply heading size optimizations from iPhone 14 */
+  h1 {
+    font-size: 2rem;
+  }
+
+  h2 {
+    font-size: 1.6rem;
+  }
+}
+
+@media only screen and (max-width: 375px) {
+  /* Eliminate body margins that create the light blue space */
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  .container {
+    padding: 0.25rem 0.02rem 0.25rem 0.8rem !important; /* Consistent with iPhone 14 left padding */
+    width: 100% !important;
+    margin: 0 !important;
+    max-width: none !important; /* Override any max-width constraints */
+  }
+
+  /* Better spacing in form elements */
+  .input-wrapper, .select-wrapper {
+    margin-bottom: 10px;
+  }
+
+  /* Input type optimizations */
+  input[type="number"],
+  input[type="text"],
+  select {
+    font-size: 16px; /* Prevent iOS zoom on focus */
+    max-width: 100%;
+    min-width: 0;
+    width: 100%;
+  }
+
+  /* Make dropdowns wider and more readable on mobile */
+  select {
+    max-width: 100%;
+    min-width: 0;
+    width: 100%;
+  }
+
+  /* Ensure labels and text wrap properly */
+  label {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+  }
+
+  h2, h3, p, div {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+
+  /* Apply heading size optimizations from iPhone 14 */
+  h1 {
+    font-size: 2rem;
+  }
+
+  h2 {
+    font-size: 1.6rem;
+  }
+}

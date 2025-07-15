@@ -1,0 +1,67 @@
+{
+  "version": "1.0.0",
+  "queries": [
+    {
+      "Query": {
+        "Commands": [
+          {
+            "SemanticQueryDataShapeCommand": {
+              "Query": {
+                "Version": 2,
+                "From": [
+                  { "Name": "t", "Entity": "Tracker_Aggregation", "Type": 0 },
+                  { "Name": "subquery", "Expression": {
+                      "Subquery": {
+                        "Query": {
+                          "Version": 2,
+                          "From": [
+                            { "Name": "t1", "Entity": "Tracker_Aggregation", "Type": 0 },
+                            { "Name": "v1", "Entity": "View Selection", "Type": 0 }
+                          ],
+                          "Select": [
+                            { "Column": { "Expression": { "SourceRef": { "Source": "t1" } }, "Property": "Date" }, "Name": "field" }
+                          ],
+                          "Where": [
+                            { "Condition": { "In": {
+                                "Expressions": [ { "Column": { "Expression": { "SourceRef": { "Source": "v1" } }, "Property": "Range3" } } ],
+                                "Values": [ [ { "Literal": { "Value": "'Changes from prior week'" } } ] ]
+                            } } },
+                            { "Condition": { "In": {
+                                "Expressions": [ { "Column": { "Expression": { "SourceRef": { "Source": "t1" } }, "Property": "Date" } } ],
+                                "Values": [ [ { "Literal": { "Value": "datetime'2024-10-31T00:00:00'" } } ] ]
+                            } } }
+                          ],
+                          "OrderBy": [ { "Direction": 2, "Expression": { "Aggregation": { "Expression": { "Column": { "Expression": { "SourceRef": { "Source": "t1" } }, "Property": "Date" } }, "Function": 4 } } } ],
+                          "Top": 1
+                        }
+                      }
+                  }, "Type": 2 },
+                  { "Name": "v", "Entity": "View Selection", "Type": 0 }
+                ],
+                "Select": [
+                  { "Measure": { "Expression": { "SourceRef": { "Source": "t" } }, "Property": "Positivity view2" }, "Name": "Tracker_Aggregation.Positivity view2" }
+                ],
+                "Where": [
+                  { "Condition": { "In": {
+                        "Expressions": [ { "Column": { "Expression": { "SourceRef": { "Source": "t" } }, "Property": "Date" } } ],
+                        "Table": { "SourceRef": { "Source": "subquery" } }
+                  } } },
+                  { "Condition": { "In": {
+                        "Expressions": [ { "Column": { "Expression": { "SourceRef": { "Source": "v" } }, "Property": "Range3" } } ],
+                        "Values": [ [ { "Literal": { "Value": "'Changes from prior week'" } } ] ]
+                  } } }
+                ]
+              },
+              "Binding": { "Primary": { "Groupings": [ { "Projections": [0] } ] }, "DataReduction": { "DataVolume": 3, "Primary": { "Top": {} } }, "Version": 1 },
+              "ExecutionMetricsKind": 1
+            }
+          }
+        ]
+      },
+      "QueryId": "",
+      "ApplicationContext": { "DatasetId": "72ea3724-d9a9-4c3d-8ba9-2cc94606a1a9", "Sources": [ { "ReportId": "74786277-bd89-4734-9456-07295ed58615", "VisualId": "66c16449a0b880046d72" } ] }
+    }
+  ],
+  "cancelQueries": [],
+  "modelId": 14351198
+}

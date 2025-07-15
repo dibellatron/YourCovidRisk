@@ -1,0 +1,138 @@
+<h2 style="margin-top: 3rem; margin-bottom: 2rem; color: #0f766e; border-bottom: 3px solid #ccfbf1; padding-bottom: 0.75rem; position: relative; font-size: 1.75rem;">
+      ℹ️ General
+      <span style="position: absolute; bottom: -3px; left: 0; width: 50px; height: 3px; background: linear-gradient(90deg, #0f766e 0%, #14b8a6 100%); border-radius: 2px;"></span>
+    </h2>
+    <div class="faq-item">
+      <button type="button" class="faq-question" onclick="toggleFaqAnswer(this)">
+        Who created this tool?
+      </button>
+      <div class="faq-answer">
+        <p><!--This tool was created by me: <a href="https://nicholasdibella.com" target="_blank" rel="noopener">Nicholas DiBella</a>. -->
+        This tool was created by me: <a href="https://nicholasdibella.com" target="_blank" rel="noopener">Nicholas DiBella</a>. I'm a researcher with a PhD in Philosophy from Stanford University (where I specialized in the foundations of probability) and a B.S. in Physics from MIT. While I have no formal training in epidemiology, I've spent considerable time during the pandemic learning about COVID transmission models, diagnostics, and various other matters in public health risk assessment.</p>
+        
+        <p>My physics training and philosophical work on probability were extremely valuable for this project—it gave me the tools to develop and implement complex mathematical models while thinking carefully about how to communicate uncertainty and risk in honest, helpful ways.</p>
+
+        <p>Throughout the development process, I've benefited greatly from feedback from various researchers, friends, and kindred spirits who share a commitment to rigorous COVID risk assessment. I especially want to thank Benjamin Brown, <a href="https://www.covidtaser.com" target="_blank" rel="noopener">Cameron O'Neill Byerley</a>, <a href="https://www.simoncullen.org" target="_blank" rel="noopener">Simon Cullen</a>, Pantea Javidan, Matthew Karolian, <a href="https://www.nature.com/articles/s41598-024-57841-1" target="_blank" rel="noopener">Alison Mirin</a>, Lidia Pruente, <a href="https://www.stephanieschmit.com" target="_blank" rel="noopener">Stephanie Schmit</a>, and W.W. for their valuable input and encouragement.</p>
+      </div>
+    </div>
+        
+    <div class="faq-item">
+      <button type="button" class="faq-question" onclick="toggleFaqAnswer(this)">
+        Is this project open source?
+      </button>
+      <div class="faq-answer">
+        <p>Yes! This entire project is open source and available at <a href="https://github.com/dibellatron/YourCovidRisk" target="_blank" rel="noopener">github.com/dibellatron/YourCovidRisk</a>. All code, calculations, and methodologies are publicly accessible for review.</p>
+        
+        <p>I especially welcome feedback from researchers, epidemiologists, programmers, and anyone with relevant expertise who notices potential technical errors, scientific inaccuracies, mathematical issues, or has general suggestions. Please reach out at <a href="mailto:yourcovidrisk@gmail.com">yourcovidrisk@gmail.com</a> with any concerns or suggestions.</p>
+      </div>
+    </div>
+        
+    <div class="faq-item">
+      <button type="button" class="faq-question" onclick="toggleFaqAnswer(this)">
+        Why was this tool created?
+      </button>
+      <div class="faq-answer">
+        <p>This tool was created to fill a significant gap in available COVID risk assessment resources. While COVID remains a serious ongoing health concern in 2025—particularly for immunocompromised individuals and those with chronic illnesses—most public health messaging has shifted toward oversimplified guidance that doesn't help people make informed decisions about their individual circumstances.</p>
+        
+        <p>I noticed that people who are still taking COVID seriously (including immunocompromised individuals, those caring for vulnerable family members, and anyone wanting to make evidence-based decisions) lacked access to sophisticated risk assessment tools. The available options were either overly simplistic or required specialized scientific knowledge to use effectively.</p>
+        
+        <p>This represents a gap where the underlying science exists—academic researchers have developed sophisticated transmission models and Bayesian risk assessment methods—but these advances haven't been made accessible to the public through user-friendly tools. While government agencies have the resources to build such tools, comprehensive risk calculators haven't been prioritized in public health policy. The COVID-cautious community, which most needs these resources for making informed decisions, has been largely underserved by existing risk communication efforts.</p>
+        
+        <p>This tool aims to bridge that gap by:</p>
+        <ul>
+          <li><strong>Respecting user intelligence:</strong> Providing sophisticated calculations while explaining the methodology clearly</li>
+          <li><strong>Serving vulnerable populations:</strong> Explicitly addressing risks for immunocompromised individuals</li>
+          <li><strong>Maintaining scientific rigor:</strong> Using peer-reviewed research and up-to-date data rather than outdated assumptions</li>
+          <li><strong>Supporting individual decision-making:</strong> Giving people the information they need to make choices that align with their values and risk tolerance</li>
+        </ul>
+        
+        <p>While I recognize that only a small percentage of the population may use this tool, those who do are often making higher-stakes decisions where precision really matters. My goal is to ensure they have access to the best available science for those decisions.</p>
+      </div>
+    </div>
+    
+    <div class="faq-item">
+      <button type="button" class="faq-question" onclick="toggleFaqAnswer(this)">
+        I live outside the U.S. Can I still use these calculators?
+      </button>
+      <div class="faq-answer">
+        <p>Currently, the calculators are designed primarily for the United States, with U.S.-specific data sources for COVID prevalence and positivity rates. However, many of the underlying calculations (especially for exposure risk) are based on universal biological and physical principles that apply globally.</p>
+        
+        <p>If you have access to local COVID prevalence estimates, you can manually enter them in the advanced fields of either calculator for more accurate results. In the exposure calculator, click "Advanced" to override the default prevalence data. In the test calculator, you can adjust prevalence settings when calculating risk.</p>
+        
+        <p>I hope to expand international support in the future, but don't have a specific timeline yet. This would involve integrating international data sources for COVID prevalence, local positivity rates, and potentially region-specific epidemiological factors.</p>
+        
+        <p>In the meantime, users outside the U.S. may still find these tools useful as general risk assessment tools, though the default prevalence estimates may not reflect your local situation accurately.</p>
+      </div>
+    </div>
+
+
+    
+    <div class="faq-item">
+      <button type="button" class="faq-question" onclick="toggleFaqAnswer(this)">
+        Are you planning to add more calculators and features?
+      </button>
+      <div class="faq-answer">
+        <p>Yes! I'm actively working on improvements to the existing calculators as well as developing entirely new tools, though I don't have specific timelines for their release. Here are some things I plan/hope to do:</p>
+        
+        <p><strong>Exposure Calculator Enhancements</strong></p>
+        
+        <p><strong>Improved ventilation and air quality controls:</strong> Currently, the calculator uses typical air change rates for different indoor environments, though you can specify custom ACH values in the Advanced settings. I plan to add user-friendly controls that let you specify the actual ventilation, filtration, and disinfection measures in your specific environment. This would include options for windows being opened, portable air purifiers, HVAC filtration upgrades, and far-UVC systems. This will give users much more accurate risk estimates without needing to know technical measurements that are difficult for most people to obtain.</p>
+        
+        <p><strong>International support:</strong> Integrating international data sources for COVID prevalence and potentially more local data sources for COVID prevalence for users in the U.S.</p>
+        
+        <p><strong>Wind customization for outdoor scenarios:</strong> Adding the ability to input specific wind conditions (speed and direction) for more accurate outdoor risk calculations.</p>
+        
+        <p><strong>More mask customization options:</strong> Expanding the detailed mask options currently available for you as the app user to also include custom settings for other people's masks in your exposure scenarios.</p>
+        
+        <p><strong>Preset scenario templates:</strong> Pre-configured common scenarios that normally require complex manual setup. For example, travel (airport wait + flight + ground transport), healthcare visits (waiting room + appointment), workplace events, social gatherings, and other multi-step situations. Users would just need to input durations and basic details rather than configuring each component separately.</p>
+        
+        <p><strong>"Did other people test negative recently?" option:</strong> Adding the ability to account for whether other people in your scenario have tested negative recently. This could significantly reduce calculated risk in many real-world situations where you have this information.</p>
+        
+        <p><strong>Test Calculator Enhancements</strong></p>
+        
+        <p><strong>Multi-day test support:</strong> Currently, the test calculator only works when you enter tests taken within a few hours of each other. I plan to add support for tests taken on different days, with appropriate statistical modeling for how your infection risk and viral load might change between testing sessions.</p>
+        
+        <p><strong>Uncertainty analysis for multiple tests:</strong> Currently, uncertainty intervals are only shown when you enter a single test result. I plan to extend this uncertainty analysis to scenarios where you enter multiple test results.</p>
+        
+        <p><strong>Additional test types:</strong> Adding more rapid tests to the dropdown list, taking into account their particular sensitivities and specificities.</p>
+        
+        <p><strong>International support:</strong> Integrating international data sources for COVID prevalence and potentially more local data sources for COVID prevalence for users in the U.S.</p>
+        
+        
+        <p><strong>New Calculators</strong></p>
+        
+        <p><strong>"How long is my negative test good for?"</strong> This calculator would help determine the probability that you remain uninfected at various time points after testing negative. For example, if you test negative in the morning, what's the probability you're still uninfected that evening, or several days later? The tool would account for multiple tests taken at different times, varying test sensitivities, and changing exposure risks over time.</p>
+        
+        <p><strong>"Are you still contagious?"</strong> This calculator would be particularly useful for determining when it's safe to visit others after an infection. It would estimate the probability that someone is no longer contagious based on factors like when their symptoms resolved, recent negative test results, and the specific tests used. The model would incorporate clinical data on contagiousness duration, test performance characteristics, and viral rebound patterns—including how these vary based on Paxlovid treatment.</p>
+        
+        <p>While I'm looking forward to building these new calculators, I should note that I'm prioritizing improvements to the existing calculators for the time being. I also plan to add more documentation about the methodology of the existing calculators.</p>
+        
+        <p>I'm also happy to hear suggestions for new features or improvements! Feel free to reach out at <a href="mailto:yourcovidrisk@gmail.com">yourcovidrisk@gmail.com</a> with your ideas.</p>
+      </div>
+    </div>
+    
+    <div class="faq-item">
+      <button type="button" class="faq-question" onclick="toggleFaqAnswer(this)">
+        How can I support this project?
+      </button>
+      <div class="faq-answer">
+        <p>If you'd like to contribute, you can support the project at <a href="https://ko-fi.com/yourcovidrisk" target="_blank" rel="noopener">ko-fi.com/yourcovidrisk</a> or reach out at <a href="mailto:yourcovidrisk@gmail.com">yourcovidrisk@gmail.com</a> to learn about other ways to help.</p>
+        
+        <p>This tool represents hundreds of hours of unpaid scientific and technical work—including extensive literature reviews, original scientific research, and software development. I created it to fill a stark gap in available COVID risk assessment resources for individuals who need detailed, personalized risk calculations. While I'm passionate about continuing to develop and improve these calculators, sustaining and expanding this resource requires significant ongoing time and effort.</p>
+        
+        <p>Contributions of any amount will help support development of the new features mentioned in the previous question—like preset scenario templates, improved ventilation and air quality controls, international data integration, and new calculators like the "How long is my negative test good for?" and "Are you still contagious?" calculators. They will also help cover hosting costs and the time needed for ongoing maintenance, literature reviews, and regular data updates.</p>
+        
+        <p>The calculators on this site will always remain free and accessible to everyone. Donations simply help ensure I can continue dedicating the time needed to keep improving these tools for the COVID-cautious communities who rely on them.</p>
+      </div>
+    </div>
+    
+    
+    <div class="faq-item">
+      <button type="button" class="faq-question" onclick="toggleFaqAnswer(this)">
+        How can I get in touch about questions, feature requests, bug reports, or other feedback?
+      </button>
+      <div class="faq-answer">
+        <p>Please reach out at <a href="mailto:yourcovidrisk@gmail.com">yourcovidrisk@gmail.com</a>. Your feedback is important and will help improve the tool.</p>
+      </div>
+    </div>
+  </div>

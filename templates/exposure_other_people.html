@@ -1,0 +1,58 @@
+{# Partial: Other People section #}
+<label for="N">How many other people were present?</label>
+{{ ctrl.info_box('peopleInfo', 'Total number of people present, not including yourself.') }}
+<div class="slider-container">
+  <input type="range" class="slider" id="N_slider" min="0" max="25" step="1"
+         value="{{ request.form.get('people_index', '0') }}" required>
+  <div class="slider-ticks"></div>
+  <div class="slider-value-container">
+    <span class="slider-value">{{ request.form.get('N', '1') }} people</span>
+    <!-- Manual edit button for custom people count -->
+    <button type="button" class="edit-value-btn" id="edit-people-btn" aria-label="Edit manually">
+      <span class="btn-content"><i class="fas fa-edit"></i><span>Edit</span></span>
+    </button>
+    <div class="manual-input-container" id="people-manual-input" style="display: none;">
+      <div class="input-wrapper">
+        <input type="text" inputmode="numeric" pattern="[1-9][0-9]*" id="manual-people-input" placeholder="" class="manual-input" style="height: 24px; width: 80px;">
+        <span class="validation-message" id="people-validation-message">Please enter a number between 1 and 1,000</span>
+      </div>
+    </div>
+  </div>
+</div>
+<input type="hidden" name="N" id="N" value="{{ request.form.get('N', '1') }}">
+<input type="hidden" name="people_index" id="people_index" value="{{ request.form.get('people_index', '0') }}">
+
+{# Masked percentage slider moved from main template to here #}
+<div id="masked_percentage_container" style="margin-top: 10px;">
+  <label for="masked_percentage">How many other people were masked?</label>
+  {{ ctrl.info_box('maskedPercentInfo', '
+    <p>Estimate the approximate percentage of people who were wearing masks. This helps calculate how many infectious particles were released into the air.</p>
+    <p>Even if some people were masked, you\'ll be asked about what type of masks they wore in the next question.</p>
+  ') }}
+  <div class="slider-container">
+    <input type="range" class="slider" name="masked_percentage" id="masked_percentage" min="0" max="100" step="25" value="{{ request.form.get('masked_percentage', '0') }}" required>
+    <div class="slider-ticks">
+      {% for i in [0,25,50,75,100] %}
+      <span class="tick" style="left: {{ i }}%"></span>
+      {% endfor %}
+    </div>
+    <div class="slider-labels five-options">
+      {% for value,label in [( '0', 'None'), ('25','Some<br>(25%)'), ('50','Half<br>(50%)'), ('75','Most<br>(75%)'), ('100','All<br>(100%)')] %}
+      <span class="{{ 'active' if request.form.get('masked_percentage', '0') == value }}">{{ label|safe }}</span>
+      {% endfor %}
+    </div>
+  </div>
+  <input type="hidden" id="masked_percentage_value" name="masked_percentage_value" value="{{ request.form.get('masked_percentage', '0') }}">
+  <input type="hidden" id="percentage_masked" name="percentage_masked" value="{{ request.form.get('percentage_masked', '0') }}">
+</div>
+
+<div id="others_mask_type_container" style="display: {% if request.form.get('masked_percentage_value', '0') == '0' %}none{% else %}block{% endif %}; margin-top: 10px;">
+  {{ ctrl.dropdown('others_mask_type', 'What type of mask did they wear?', []) }}
+</div>
+
+{# Duration section moved from main template to here #}
+<div style="margin-top: 20px;">
+  <label for="exposure_duration">How long were you around other people?</label>
+  {{ ctrl.time_selector(request.form.get('exposure_hours', ''), request.form.get('exposure_minutes', ''), request.form.get('exposure_seconds', '')) }}
+  <input type="hidden" name="delta_t" id="delta_t" value="0">
+</div>

@@ -1,0 +1,63 @@
+{# Partial: Environment section #}
+{{ ctrl.dropdown('indoor_outdoor', 'Was this indoors or outdoors?',
+    [ {'value':'Indoors','label':'Indoors'}, {'value':'Outdoors','label':'Outdoors'} ]) }}
+<div id="environment_container" style="display: none;">
+  {{ ctrl.dropdown('ACH', 'Environment type', []) }}
+  <input type="hidden" name="environment_volume" id="environment_volume"
+         value="{{ request.form.get('environment_volume', '') }}">
+  <input type="hidden" name="selected_environment_text" id="selected_environment_text"
+         value="{{ request.form.get('selected_environment_text', '') }}">
+  <input type="hidden" name="selected_environment_index" id="selected_environment_index"
+         value="{{ request.form.get('selected_environment_index', '') }}">
+</div>
+<div id="car-type-container" style="display: none; margin-top: 10px;">
+  {{ ctrl.dropdown('car_type', 'Type of Car', []) }}
+</div>
+<div id="airplane-type-container" style="display: none; margin-top: 10px;">
+  {{ ctrl.slider('airplane_size_slider', 'How big was the plane?',
+      0, 3, 1,
+      request.form.get('airplane_size_index', '0'),
+      'four-options',
+      [
+        {'value':'small','display':'Small'},
+        {'value':'medium','display':'Medium (Boeing 737)'},
+        {'value':'large','display':'Large (A330)'},
+        {'value':'very_large','display':'Very Large (Boeing 777)'}
+      ],
+      'airplane_size_index','airplane_type','') }}
+</div>
+<label for="x">How far away were other people (on average)? <span class="slider-value-label">{{ request.form.get('x_display','6 feet') }}</span></label>
+<div class="slider-container">
+  <input type="range" class="slider" name="x" id="x" min="0" max="20" step="1"
+         value="{{ request.form.get('x','6')|int|default(6) }}" required oninput="updateDistanceLabel(this.value)">
+  <div class="slider-ticks">
+    <span class="tick" style="left:0%"></span>
+    <span class="tick" style="left:15%"></span>
+    <span class="tick" style="left:30%"></span>
+    <span class="tick" style="left:50%"></span>
+    <span class="tick" style="left:76%"></span>
+    <span class="tick" style="left:100%"></span>
+  </div>
+  <div class="distance-labels">
+    <span class="distance-label" style="left:0%">0.5 ft</span>
+    <span class="distance-label" style="left:15%">3 ft</span>
+    <span class="distance-label" style="left:30%">6 ft</span>
+    <span class="distance-label" style="left:50%">10 ft</span>
+    <span class="distance-label" style="left:76%">15 ft</span>
+    <span class="distance-label" style="left:100%">20+ ft</span>
+  </div>
+  <input type="hidden" id="x_actual" name="x" value="{{ request.form.get('x','6') }}">
+  <input type="hidden" id="x_display" name="x_display"
+         value="{{ request.form.get('x_display','6 feet') }}">
+</div>
+<!-- Optional exposure location for prevalence lookup -->
+<label for="exposure_location">Where did this occur? <span style="font-weight: normal;">(optional)</span></label>
+<div class="select-wrapper">
+  <select name="exposure_location" id="exposure_location" class="dropdown-styled">
+    <option value="" {% if exposure_location == '' %}selected{% endif %}></option>
+    {% for code, name in states %}
+    <option value="{{ code }}" {% if exposure_location == code %}selected{% endif %}>{{ name }}</option>
+    {% endfor %}
+  </select>
+  <span class="validation-message">Please select a state</span>
+</div>

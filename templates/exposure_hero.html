@@ -1,0 +1,80 @@
+<div class="hero-section">
+  <div class="hero-content">
+    <p>This calculator uses the latest research on Covid transmission to assess your risk of contracting Covid from a specific exposure event. See the <a href="{{ url_for('faq') }}">FAQ</a> for info about the science behind calculator.</p>
+  </div>
+</div>
+
+<style>
+.hero-section {
+  background: linear-gradient(135deg, #f0f7ff 0%, #e6f0fd 100%);
+  border-radius: 16px;
+  padding: 0.75rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+  border: 1px solid rgba(0,0,0,0.03);
+}
+
+.hero-content {
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.hero-content h2 {
+  color: #111827;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  letter-spacing: -0.02em;
+}
+
+.hero-content p {
+  color: #4b5563;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}
+
+.hero-features {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin-top: 1.5rem;
+}
+
+.feature {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.feature i {
+  font-size: 1.5rem;
+  color: var(--primary);
+  margin-bottom: 0.5rem;
+}
+
+.feature span {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+@media (max-width: 820px) {
+  .hero-features {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .feature {
+    flex-direction: row;
+    text-align: left;
+    gap: 1rem;
+  }
+  
+  .feature i {
+    margin-bottom: 0;
+  }
+}
+</style>

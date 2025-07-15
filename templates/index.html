@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  {% include 'base_analytics.html' %}
+  <title>YourCovidRisk.com – COVID Risk Calculators</title>
+  <!-- Favicon -->
+  <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml">
+  <link rel="icon" href="{{ url_for('static', filename='favicon-32x32.png') }}" type="image/png">
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <!-- Global styles -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='fontawesome/css/all.min.css') }}">
+  <style>
+    /* Page‑specific overrides */
+    body {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(31, 41, 55, 0.9)), url('https://images.unsplash.com/photo-1584118624012-df056829fbd0?q=80&w=1200&auto=format');
+      background-size: cover;
+      background-position: center;
+      color: white;
+      text-align: center;
+      padding: 6rem 2rem 10rem; /* Reduced top, increased bottom for overlap space */
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at center, rgba(129, 140, 248, 0.2) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero h1 {
+      font-size: 3.75rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      text-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      background: linear-gradient(to right, #fff, #e2e8f0);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: fadeIn 0.8s ease-out;
+    }
+
+    .hero p {
+      font-size: 1.25rem;
+      max-width: 700px;
+      margin: 0 auto 3rem;
+      color: rgba(255, 255, 255, 0.9);
+      text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      animation: fadeIn 1s ease-out;
+    }
+
+    /* fadeIn animation moved to global stylesheet */
+
+    .wave {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 120px;
+      background: url('data:image/svg+xml;utf8,<svg viewBox="0 0 1200 120" xmlns="http://www.w3.org/2000/svg"><path d="M0 0v46.29c47.79 22.2 103.59 32.17 158 28 70.36-5.37 136.33-33.31 206.8-37.5 73.84-4.36 147.54 16.88 218.2 35.26 69.27 18.17 138.3 24.88 209.4 13.08 36.15-6 69.85-17.84 104.45-29.34C989.49 25 1113-14.29 1200 52.47V0z" fill="%23f8fafc" opacity=".25"/><path d="M0 0v15.81c13 21.11 27.64 41.05 47.69 56.24C99.41 111.27 165 111 224.58 91.58c31.15-10.15 60.09-26.07 89.67-39.8 40.92-19 84.73-46 130.83-49.67 36.26-2.85 70.9 9.42 98.6 31.56 31.77 25.39 62.32 62 103.63 73 40.44 10.79 81.35-6.69 119.13-24.28s75.16-39 116.92-43.05c59.73-5.85 113.28 22.88 168.9 38.84 30.2 8.66 59 6.17 87.09-7.5 22.43-10.89 48-26.93 60.65-49.24V0z" fill="%23f8fafc" opacity=".5"/><path d="M0 0v5.63C149.93 59 314.09 71.32 475.83 42.57c43-7.64 84.23-20.12 127.61-26.46 59-8.63 112.48 12.24 165.56 35.4C827.93 77.22 886 95.24 951.2 90c86.53-7 172.46-45.71 248.8-84.81V0z" fill="%23f8fafc"/></svg>');
+      background-size: cover;
+      background-repeat: no-repeat;
+      z-index: 1; /* Keep wave behind cards */
+    }
+
+    main {
+      flex: 1;
+      padding: 0 2rem 5rem;
+      position: relative;
+      z-index: 2;
+      margin-top: -6rem; /* Pull cards up to overlap hero */
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .cards {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2.5rem;
+      justify-content: center;
+    }
+
+    .card {
+      background: white;
+      border-radius: var(--border-radius);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.15), 0 8px 16px rgba(0,0,0,0.1); /* Enhanced shadow for elevated look */
+      overflow: hidden;
+      flex: 1 1 350px;
+      max-width: 450px;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      text-decoration: none;
+      color: inherit;
+      position: relative;
+      border: 1px solid rgba(229, 231, 235, 0.8);
+      animation: cardAppear 0.8s backwards;
+      z-index: 10; /* Ensure cards stay above hero background */
+    }
+
+    .card:nth-child(1) { animation-delay: 0.2s; }
+    .card:nth-child(2) { animation-delay: 0.4s; }
+
+    @keyframes cardAppear {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card:hover {
+      transform: translateY(-16px) scale(1.02);
+      box-shadow: 0 30px 60px rgba(0,0,0,0.2), 0 12px 24px rgba(0,0,0,0.15); /* Enhanced hover shadow */
+    }
+
+    .card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary-light), var(--primary));
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.4s ease;
+    }
+
+    .card:nth-child(2)::after {
+      background: linear-gradient(90deg, var(--secondary-light), var(--secondary));
+    }
+
+    .card:hover::after {
+      transform: scaleX(1);
+    }
+
+    .card-header {
+      padding: 1.25rem;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: white;
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .card:nth-child(2) .card-header {
+      background: linear-gradient(135deg, var(--secondary) 0%, #0891b2 100%);
+    }
+
+    .card-icon {
+      font-size: 2.5rem;
+      transition: transform 0.3s ease;
+      flex-shrink: 0;
+    }
+
+    .card:hover .card-icon {
+      /* Icons don't move on hover */
+    }
+
+    /* Subtle hover effects for bottom FAQ cards */
+    .faq-card {
+      cursor: pointer;
+    }
+    
+    .faq-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.15) !important;
+      border-color: #94a3b8 !important;
+    }
+
+    .card-body {
+      padding: 1.5rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .card h2 {
+      font-size: 1.75rem;
+      margin-bottom: 1rem;
+      color: white;
+    }
+
+    .card p {
+      font-size: 1.125rem;
+      line-height: 1.7;
+      margin-bottom: 1.75rem;
+      color: #4b5563;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.75rem;
+      background: var(--primary);
+      color: white;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 1rem;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+    }
+
+    .btn::after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: -100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.6s ease;
+    }
+
+    .btn:hover {
+      background: var(--primary-dark);
+      transform: translateY(-3px);
+      box-shadow: 0 6px 16px rgba(79, 70, 229, 0.4);
+    }
+
+    .btn:hover::after {
+      left: 100%;
+    }
+
+    .card:nth-child(2) .btn {
+      background: var(--secondary);
+      box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
+    }
+
+    .card:nth-child(2) .btn:hover {
+      background: #0891b2;
+      box-shadow: 0 6px 16px rgba(6, 182, 212, 0.4);
+    }
+
+    footer {
+      background: var(--dark);
+      color: white;
+      padding: 2.5rem;
+      text-align: center;
+      position: relative;
+      z-index: 2;
+    }
+
+    footer a {
+      color: #94a3b8;
+      text-decoration: none;
+      margin: 0 0.75rem;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    footer a::after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 1px;
+      bottom: -4px;
+      left: 0;
+      background: var(--primary-light);
+      transform: scaleX(0);
+      transform-origin: center;
+      transition: transform 0.3s ease;
+    }
+
+    footer a:hover {
+      color: white;
+    }
+
+    footer a:hover::after {
+      transform: scaleX(1);
+    }
+
+    @media (max-width: 820px) {
+      .hero {
+        padding: 3rem 1.5rem 7rem; /* Even more bottom padding for better spacing */
+      }
+
+      .hero h1 {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+      }
+
+      .card {
+        flex: 1 1 100%;
+      }
+
+      .card-header {
+        padding: 1rem;
+      }
+
+      .card-icon {
+        font-size: 2rem;
+      }
+
+      .card-body {
+        padding: 1rem;
+      }
+
+      main {
+        padding: 0 1.5rem 3rem;
+        margin-top: -5rem; /* Maximum overlap on mobile to bring cards as high as possible */
+      }
+    }
+  </style>
+</head>
+<body data-page-type="homepage">
+  <section class="hero">
+    <div class="container">
+      <h1>Calculate Your COVID-19 Risk</h1>
+    </div>
+    <div class="wave"></div>
+  </section>
+
+  <main>
+    <div class="container">
+      <div class="cards">
+        <a href="{{ url_for('exposure_calculator') }}" class="card" onclick="analytics.trackNavigation('exposure_calculator', 'homepage_card')">
+          <div class="card-header">
+            <div class="card-icon"><i class="fas fa-shield-virus"></i></div>
+            <h2>Exposure Risk Calculator</h2>
+          </div>
+          <div class="card-body">
+            <p>Estimate your risk of catching COVID‑19 in various scenarios, whether indoors or outdoors.</p>
+            <span class="btn">Calculate Risk <i class="fas fa-arrow-right"></i></span>
+          </div>
+        </a>
+
+        <a href="{{ url_for('test_calculator') }}" class="card" onclick="analytics.trackNavigation('test_calculator', 'homepage_card')">
+          <div class="card-header">
+            <div class="card-icon"><i class="fas fa-vial"></i></div>
+            <h2>Test Calculator</h2>
+          </div>
+          <div class="card-body">
+            <p>Enter your test results and related information to estimate the probability you're infected with COVID‑19.</p>
+            <span class="btn">Analyze Test Results <i class="fas fa-arrow-right"></i></span>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <div style="background: #fefce8; border-top: 3px solid #eab308; border-radius: 12px; padding: 1.5rem; margin: 3rem auto; max-width: 700px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+      <h3 style="margin: 0 0 0.5rem 0; color: #a16207; font-size: 1.1rem;">🌟 Support This Project</h3>
+      <p style="margin: 0; color: #a16207; font-size: 0.95rem;">
+        This tool will <em>always</em> be free.<br>
+        Your support helps fund maintenance, hosting costs, and new features.
+        <br><a href="https://ko-fi.com/yourcovidrisk" target="_blank" rel="noopener" style="color: #a16207; font-weight: 600; text-decoration: underline;">Contribute here →</a>
+      </p>
+    </div>
+
+    <div class="container" style="margin-top: 4rem;">
+      <div style="text-align: center; margin-bottom: 2.5rem;">
+        <h2 style="font-size: 1.8rem; margin-bottom: 0.75rem; color: var(--primary);">📚 Key Information & Science</h2>
+        <p style="font-size: 1.1rem; color: #64748b; max-width: 600px; margin: 0 auto;">Learn about the methodology, data sources, and scientific research behind these calculations.</p>
+      </div>
+      
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+        <a href="{{ url_for('faq') }}#exposure-how-works" style="text-decoration: none; color: inherit;" onclick="analytics.trackNavigation('faq_exposure', 'homepage_highlight')">
+          <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border: 1px solid #e2e8f0; transition: all 0.3s ease; height: 100%;" 
+               class="faq-card">
+            <div style="color: var(--primary); font-size: 1.5rem; margin-bottom: 0.75rem;">🌬️ Airborne Transmission</div>
+            <h3 style="color: var(--dark); margin-bottom: 0.5rem; font-size: 1.1rem;">How exposure risk is calculated</h3>
+            <p style="color: #64748b; margin: 0; font-size: 0.95rem; line-height: 1.5;">Learn about aerosol physics, ventilation modeling, activity effects, and how environmental factors influence infection risk.</p>
+          </div>
+        </a>
+        
+        <a href="{{ url_for('faq') }}#test-how-calculated" style="text-decoration: none; color: inherit;" onclick="analytics.trackNavigation('faq_tests', 'homepage_highlight')">
+          <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border: 1px solid #e2e8f0; transition: all 0.3s ease; height: 100%;" 
+               class="faq-card">
+            <div style="color: var(--secondary); font-size: 1.5rem; margin-bottom: 0.75rem;">🧪 Test Results</div>
+            <h3 style="color: var(--dark); margin-bottom: 0.5rem; font-size: 1.1rem;">How infection probability is calculated</h3>
+            <p style="color: #64748b; margin: 0; font-size: 0.95rem; line-height: 1.5;">Understand how symptoms, local data, and test accuracy combine to estimate your infection probability.</p>
+          </div>
+        </a>
+        
+        <a href="{{ url_for('faq') }}#immunocompromised-risk" style="text-decoration: none; color: inherit;" onclick="analytics.trackNavigation('faq_immunocompromised', 'homepage_highlight')">
+          <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border: 1px solid #e2e8f0; transition: all 0.3s ease; height: 100%;" 
+               class="faq-card">
+            <div style="color: var(--accent); font-size: 1.5rem; margin-bottom: 0.75rem;">🛡️ Immunocompromised Support</div>
+            <h3 style="color: var(--dark); margin-bottom: 0.5rem; font-size: 1.1rem;">Risk adjustments for vulnerable populations</h3>
+            <p style="color: #64748b; margin: 0; font-size: 0.95rem; line-height: 1.5;">Learn how the exposure calculator recognizes that immunocompromised individuals face higher infection risk and adjusts estimates for them.</p>
+          </div>
+        </a>
+      </div>
+      
+      <div style="text-align: center;">
+        <a href="{{ url_for('faq') }}" class="btn" onclick="analytics.trackNavigation('faq_full', 'homepage_cta')">
+          <i class="fas fa-book"></i> View Complete FAQ
+        </a>
+      </div>
+    </div>
+
+    <div style="margin: 2rem auto; padding: 15px; background-color: #f8f9fa; border-radius: 8px; max-width: 900px; text-align: left; font-size: 14px; color: #475569;">
+      <p style="margin: 0;"><strong>Disclaimer:</strong> This site provides mathematical calculations for educational purposes only. It is not intended as medical advice, diagnosis, or treatment.</p>
+    </div>
+  </main>
+
+  <footer>
+    <a href="{{ url_for('faq') }}"><i class="fas fa-book"></i> FAQ</a> <a href="mailto:yourcovidrisk@gmail.com"><i class="fas fa-envelope"></i> Contact</a> &copy; 2025 YourCovidRisk.com
+  </footer>
+</body>
+</html>

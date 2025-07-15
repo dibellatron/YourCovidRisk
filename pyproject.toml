@@ -1,0 +1,33 @@
+[project]
+name = "covid-risk"
+version = "0.1.0"
+description = "Flask web app containing airborne‑exposure and rapid‑test Covid risk calculators"
+authors = [{ name = "Nicholas DiBella" }]
+requires-python = ">=3.12"
+
+[build-system]
+requires = ["setuptools>=67", "wheel"]
+build-backend = "setuptools.build_meta"
+
+# ----------------------------------------------------------------------
+# Tooling configuration
+# ----------------------------------------------------------------------
+
+[tool.black]
+line-length = 88
+target-version = ["py312"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+
+[tool.ruff.lint]
+extend-select = [
+    "F",   # pyflakes
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "I",   # isort
+]
+# Allow long docstring/comment lines; black does not wrap them
+extend-ignore = ["E501", "E402"]
+isort = { combine-as-imports = true, known-first-party = ["calculators", "covid_app"] }

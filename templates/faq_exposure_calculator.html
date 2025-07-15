@@ -1,0 +1,412 @@
+<h2 style="margin-top: 2rem; margin-bottom: 2rem; color: #0369a1; border-bottom: 3px solid #dbeafe; padding-bottom: 0.75rem; position: relative; font-size: 1.75rem;">
+      📊 Exposure Risk Calculator
+      <span style="position: absolute; bottom: -3px; left: 0; width: 80px; height: 3px; background: linear-gradient(90deg, #0369a1 0%, #0284c7 100%); border-radius: 2px;"></span>
+    </h2>
+    
+    <div class="faq-item">
+      <button type="button" class="faq-question" id="exposure-how-works" onclick="toggleFaqAnswer(this)">
+        What is the science behind the exposure risk calculator?
+      </button>
+      <div class="faq-answer">
+        <p>The calculator draws from <strong><a href="https://caimira.web.cern.ch/" target="_blank" rel="noopener">CERN's CAiMIRA (Airborne Model for Indoor Risk Assessment)</a></strong> aerosol physics framework and implements the methodology from <a href="https://doi.org/10.1098/rsif.2024.0740" target="_blank" rel="noopener">Henriques et al. (2025), "An integrated airborne transmission risk assessment model for respiratory viruses: short- and long-range contributions,"</a> published in Journal of the Royal Society Interface. It integrates both short-range transmission (when you're close to someone) and long-range transmission (breathing shared air in a room) using an advanced version of the <a href="https://en.wikipedia.org/wiki/Wells-Riley_model" target="_blank" rel="noopener">Wells-Riley equation</a>, with substantial enhancements including immunocompromised risk adjustments, real-time prevalence integration, and advanced mask effectiveness modeling.</p>
+        
+        <p>The model accounts for realistic aerosol physics, including how particles of different sizes behave in the air, how they deposit in your lungs, and how environmental factors like temperature and humidity affect viral survival. It also incorporates Omicron-specific <a href="https://pubmed.ncbi.nlm.nih.gov/35458551/" target="_blank" rel="noopener">transmissibility data</a> and <a href="https://www.nature.com/articles/s41467-024-47777-5" target="_blank" rel="noopener">viral decay patterns</a>.</p>
+        
+        <p>The calculator runs thousands of <a href="https://en.wikipedia.org/wiki/Monte_Carlo_method" target="_blank" rel="noopener">Monte Carlo simulations</a> to realistically model transmission. Each simulation independently determines which specific people in the exposure scenario happen to be infectious (based on COVID prevalence), samples their unique characteristics (viral load from <a href="https://elifesciences.org/articles/65774" target="_blank" rel="noopener">Chen et al. 2021</a> distribution, breathing patterns, etc.), and calculates the cumulative dose from all infectious individuals using size-resolved aerosol physics. This approach captures the discrete, stochastic nature of transmission.</p>
+        
+        <p>The calculator also integrates real-time data, including the <a href="https://www.pmc19.com/data/" target="_blank" rel="noopener">PMC's</a> regional COVID prevalence estimates from wastewater surveillance, with automatic weekly updates to keep the estimates current.</p>
+      </div>
+    </div>
+    
+    <div class="faq-item">
+      <button type="button" class="faq-question" id="calculator-accuracy" onclick="toggleFaqAnswer(this)">
+        How accurate is this calculator? Has it been externally validated?
+      </button>
+      <div class="faq-answer">
+        <p>The exposure risk calculator is built on a foundation of peer-reviewed scientific research and has undergone multiple forms of validation to ensure accuracy and reliability.</p>
+        
+        <p><strong>Scientific Foundation</strong></p>
+        <p>The calculator implements the methodology from <a href="https://doi.org/10.1098/rsif.2024.0740" target="_blank" rel="noopener">Henriques et al. (2025)</a>. This research represents the latest advancement in airborne transmission modeling, extending <strong><a href="https://caimira.web.cern.ch/" target="_blank" rel="noopener">CERN's CAiMIRA (COVID Airborne Indoor Risk Assessment)</a></strong> framework to properly integrate both short-range and long-range transmission routes.</p>
+        
+        <p><strong>CAiMIRA Model Validation Status</strong></p>
+        <p>The underlying CAiMIRA framework has mixed validation depending on transmission route. The long-range (background aerosol) component has been benchmarked against real-world outbreak data, with <a href="https://doi.org/10.1098/rsfs.2021.0076" target="_blank" rel="noopener">Henriques et al. (2022)</a> showing that predicted attack rates matched observed infection probabilities across documented superspreading events in classrooms, offices, and restaurants. However, the short-range (jet) component lacks large-scale epidemiological validation since outbreak reports cannot easily separate close-range aerosols from droplets or surface transmission. Instead, the short-range model is validated against laboratory measurements of respiratory jet dilution and CFD studies, with dilution factors matching experimental data from <a href="https://doi.org/10.1016/j.buildenv.2022.109166" target="_blank" rel="noopener">respiratory jet studies</a>. When combined, the integrated model produces attack rates consistent with observed outbreak probabilities, though the authors acknowledge that direct field validation of short-range aerosol transmission remains limited.</p>
+        
+        <p><strong>The "Average Joe" Validation Case</strong></p>
+        <p>One of the strongest forms of validation comes from calibrating calculated risk against independent epidemiological models. I developed detailed behavioral personas representing typical American exposure patterns, with "Average Joe" serving as the primary validation case. According to the exposure calculator (detailed explanation below), Average Joe's weekly risk of contracting Covid in early June 2025 is about 0.54%. This closely matches <a href="https://www.pmc19.com/data/" target="_blank" rel="noopener">PMC's</a> current estimate of the national COVID prevalence (0.5%).</p>
+        
+        <p>Since the average person is infectious with COVID for <a href="https://pubmed.ncbi.nlm.nih.gov/35853589/" target="_blank" rel="noopener">approximately 7 days</a>, the PMC model (largely built on <a href="https://www.healthdata.org/research-analysis/library/forecasting-trajectory-covid-19-pandemic-2023-under-plausible-variant-and" target="_blank" rel="noopener">IHME's model of daily new infections</a>) provides an independent estimate of the probability that an average American will be infected in a given week. The fact that the exposure calculator's estimate of Average Joe's weekly infection risk so closely matches the PMC model's COVID prevalence estimate provides independent support of the calculator's accuracy.</p>
+        
+        <p>The following describes Average Joe's <strong>weekly exposure patterns</strong>, derived from national survey data and other research, with each scenario calculated separately using the exposure risk calculator:</p>
+        
+        <ul>
+          <li><strong>Office Work (4.3 days/week, 34.4 hours total):</strong> Based on <a href="https://www.bls.gov/ors/factsheet/office-and-administrative-support-occupations.htm" target="_blank" rel="noopener">Bureau of Labor Statistics Occupational Requirements Survey 2024</a> and <a href="https://www.jstor.org/stable/48501086" target="_blank" rel="noopener">accelerometer studies</a>, Average Joe's daily office activities break down as: 75% sitting (6 hours), 16% standing (1.25 hours), 9% walking (45 minutes). The <strong>4.3 days per week</strong> reflects weighted population data from <a href="https://www.bls.gov/news.release/atus.nr0.htm" target="_blank" rel="noopener">BLS American Time Use Survey 2023</a> showing 80% of workers are fully in-office (5 days), 12% are hybrid (~2.5 days), and 8% are fully remote (0 days). The exposure calculator was used iteratively for each activity component, modeling an office with <strong>11 coworkers</strong> (12 total people based on <a href="https://www.bls.gov/bdm/" target="_blank" rel="noopener">BLS Business Employment Dynamics average workplace sizes</a>) at 2.5-meter desk spacing, modern ventilation (5 ACH, 300 m³ volume), with all people following the same activity breakdown.
+            <ul><li><em>Calculated weekly office risk: 0.4253%</em></li></ul>
+          </li>
+          
+          <li><strong>Home Life (42 hours/week awake):</strong> Typical household with <strong>2 family members</strong> (spouse + child, reflecting 2.6 average household size from <a href="https://www.census.gov/data/tables/2023/demo/families/households.html" target="_blank" rel="noopener">U.S. Census</a>) in whole-home environment (1.5 ACH, 250 m³ volume) with 1-meter close family contact, modeled as sitting with speaking for family conversations.
+            <ul><li><em>Calculated weekly home risk: 0.0549%</em></li></ul>
+          </li>
+          
+          <li><strong>Restaurant Dining (1.125 hours/week average):</strong> 0.75 visits/week (3 times/month) based on <a href="https://www.escoffier.edu/blog/world-food-drink/consumer-dining-trend-statistics" target="_blank" rel="noopener">dining frequency surveys</a> with <strong>20 other diners</strong> in restaurant environment (5 ACH, 400 m³ volume) at 1.5-meter table spacing, modeled as sitting with speaking for dining conversations.
+            <ul><li><em>Calculated weekly dining risk: 0.0213%</em></li></ul>
+          </li>
+          
+          <li><strong>Social Gatherings (3 hours/week):</strong> Reflects <a href="https://www.bls.gov/news.release/atus.nr0.htm" target="_blank" rel="noopener">American Time Use Survey 2023</a> patterns with <strong>3 friends</strong> in residential settings (2 ACH, 200 m³ volume) at 2-meter social distance, modeled as sitting with speaking for social conversations.
+            <ul><li><em>Calculated weekly social risk: 0.0178%</em></li></ul>
+          </li>
+          
+          <li><strong>Commuting (population-weighted across transportation modes):</strong> Based on <a href="https://www.census.gov/topics/employment/commuting/guidance/acs-1yr.html" target="_blank" rel="noopener">U.S. Census transportation data</a>: 69% drive alone (negligible exposure), 9% carpool, 3.5% public transit, 18.5% other modes including work from home, walking, biking (negligible exposure). Carpool modeled as <strong>2 people in car</strong> (4 m³ volume, 8 ACH from windows/AC, 1-meter spacing, 5 hours/week total, sitting with speaking). Public transit modeled as <strong>20 people on bus/train</strong> (150 m³ volume, 12 ACH from doors/HVAC, 1-meter spacing, 2.5 hours/week total, sitting with breathing). Most Americans drive alone, but the small percentage using shared transportation creates a measurable population-weighted risk.
+            <ul><li><em>Calculated weekly commute risk: 0.0058%</em></li></ul>
+          </li>
+          
+          <li><strong>Religious Service (0.27 hours/week average):</strong> Population-weighted attendance based on <a href="https://www.pewresearch.org/religion/2025/02/26/religious-attendance-and-congregational-involvement/" target="_blank" rel="noopener">Pew Research 2025 data</a> showing 25% of Americans attend weekly (1 hour), 8% attend monthly only (0.25 hours average), and 67% seldom/never attend. Modeled with <strong>70 congregation members</strong> in sanctuary (6 ACH, 1000 m³ volume) using realistic distance distribution: 10% very close (1m), 30% nearby (1.5m), 40% medium distance (2.5m), and 20% far (4m), with weighted average of sitting and speaking (representing mix of silent prayer, responsive prayers, and congregational singing).
+            <ul><li><em>Calculated weekly religious risk: 0.0057%</em></li></ul>
+          </li>
+          
+          <li><strong>Gym/Fitness (0.38 hours/week):</strong> Population-weighted for <a href="https://www.healthandfitness.org/improve-your-club/industry-news/us-health-club-and-studio-memberships-increase-to-record-77-million/" target="_blank" rel="noopener">25% of Americans who use gyms weekly</a> with <strong>8 other gym users</strong> in fitness facility (4 ACH, 500 m³ volume) at 2-meter equipment spacing, modeled as moderate exercise with breathing (minimal conversation).
+            <ul><li><em>Calculated weekly gym risk: 0.0008%</em></li></ul>
+          </li>
+          
+          <li><strong>Grocery Shopping (45 minutes/week):</strong> Weekly shopping with <strong>15 other shoppers</strong> in supermarket (3 ACH, 2000 m³ volume) at 1.5-meter cart distance, modeled as light exercise (walking) with breathing (minimal talking).
+            <ul><li><em>Calculated weekly grocery risk: 0.0006%</em></li></ul>
+          </li>
+          
+          <li><strong>No COVID Precautions:</strong> All scenarios modeled with zero masking, no ventilation improvements, and normal crowd densities representing typical American behavioral patterns in 2025.</li>
+          
+          <li><strong>Health Status:</strong> Average Joe is not immunocompromised and was assumed to have had his last COVID infection 6 months prior, representing typical American infection patterns (roughly once per year).</li>
+        </ul>
+        
+        <p>Each exposure scenario used the unified transmission exposure calculator. (Exposures with different activity levels were treated separately in the calculator.) Individual risks were combined probabilistically using the formula: Total Risk = 1 - (1 - risk₁) × (1 - risk₂) × ... × (1 - riskₙ), treating each exposure as an independent event.</p>
+        
+        <p style="background-color: #f0f4ff; border-left: 4px solid #4f46e5; padding: 1rem; margin: 1rem 0; border-radius: 4px;"><strong>Total calculated weekly risk: 0.54%</strong></p>
+        
+        <div style="background-color: #fef2f2; border-left: 4px solid #ef4444; padding: 1.5rem; margin: 1.5rem 0; border-radius: 6px; border: 1px solid #fecaca;">
+          <p style="margin: 0; font-weight: 600; color: #dc2626;"><strong>⚠️ Important Seasonal Context:</strong> These risk levels represent the <strong>annual low point</strong> for COVID activity. June 2025 falls during the traditional spring/early summer lull when COVID prevalence is at its lowest. Users should expect risks to <strong>increase significantly during summer peaks</strong> (typically July-August) and especially during <strong>winter surges</strong> (December-February), when prevalence can reach <strong>5-10x current levels</strong>.</p>
+        </div>
+        
+        <p><strong>Internal Consistency</strong></p>
+        <p>The model demonstrates strong internal consistency, with risk estimates scaling appropriately across different scenarios, environmental conditions, and intervention strategies. Additionally, the fact that home and office exposures account for over 90% of calculated risk aligns with <a href="https://jphe.amegroups.org/article/view/8699/html" target="_blank" rel="noopener">epidemiological understanding of where most transmission occurs</a>.</p>
+        
+        <p><strong>Conclusion</strong></p>
+        <p>While no model perfectly captures the complexity of real-world transmission, this calculator represents the current state-of-the-art in airborne transmission risk assessment. It combines the latest aerosol physics research, rigorous mathematical modeling, empirical validation against outbreak data, and independent epidemiological calibration. The convergence of theoretical foundations, experimental evidence, and real-world validation across multiple lines of evidence provides strong support of the calculator's reliability as a quantitative risk assessment tool.</p>
+      </div>
+    </div>
+    
+    <div class="faq-item">
+      <button type="button" class="faq-question" id="immunocompromised-risk" onclick="toggleFaqAnswer(this)">
+        How does the calculator adjust risk estimates for immunocompromised individuals?
+      </button>
+      <div class="faq-answer">
+        <p>The calculator recognizes that immunocompromised individuals face substantially higher infection risk because they can become infected with fewer viral particles than healthy adults. This is implemented by treating the infectious dose as significantly lower for people with weakened immune systems.</p>
+        
+        <p><strong>Scientific basis:</strong> Studies show that the median infectious dose (ID₅₀) for healthy adults is approximately 100 viable viral particles. However, research indicates immunocompromised individuals have markedly reduced infectious thresholds:</p>
+        
+        <ul>
+          <li><strong>Moderately immunocompromised</strong> (e.g., low-dose steroids, methotrexate, stable transplant recipients, HIV with CD4 200-500): <strong>~8× higher susceptibility</strong> (i.e. their median infectious dose is one-eighth that of a healthy adult, ≈ 13 virions vs 100 for healthy)</li>
+          <li><strong>Severely immunocompromised</strong> (e.g., B-cell depleting therapies, recent transplant, active chemotherapy, HIV with CD4 &lt;200): <strong>~20× higher susceptibility</strong> (i.e. their median infectious dose is one-twentieth that of a healthy adult, ≈ 5 virions vs 100 for healthy)</li>
+        </ul>
+        
+        <p><strong>How these estimates were derived:</strong> The multipliers come from multiple evidence sources triangulated using Bayesian analysis. <a href="https://pubmed.ncbi.nlm.nih.gov/33185244/" target="_blank" rel="noopener">Household transmission studies</a> showed immunocompromised contacts had 4-16× higher odds of infection given identical exposures. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC7592214/" target="_blank" rel="noopener">Animal studies using immune-suppressed hamsters</a> found 5-6× lower infectious doses when adaptive immunity was disabled. <a href="https://journals.lww.com/transplantjournal/fulltext/2021/12000/preemptive_antibody_therapy_for_vaccine.12.aspx" target="_blank" rel="noopener">Breakthrough infection surveillance in transplant recipients</a> showed up to 82× higher post-vaccination infection rates compared to the general population. Real-world susceptibility spans a range within each class; the factors here are meant for cautious default settings, not precise patient-level prognoses.</p>
+
+        <p><strong>For the math mavens—Bayesian modeling approach:</strong> In brief, a log-normal prior (σ = 0.7), centered on a 5× susceptibility increase, was informed by the aforementioned <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7592214/" target="_blank" rel="noopener">animal studies</a>. Likelihood functions incorporated observed odds ratios: moderate immunocompromising conditions ~4± 2-fold increased risk, severe immunocompromising conditions ~15± 5-fold increased risk. The posterior analysis yielded median estimates of 3.0× (95% credible interval: 2-8×) for moderate and 9.6× (95% CrI: 5-25×) for severe immunocompromising conditions. <strong>Conservative values of 8× and 20× were selected</strong> from the upper portions of the credible ranges rather than using the posterior medians, prioritizing appropriate caution for this vulnerable population. These factors sit near the upper end of the statistical credible range; less-immunosuppressed people in the 'moderate' bucket may in reality be closer to ~3–4×. (Note: I plan to write a more detailed explanation of the approach at a later time.)</p>
+        
+        <p><strong>Implementation:</strong> When you indicate moderately or severely immunocompromising conditions, the calculator divides the standard "quantum" emission rate by 8 or 20, respectively. This effectively increases your calculated risk proportionally, reflecting the biological reality that fewer viral particles are needed to establish infection in immunocompromised individuals.</p>
+      </div>
+    </div>
+    
+    <div class="faq-item">
+      <button type="button" class="faq-question" onclick="toggleFaqAnswer(this)">
+        My exposure risk from this activity seems low. Have I been wrong to take precautions?
+      </button>
+      <div class="faq-answer">
+        <p>Not necessarily! A low single-exposure risk doesn't mean precautions are unnecessary - it often means your precautions are <strong>working</strong>. The key insight is understanding the difference between <strong>individual exposure risk and lifestyle risk</strong>.</p>
+        
+        <p><strong>The "Low-Risk" Misconception</strong></p>
+        <p>When people see "0.1% risk from one restaurant visit," they often think: "That's tiny, maybe I've been overthinking this." But if you dine out twice a week for a year, that seemingly negligible risk can easily accumulate to <strong>20% annual risk</strong> or more from dining alone. Add in your work exposures, social activities, and errands, and you're looking at substantial cumulative risk from activities that individually seem harmless.</p>
+        
+        <p><strong>One-Time vs. Regular Activities</strong></p>
+        <ul>
+          <li><strong>One-off events:</strong> "Should I attend this wedding?" → Single exposure risk is what matters</li>
+          <li><strong>Lifestyle patterns:</strong> "Should I dine out regularly?" → Cumulative risk over time is what matters</li>
+        </ul>
+        <p>Your precautions make the most difference for activities you do repeatedly, even if each individual instance seems low-risk.</p>
+        
+        <p><strong>Why Precautions Still Matter</strong></p>
+        <p>Understanding cumulative risk shows why precautions are valuable:</p>
+        <ul>
+          <li><strong>Regular activities add up:</strong> Your weekly routines likely dominate your annual risk, not occasional events</li>
+          <li><strong>Precautions compound:</strong> An N95 might not feel worth it for one store trip, but it dramatically reduces risk from regular activities</li>
+          <li><strong>Timing matters:</strong> Low risk today doesn't mean low risk during winter peaks when COVID levels are 5-10x higher</li>
+          <li><strong>Smart trade-offs:</strong> Understanding cumulative risk helps you focus precautions where they matter most</li>
+        </ul>
+        
+        <p><strong>Explore Your Cumulative Risk</strong></p>
+        <p>To see how seemingly low-risk activities add up over time, click <strong>"Explore repeated exposures"</strong> at the bottom of your results. You can explore how your risk accumulates if you repeat this activity on a regular basis (e.g., weekly, monthly, daily).</p>
+        
+        <p><strong>The Bottom Line</strong></p>
+        <p>A low single-exposure risk often reflects good decision-making, not wasted effort. Your individual exposure risk tells you about today, but your lifestyle patterns determine your long-term health outcomes. Precautions that seem unnecessary for one exposure can be crucial for the activities that shape your cumulative risk over time.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button type="button" class="faq-question" onclick="toggleFaqAnswer(this)">
+        How do the repeated exposure calculations work?
+      </button>
+      <div class="faq-answer">
+        <p>The repeated exposure feature calculates cumulative risk over time using time-varying prevalence data that accounts for seasonal changes in COVID activity. Rather than assuming constant risk, it incorporates real epidemiological patterns from <a href="https://www.cdc.gov/nwss/rv/COVID19-nationaltrend.html" target="_blank" rel="noopener">CDC wastewater data</a>.</p>
+        
+        <p><strong>Multiple exposure patterns are available:</strong></p>
+        <ul>
+          <li><strong>Short-term options:</strong> 5, 10, 30, or 90 consecutive days</li>
+          <li><strong>Long-term patterns:</strong> Monthly for a year (12 exposures), weekly for a year (52 exposures), every workday for a year (250 exposures), or daily for a year (365 exposures)</li>
+        </ul>
+        
+        <p><strong>Time-varying prevalence:</strong> The calculator starts from your current week and uses CDC historical data to project how prevalence changes over the year.</p>
+        
+        <p><strong>Waning immunity:</strong> If you indicate that you've been vaccinated or infected in the last year, the calculator accounts for the fact that your immune protection gradually weakens over time. For each future exposure, it estimates what your immunity level will be at that point in time, rather than assuming constant protection throughout the entire period. This provides more accurate long-term risk estimates, as immunity from both vaccination and infection naturally wanes over time.</p>
+        
+        <p><strong>Risk calculation:</strong> For each exposure, the calculator scales your base single-exposure risk by both the prevalence ratio for that time period and your immunity level at that future date. The cumulative risk is calculated as: 1 - (1 - risk₁) × (1 - risk₂) × ... × (1 - riskₙ), treating each exposure as an independent event.</p>
+        
+        <p><strong>Important assumption:</strong> This calculation assumes each exposure is independent. For repeated exposures to the same people, actual risk may vary due to correlated infection patterns. The calculation provides a useful baseline estimate, but your specific risk depends on whether you're exposed to the same group repeatedly or different people each time.</p>
+        
+      </div>
+    </div>
+    
+    <div class="faq-item">
+      <button type="button" class="faq-question" id="simulation-variability" onclick="toggleFaqAnswer(this)">
+        Why do I sometimes get slightly different results when I enter the same scenario twice?
+      </button>
+      <div class="faq-answer">
+        <p>Small variations between identical calculations are normal and expected. This occurs because the calculator uses <a href="https://en.wikipedia.org/wiki/Monte_Carlo_method" target="_blank" rel="noopener">Monte Carlo simulations</a>, which involve random sampling to account for the natural uncertainty in transmission.</p>
+        
+        <p><strong>How the randomness works:</strong> Each time you run a calculation, the simulator performs thousands of individual scenarios, randomly sampling different combinations of variables like viral loads (which can vary 100-fold between infected people), the exact number of infectious people present, individual breathing rates, and dose-response thresholds. Even with identical inputs, each simulation run samples these variables differently, leading to slightly different final estimates.</p>
+        
+        <p><strong>Why we use this approach:</strong> Monte Carlo simulation provides more accurate risk estimates than simple deterministic calculations because it captures the real-world uncertainty in transmission. The slight run-to-run variation is the trade-off for getting statistically robust results that account for the inherent randomness in infectious disease transmission.</p>
+        
+        <p><strong>Bottom line:</strong> Small variations between identical calculations don't indicate an error—they reflect the statistical nature of the underlying model. Focus on the general magnitude of risk (e.g., "around 0.2%") rather than precise decimal places when interpreting results.</p>
+      </div>
+    </div>
+    
+    <div class="faq-item">
+      <button type="button" class="faq-question" id="safer-scenario-higher-risk" onclick="toggleFaqAnswer(this)">
+        Why does making a scenario safer sometimes show slightly higher risk?
+      </button>
+      <div class="faq-answer">
+        <p>Occasionally, you might notice that reducing the number of people, shortening exposure time, or making other clearly safer changes results in a slightly higher risk estimate. This counterintuitive result is due to the random sampling in the calculator's simulations, not an error in the underlying science.</p>
+        
+        <p><strong>How this happens:</strong> Each calculation simulates thousands of scenarios to account for uncertainty in transmission risk. Even with identical inputs, different random combinations of viral loads, infectious people, and other variables can produce slightly different results. When you make a small safety improvement, the true risk reduction might be smaller than this natural variability, allowing random chance to occasionally produce a higher number.</p>
+        
+        <p><strong>What to do:</strong> If you see this pattern, try running the calculation several times for both scenarios. The safer option should show lower risk on average, even if individual runs occasionally go the wrong way.</p>
+        
+        <p><strong>When to be concerned:</strong> For small modifications, occasional "wrong direction" results are statistically normal. However, if a major change (like adding masks or halving exposure time) shows higher risk, that's unusual and worth investigating. If you notice persistent unexpected behavior or suspect a bug, please reach out at <a href="mailto:yourcovidrisk@gmail.com">yourcovidrisk@gmail.com</a>.</p>
+      </div>
+    </div>
+    
+    <div class="faq-item">
+      <button type="button" class="faq-question" onclick="toggleFaqAnswer(this)">
+        How does the calculator handle mask effectiveness?
+      </button>
+      <div class="faq-answer">
+        <p>The calculator models mask effectiveness through two key factors: <strong>mask type</strong> and <strong>mask fit quality</strong>. Mask type determines the intrinsic filtration efficiency of the material, but the overall effectiveness of a mask depends critically on how well it fits your face. Ultimately, what matters for your protection is <strong>leakage</strong>—the percentage of airborne particles that penetrate through both the mask material and any gaps around the edges to reach your breathing zone.</p>
+        
+        <p>The table below shows the leakage values actually used in the calculator for different combinations of mask types and fit quality. These leakage rates are applied to <strong>you</strong> (the app user) to assess your personal risk based on your specific mask choice and fit quality. These values represent <em>reasonable approximations</em> of real-world leakage given the mask type and fit quality, derived from various real-world studies of mask performance across different mask types and fit conditions:</p>
+        
+        <div class="faq-table-container">
+          <table class="faq-table">
+            <thead>
+              <tr>
+                <th>Mask Type</th>
+                <th>Loose Fit</th>
+                <th>Average Fit</th>
+                <th>Snug Fit</th>
+                <th>Passes Qualitative Fit Test</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Cloth</strong></td>
+                <td>70%</td>
+                <td>50%</td>
+                <td>30%</td>
+                <td>—</td>
+              </tr>
+              <tr>
+                <td><strong>Surgical</strong></td>
+                <td>55%</td>
+                <td>35%</td>
+                <td>18%</td>
+                <td>—</td>
+              </tr>
+              <tr>
+                <td><strong>KN94/95</strong></td>
+                <td>45%</td>
+                <td>30%</td>
+                <td>15%</td>
+                <td>5%</td>
+              </tr>
+              <tr>
+                <td><strong>N95</strong></td>
+                <td>25%</td>
+                <td>12%</td>
+                <td>5%</td>
+                <td>1%</td>
+              </tr>
+              <tr>
+                <td><strong>N99</strong></td>
+                <td>25%</td>
+                <td>12%</td>
+                <td>3%</td>
+                <td>0.7%</td>
+              </tr>
+              <tr>
+                <td><strong>Elastomeric with P100/N100 filters</strong></td>
+                <td>15%</td>
+                <td>6%</td>
+                <td>2%</td>
+                <td>0.5%</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <p><strong>Notes:</strong></p>
+        <ul>
+          <li><strong>Fit quality matters enormously:</strong> A loose-fitting KN95 (approximately 45% leakage) can provide worse protection than a snug surgical mask (around 18% leakage)</li>
+          <li><strong>Cloth masks and surgical masks cannot pass fit tests:</strong> These masks are not designed to form a tight seal around the face and rely primarily on their material filtration rather than achieving an airtight fit</li>
+          <li><strong>Cloth masks tend to have high leakage:</strong> Even with good fit, cloth masks typically allow around 30% of particles through</li>
+          <li><strong>N95s with good fit are highly effective:</strong> An N95 with average fit typically has around 12% leakage, while one that passes a qualitative fit test reduces leakage to approximately 1%</li>
+          <li><strong>Surgical masks can be reasonably effective with good fit:</strong> While generally not as effective as N95s, a snug surgical mask (roughly 18% leakage) is typically much better than a loose one (around 55% leakage)</li>
+        </ul>
+        
+        <p><strong>Advanced option:</strong> If you have quantitative fit test results (a fit factor number from a PortaCount machine or similar device), you can enter this directly for maximum accuracy. Fit factor represents the ratio of particles outside versus inside the mask, so leakage percentage equals 1 divided by the fit factor (1/fit factor × 100%). For example, a fit factor of 100 means 1/100 = 1% leakage, a fit factor of 10 means 1/10 = 10% leakage, and a fit factor of 43 means 1/43 = 2.3% leakage. <strong>Note:</strong> For PortaCount machines, the calculator interprets "fit factor" as measurements taken in N99 mode, not N95 mode. This is because N95 mode uses a narrow particle size band around 0.04 µm to isolate seal leakage only, while N99 mode counts particles of a much broader range (from 0.02-1.0 µm) to measure total leakage from both seal bypass and filter penetration. The latter measurement is needed to assess infection risk from respiratory aerosols of <em>all</em> sizes.</p></invoke>
+        
+        <p>The calculator applies these detailed leakage rates to your inhalation (protecting you) based on your specific mask selection and fit quality. For others' exhalation (source control), if you indicate that other people are wearing masks, the calculator assumes they have average fit quality. Currently, the calculator provides more comprehensive mask customization for you as the app user than for other people, though I plan to add more custom options for other mask-wearers in the future.</p>
+        
+        <p>Try experimenting with the calculator to see these effects for yourself—compare scenarios with no mask, a loose cloth mask, a snug surgical mask, and a fit-tested N95 to see how dramatically your mask choice and fit quality affect your probability of getting infected in the same exposure scenario.</p>
+      </div>
+    </div>
+    
+    
+    <div class="faq-item">
+      <button type="button" class="faq-question" id="distance-limitations" onclick="toggleFaqAnswer(this)">
+        Why does the calculator show a warning for very close distances?
+      </button>
+      <div class="faq-answer">
+        <p>At distances less than 1.5 feet (0.5 m), this calculator likely <strong>underestimates infection risk</strong> because the underlying physics model was never designed for such close proximity. A warning appears when you select 0.5 ft or 1 ft to flag this limitation.</p>
+        
+        <p><strong>Scientific foundation</strong></p>
+        <p>The calculator implements the model in <a href="https://doi.org/10.1098/rsif.2024.0740" target="_blank" rel="noopener">Henriques et al. (2025) "An integrated airborne transmission risk assessment model for respiratory viruses: short- and long-range contributions"</a> (J. R. Soc. Interface). The authors explicitly exclude "intimate interactions" closer than 0.5 m (about 1.5 ft).</p>
+        
+        <p><strong>What happens at very close range</strong></p>
+        <p>Closer than about 1.5 ft, the <strong>direct-deposition sub-mode</strong> of "through-the-air" transmission dominates.</p>
+        <ul>
+          <li>Infectious respiratory particles fly along short, semi-ballistic paths and land directly on the eyes, nose, or mouth instead of being inhaled.</li>
+          <li>In the <a href="https://www.who.int/publications/m/item/global-technical-consultation-report-on-proposed-terminology-for-pathogens-that-transmit-through-the-air" target="_blank" rel="noopener">2024 WHO terminology</a>, airborne transmission/inhalation and direct deposition are two distinct descriptors under the umbrella of "through-the-air" transmission.</li>
+        </ul>
+        <p>This calculator models <strong>airborne inhalation only</strong>—both short-range inhalation (1.5 ft–6 ft) and well-mixed long-range exposure—but does not include direct deposition.</p>
+        
+        <p><strong>Why the model breaks down at distances less than 1.5 ft:</strong></p>
+        <ul>
+          <li><strong>Different physics:</strong> Inside the undiluted core of an exhaled jet, the "two-stage" dilution formula no longer applies.</li>
+          <li><strong>Missing pathway:</strong> Large droplets (&gt; 100 µm) can strike facial mucosa directly; the model ignores this route.</li>
+          <li><strong>Different particle mix:</strong> Very near the mouth, big droplets that haven't evaporated or settled dominate, but the model only considers particles smaller than 100 µm.</li>
+        </ul>
+        
+        <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0; border-radius: 6px;">
+          <div style="display: flex; align-items: center; margin-bottom: 8px;">
+            <i class="fas fa-exclamation-triangle" style="color: #f59e0b; margin-right: 8px; font-size: 16px;"></i>
+            <strong style="color: #92400e; font-size: 16px;">Practical takeaway</strong>
+          </div>
+          <p style="margin: 0; color: #92400e; line-height: 1.5;">
+            <strong>Treat the calculated risk as a lower bound.</strong> Your actual risk closer than 1.5 ft may be significantly higher—especially during face-to-face conversation, medical or dental work, or other intimate contact.
+          </p>
+        </div>
+        
+      </div>
+    </div>
+    
+    <div class="faq-item">
+      <button type="button" class="faq-question" onclick="toggleFaqAnswer(this)">
+        How does the calculator account for different types of indoor spaces?
+      </button>
+      <div class="faq-answer">
+        <p>For indoor environments, the calculator uses typical measured ventilation parameters and space sizes from published studies. Each indoor venue type (offices, classrooms, restaurants, etc.) and transportation option is assigned appropriate air change rates and volumes based on real-world measurements from building engineering research.</p>
+        
+        <p>If you want more control over these parameters, you can override the defaults in the advanced settings and enter specific values for air changes per hour, room volume, temperature, humidity, and CO₂ levels for your particular indoor space.</p>
+        
+        <p>Note that outdoor transmission modeling uses a different approach based on distance and wind speed, which is explained in the next question.</p>
+      </div>
+    </div>
+    
+    <div class="faq-item">
+      <button type="button" class="faq-question" onclick="toggleFaqAnswer(this)">
+        How does the calculator model outdoor transmission risk?
+      </button>
+      <div class="faq-answer">
+        <p>The calculator models outdoor transmission using the same core scientific framework as indoor calculations—the integrated airborne transmission model from <a href="https://doi.org/10.1098/rsif.2024.0740" target="_blank" rel="noopener">Henriques et al. (2025)</a>—but with environmental parameters that reflect the dramatically enhanced ventilation found in outdoor settings.</p>
+        
+        <p><strong>Adapting Indoor Models for Outdoor Use</strong></p>
+        <p>While the Henriques et al. model was originally developed for indoor environments, there's no fundamental reason it can't be applied to outdoor transmission with appropriate environmental assumptions. The underlying physics of aerosol dispersion, inhalation, and dose-response relationships remain the same whether you're indoors or outdoors. What changes simply are the environmental conditions (ventilation rates, mixing volumes, and air movement patterns).</p>
+        
+        <p>This approach allows us to maintain scientific consistency across indoor and outdoor scenarios while capturing the key differences that make outdoor transmission typically much safer than indoor exposure.</p>
+        
+        <p><strong>Outdoor Environmental Parameters Used to Calculate Risk</strong></p>
+        
+        <p><strong>Volume: Distance-dependent</strong> - The calculator uses a volume that is based on your answer to "How far away were other people (on average)?" This distance determines a square area around each person (distance × distance). When multiplied by a 2-meter mixing height, this yields the air volume where infectious particles disperse. The 2-meter height represents the breathing zone where person-to-person transmission occurs—roughly the height where people's nose and mouth are located when standing (1.5-1.8m) plus some additional space for initial aerosol dispersion. For example, if people are 6 feet apart, each person occupies a 6×6 foot square of ground space, and the calculator uses the air volume in that square up to 2 meters high. Closer spacing means less air volume for dilution, resulting in higher risk.</p>
+        
+        <p><strong>ACH: 1,600</strong> - <a href="https://en.wikipedia.org/wiki/Air_changes_per_hour" target="_blank" rel="noopener">ACH</a> stands for "Air Changes per Hour," which measures how many times the entire air volume in a space gets replaced each hour. The calculator uses an outdoor ACH of 1,600, which is dramatically higher than typical indoor environments. For comparison, a small office typically has an ACH of around 3 or 4, meaning outdoor air exchange is hundreds of times faster than a typical indoor workspace. The 1,600 figure is based on a 2 mph (0.89 m/s) breeze using the standard formula ACH = 3600 × wind speed ÷ height = 3600 × 0.89 m/s ÷ 2 m ≈ 1,600. (See, for example, p. 71 of <a href="https://ocw.mit.edu/courses/4-401-environmental-technologies-in-buildings-fall-2018/7b3aca8cb1f3a8f93a98efb1da6faa93_MIT4_401F18_lec15.pdf" target="_blank" rel="noopener">these notes</a> for a practical illustration.) A 2 mph wind represents a light breeze that's common outdoors but conservative enough not to over-estimate dilution in typical settings. As you can see for yourself using the above formula, even even modest outdoor breezes create extremely high effective air exchange rates.</p>
+        
+        
+
+        
+        <p><strong>Future Enhancements</strong></p>
+        <p>Eventually I plan to add the ability for users to input specific wind information (speed and direction) to customize the ventilation calculations for particular outdoor conditions.</p>
+        
+        
+
+      </div>
+    </div>
+    
+    <div class="faq-item">
+      <button type="button" class="faq-question" onclick="toggleFaqAnswer(this)">
+        How do activity levels affect transmission risk?
+      </button>
+      <div class="faq-answer">
+        <p>The calculator now separates physical activity from vocalization to provide more accurate estimates. Your physical activity level (sitting, standing, light exercise, moderate exercise, or heavy exercise) determines your breathing rate, which affects how much air you inhale. Other people's physical activity affects how much virus they emit through breathing, while their vocalization level (just breathing, speaking, or loudly speaking) dramatically multiplies virus emission.</p>
+        
+        <p>The effects are significant: heavy exercise increases breathing rate about 6-fold compared to sitting, while loudly speaking can increase virus emission over 100-fold compared to quiet breathing. An infected person doing heavy exercise while speaking loudly emits vastly more virus than someone sitting quietly, creating much higher risk for everyone nearby.</p>
+        
+        <p>Try experimenting with the calculator to see these effects for yourself—compare a quiet library setting (everyone sitting, just breathing) with a loud gym class (heavy exercise, loud speaking) to see how dramatically activity levels affect your risk.</p>
+      </div>
+    </div>
+    
+    <div class="faq-item">
+      <button type="button" class="faq-question" onclick="toggleFaqAnswer(this)">
+        How does vaccination and infection history affect my risk?
+      </button>
+      <div class="faq-answer">
+        <p>The calculator incorporates your vaccination and infection history through a sophisticated <a href="https://en.wikipedia.org/wiki/Dose–response_relationship" target="_blank" rel="noopener">dose-response model</a> that adjusts how susceptible you are to infection based on your immune protection. This protection is integrated into the overall airborne transmission risk assessment described in earlier questions.</p>
+        
+        <p><strong>Recent Infection Protection</strong></p>
+        <p>For those with recent COVID infections (i.e., infections in the past year), the calculator uses data from <a href="https://www.nature.com/articles/s41586-024-08511-9" target="_blank" rel="noopener">Chemaitelly et al. (2025), "Differential protection against SARS-CoV-2 reinfection pre- and post-Omicron," Nature 639, 1024–1031</a>. This is one of the most recent and comprehensive studies of reinfection protection, analyzing data collected from December 2021 through February 2024 when essentially only Omicron variants and sublineages were circulating (including BA.1, BA.2, BA.4/BA.5, BA.2.75, and XBB-derived lineages). The study found that after an Omicron infection, immunity is at its strongest in the months immediately following illness but then steadily wanes over the course of the year—ultimately becoming quite low by 12 months—and that this same general pattern occurs in both vaccinated and unvaccinated individuals, with only modest differences in their starting protection levels.</p>
+        
+        <p>The calculator implements immune protection by raising your infectious dose—the number of viral particles needed to establish infection. If you have strong immune protection, you need to be exposed to more virus to get infected; if you have weak immune protection, less virus is needed. This biological mechanism is integrated into the dose-response calculations that determine your infection probability from the total viral dose you inhale during the exposure.</p>
+        <p>The model distinguishes between two protection patterns:</p>
+        <ul>
+          <li><strong>Infection-only protection (unvaccinated individuals):</strong> Protection decays more slowly over time, reflecting natural immune responses.</li>
+          <li><strong>Infection + vaccination protection (vaccinated individuals):</strong> Initially stronger protection that wanes more rapidly, consistent with hybrid immunity patterns observed in the study.</li>
+        </ul>
+
+        <p><strong>Vaccination-Only Protection</strong></p>
+        <p>For vaccination protection without recent infection, the calculator uses a more complex approach because infection effectiveness data for 2024-25 vaccines has not yet been published. The calculator draws from the following CDC data: <a href="https://www.cdc.gov/acip/downloads/slides-2025-06-25-26/03-MacNeil-COVID-508.pdf" target="_blank" rel="noopener">2024-25 vaccine effectiveness against emergency department and urgent care visits</a> (which shows notably lower effectiveness than previous years), 2023-24 vaccine effectiveness against symptomatic infection from the same source, and <a href="https://www.cdc.gov/acip/downloads/slides-2023-09-12/05-COVID-Link-Gelles-508.pdf" target="_blank" rel="noopener">2022-23 CDC data</a> that specifically breaks down effectiveness by immunocompromised status.</p>
+        
+        <p>The calculator bridges these data sources using the fact that vaccine effectiveness against infection is typically lower than effectiveness against severe outcomes like emergency department visits. This allows the calculator to estimate infection protection from current severe-outcome data while accounting for the fact that 2024-25 vaccine effectiveness appears markedly reduced compared to previous years.</p>
+        
+        <p>The calculator accounts for immunocompromised status in two ways. First, immunocompromised individuals require fewer viral particles to establish infection (lower infectious dose). Second, vaccines provide substantially reduced protection for immunocompromised individuals compared to those with normal immune function. The model applies time-dependent adjustment factors based on historical data showing immunocompromised individuals typically experience both lower initial vaccine effectiveness and faster waning of protection over the months following vaccination.</p>
+        
+        <p>Vaccination protection wanes much more rapidly than infection-based protection these days. While it provides noticeable protection in the first few months, vaccine protection becomes very limited by 6 months and is likely non-existent by 12 months after your most recent dose.</p>
+        
+        <p><strong>Integration with Overall Risk Model</strong></p>
+        <p>This immune protection is integrated into the broader airborne transmission model described in earlier FAQ questions. The calculator first determines your total inhaled viral dose using size-resolved aerosol physics, environmental factors, and exposure duration. It then applies your immune protection level to determine infection probability using dose-response relationships.</p>
+      </div>
+    </div>

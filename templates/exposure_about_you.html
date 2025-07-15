@@ -1,0 +1,137 @@
+{# Partial: About You section for exposure calculator #}
+{{ ctrl.dropdown('masked', 'Were you masked?', [ {'value':'Yes','label':'Yes'}, {'value':'No','label':'No'} ]) }}
+<div id="mask_type_container" style="display: none;">
+  {{ ctrl.dropdown('mask_type', 'What type of mask did you wear?', []) }}
+</div>
+<div id="mask_fit_container" style="display: none;">
+  {{ ctrl.slider('mask_fit_slider', 'How well did your mask fit?', 0, 3, 1,
+      request.form.get('mask_fit_index', '1'), 'four-options',
+      [
+        {'value':'Loose fit','display':'Loose fit'},
+        {'value':'Average fit','display':'Average fit'},
+        {'value':'Pretty snug','display':'Pretty<br>snug'},
+        {'value':'Passes fit test','display':'Passes<br>fit test'}
+      ],
+      'mask_fit_index','mask_fit','mask_fit_display') }}
+</div>
+<div id="fit_factor_container" style="display: none;">
+  <label for="fit_factor_input">Fit Factor <small style="font-weight: 400; color: #64748b;">(optional) (N99 mode only)</small></label>
+  <div class="input-wrapper">
+    <input type="text" id="fit_factor_input" inputmode="decimal" 
+           placeholder="Enter value"
+           value="{{ request.form.get('fit_factor', '') }}">
+    <span class="validation-message">Enter numeric fit factor</span>
+  </div>
+</div>
+{{ ctrl.dropdown('recent_vaccination', 'Have you been vaccinated in the last year?',
+    [ {'value':'Yes','label':'Yes'}, {'value':'No','label':'No'} ]) }}
+{{ ctrl.time_slider('vaccination_time', 'When were you most recently vaccinated?', '6 months ago') }}
+{{ ctrl.dropdown('recent_infection', 'Have you been infected in the last year?',
+    [ {'value':'Yes','label':'Yes'}, {'value':'No','label':'No'} ]) }}
+{{ ctrl.time_slider('infection_time', 'When were you most recently infected?', '6 months ago') }}
+
+<!-- Immunocompromised status questions -->
+<div>
+  <label for="immunocompromised">Do you have any condition or treatment that weakens your immune system? <span style="font-weight: normal;">(optional)</span></label>
+  <div class="select-wrapper">
+    <select name="immunocompromised" id="immunocompromised" class="dropdown-styled">
+      <option value="" {% if not request.form.get('immunocompromised') %}selected{% endif %}></option>
+      <option value="Yes" {% if request.form.get('immunocompromised') == 'Yes' %}selected{% endif %}>Yes</option>
+      <option value="No" {% if request.form.get('immunocompromised') == 'No' %}selected{% endif %}>No</option>
+      <option value="unsure" {% if request.form.get('immunocompromised') == 'unsure' %}selected{% endif %}>I'm not sure</option>
+    </select>
+    <span class="validation-message">Please select an option</span>
+  </div>
+</div>
+
+<!-- Progressive disclosure section for "I'm not sure" -->
+<div id="immunocompromised_progressive_disclosure" style="display: {% if request.form.get('immunocompromised') == 'unsure' and not request.form.get('immunocompromised_reconsider') %}block{% else %}none{% endif %}; margin-top: 15px; padding: 16px; background-color: #f8fafc; border-left: 4px solid var(--primary); border-radius: 8px;">
+  <style>
+    #immunocompromised_progressive_disclosure .select-wrapper::after {
+      right: 12px !important;
+    }
+  </style>
+  <p style="margin: 0 0 12px 0; font-weight: 500; color: #374151;">Here are some common conditions that weaken the immune system. Do any apply to you?</p>
+  <ul style="margin: 8px 0 16px 0; padding-left: 20px; line-height: 1.6; color: #4b5563;">
+    <li>Taking medications like steroids, methotrexate, or other immunosuppressants</li>
+    <li>Cancer treatment (chemotherapy, radiation) or recent transplant</li>
+    <li>HIV, primary immune disorders, or autoimmune conditions</li>
+    <li>Other conditions your doctor said affect your immune system</li>
+  </ul>
+  
+  <div class="select-wrapper" style="width: 100%; position: relative;">
+    <select name="immunocompromised_reconsider" id="immunocompromised_reconsider" class="dropdown-styled" style="width: 100%">
+      <option value="" {% if not request.form.get('immunocompromised_reconsider') %}selected{% endif %}></option>
+      <option value="Yes" {% if request.form.get('immunocompromised_reconsider') == 'Yes' %}selected{% endif %}>Yes</option>
+      <option value="No" {% if request.form.get('immunocompromised_reconsider') == 'No' %}selected{% endif %}>No</option>
+      <option value="still_unsure" {% if request.form.get('immunocompromised_reconsider') == 'still_unsure' %}selected{% endif %}>I'm still not sure</option>
+    </select>
+    <span class="validation-message">Please select an option</span>
+  </div>
+</div>
+
+<div id="immunocompromised_severity_container" style="display: {% if request.form.get('immunocompromised') == 'Yes' %}block{% else %}none{% endif %}; margin-top: 10px;">
+  <label for="immunocompromised_severity">Which of the following best describes your situation?</label>
+  <div class="select-wrapper">
+    <select name="immunocompromised_severity" id="immunocompromised_severity" class="dropdown-styled">
+      <option value="" {% if not request.form.get('immunocompromised_severity') %}selected{% endif %}></option>
+      <option value="moderate" {% if request.form.get('immunocompromised_severity') == 'moderate' %}selected{% endif %}>Moderate immune weakening</option>
+      <option value="severe" {% if request.form.get('immunocompromised_severity') == 'severe' %}selected{% endif %}>Severe immune weakening</option>
+      <option value="unsure" {% if request.form.get('immunocompromised_severity') == 'unsure' %}selected{% endif %}>I'm not sure</option>
+    </select>
+    <span class="validation-message">Please select an option</span>
+  </div>
+  
+  <!-- Info buttons for moderate and severe -->
+  <div style="margin-top: 10px; display: flex; gap: 10px;">
+    <button type="button" class="info-toggle-btn secondary-btn" data-info-id="moderate_info" 
+            style="font-size: 0.9em; padding: 6px 12px;">
+      <i class="fas fa-info-circle"></i> What is "moderate"?
+    </button>
+    <button type="button" class="info-toggle-btn secondary-btn" data-info-id="severe_info"
+            style="font-size: 0.9em; padding: 6px 12px;">
+      <i class="fas fa-info-circle"></i> What is "severe"?
+    </button>
+  </div>
+  
+  <!-- Info boxes for moderate and severe definitions -->
+  {{ ctrl.info_box('moderate_info', 
+    '<strong>Examples of moderate immune weakening:</strong>
+    <ul style="margin: 8px 0; padding-left: 20px; line-height: 1.6;">
+      <li>You take low-dose steroids (for example, &lt; 20 mg of prednisone per day) for a chronic condition (e.g. asthma, mild rheumatoid arthritis)</li>
+      <li>You take a single immune-modulating medicine such as methotrexate or azathioprine</li>
+      <li>You have HIV with a CD4 count currently between 200–500 cells/μL (you can check your last blood test)</li>
+      <li>You have a solid-organ transplant (kidney, liver, heart, etc.) and it\'s been more than one year since your transplant; you take two anti-rejection drugs but feel stable</li>
+      <li>You have a moderate primary immune defect (e.g. common variable immunodeficiency on intermittent immunoglobulin infusions)</li>
+    </ul>') }}
+    
+  {{ ctrl.info_box('severe_info',
+    '<strong>Examples of severe immune weakening:</strong>
+    <ul style="margin: 8px 0; padding-left: 20px; line-height: 1.6;">
+      <li>You take B-cell–depleting therapy such as rituximab, ocrelizumab, or CAR-T therapy</li>
+      <li>You\'re within one year of a solid-organ transplant or bone-marrow/HSCT (stem-cell transplant)</li>
+      <li>You\'re actively receiving chemotherapy or high-dose radiation for cancer</li>
+      <li>You have HIV with a CD4 count below 200 cells/μL (or you have AIDS-defining conditions)</li>
+      <li>You have a primary combined immunodeficiency (for example, severe congenital immunodeficiency)</li>
+    </ul>') }}
+</div>
+
+<!-- Immunocompromised FAQ snippet -->
+<div id="immunocompromised_faq_snippet" style="display: {% if request.form.get('immunocompromised') == 'Yes' %}block{% else %}none{% endif %}; margin-top: 15px; padding: 15px; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 8px; border-left: 4px solid #f59e0b;">
+  <div style="display: flex; align-items: flex-start; gap: 10px;">
+    <i class="fas fa-info-circle" style="color: #d97706; margin-top: 2px; flex-shrink: 0;"></i>
+    <div>
+      <h4 style="margin: 0 0 8px 0; color: #92400e; font-size: 1rem;">Why does this matter for your risk?</h4>
+      <p style="margin: 0 0 10px 0; font-size: 0.9rem; color: #78350f; line-height: 1.5;">
+        The calculator recognizes that immunocompromised individuals face substantially higher infection risk because they can become infected with fewer viral particles than healthy adults. Based on clinical studies, the calculator uses:
+      </p>
+      <ul style="margin: 0 0 10px 0; padding-left: 20px; color: #78350f; font-size: 0.9rem;">
+        <li><strong>Moderately immunocompromised:</strong> ~8× higher susceptibility</li>
+        <li><strong>Severely immunocompromised:</strong> ~20× higher susceptibility</li>
+      </ul>
+      <a href="{{ url_for('faq') }}#faq-container" style="color: #d97706; text-decoration: none; font-weight: 500; font-size: 0.9rem;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
+        <i class="fas fa-external-link-alt" style="margin-right: 4px;"></i>Learn more about the scientific evidence
+      </a>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,830 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  {% include 'base_analytics.html' %}
+  <!-- Favicon -->
+  <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml">
+  <link rel="icon" href="{{ url_for('static', filename='favicon-32x32.png') }}" type="image/png">
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
+  <title>Covid Exposure Risk Calculator</title>
+  <script>
+    // Set environment flag for JavaScript
+    window.DEBUG = {{ 'true' if DEBUG else 'false' }};
+    window.IS_DEVELOPMENT = {{ 'true' if is_development else 'false' }};
+    
+    {% if is_development %}
+    console.log('=== TEMPLATE TEST - THIS SHOULD ALWAYS APPEAR ===');
+    {% if result %}
+    console.log('=== TEMPLATE TEST - RESULT EXISTS ===', {{ result.risk }});
+    {% else %}
+    console.log('=== TEMPLATE TEST - NO RESULT ===');
+    {% endif %}
+    {% endif %}
+  </script>
+  <script src="/static/data.js"></script>
+  <script type="module" src="/static/exposure-calculator.js"></script>
+  <script src="/static/js/slider-labels.js"></script>
+  <script src="/static/js/utils/riskColorScale.js"></script>
+  <script src="/static/js/calculations/repeatedExposureRisk.js"></script>
+  <!-- Chart.js for risk distribution visualization -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.js"></script>
+  <!-- Risk distribution visualization module -->
+  <script src="/static/js/uncertainty/riskDistribution.js"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='fontawesome/css/all.min.css') }}" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <!-- Global styles -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='exposure-calculator.css') }}">
+  <!-- Risk distribution visualization styles -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/risk-distribution.css') }}">
+</head>
+<body data-page-type="exposure-calculator">
+{% import 'macros/exposure_controls.html' as ctrl %}
+  <nav>
+    <a href="{{ url_for('index') }}"><i class="fas fa-home"></i> Home</a>
+    <a href="{{ url_for('faq') }}"><i class="fas fa-book"></i> FAQ</a>
+    <a href="https://ko-fi.com/yourcovidrisk" target="_blank" rel="noopener"><i class="fas fa-heart"></i> Donate</a>
+  </nav>
+
+  <div class="container">
+    <div class="form-container">
+      <!-- Updated main heading with modern styling -->
+      <h1 style="text-align: center; margin: 1.5rem 0 2.5rem; font-size: 2.4rem; font-weight: 700; color: #111827; letter-spacing: -0.03em;">
+        <i class="fas fa-shield-virus" style="color: var(--primary); margin-right: 12px;"></i>
+        Covid Exposure Risk Calculator
+      </h1>
+      
+      <!-- Hero section -->
+      {% include 'exposure_hero.html' %}
+
+      <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.75rem 1.5rem; margin: 1.5rem auto; max-width: 600px; text-align: center; font-size: 0.9rem; color: #64748b;">
+        <a href="https://ko-fi.com/yourcovidrisk" target="_blank" rel="noopener" style="color: #4f46e5; text-decoration: none; font-weight: 500;">Donate to support this project →</a>
+      </div>
+    
+    <!-- ------------------------------------------------------------ -->
+    <!-- Main form starts here                                         -->
+    <!-- ------------------------------------------------------------ -->
+    <script src="{{ url_for('static', filename='js/exposure-utils.js') }}"></script>
+    <form id="exposureForm" method="post" action="{{ url_for('exposure_calculator') }}" onsubmit="submitFormAsync(event); return false;" novalidate>
+      <!-- Include hidden fit_factor field and advanced flag -->
+      <input type="hidden" name="fit_factor" id="fit_factor_hidden" value="{{ request.form.get('fit_factor', '') }}">
+      <input type="hidden" name="advanced" id="advanced" value="{{ request.form.get('advanced', '') }}">
+      <!-- Grid of cards -->
+      <div class="two-column-grid">
+        {% call ctrl.card('About You', 'fa-user-circle') %}
+          {% include 'exposure_about_you.html' %}
+        {% endcall %}
+        {% call ctrl.card('Other People', 'fa-users') %}
+          {% include 'exposure_other_people.html' %}
+        {% endcall %}
+        {% call ctrl.card('Activity During Exposure', 'fa-running') %}
+          {% include 'exposure_activity_levels.html' %}
+        {% endcall %}
+        {% call ctrl.card('Environment', 'fa-map-marker-alt') %}
+          {% include 'exposure_environment.html' %}
+        {% endcall %}
+      </div>
+      
+      <!-- Preserve hidden input from previous markup -->
+      <input type="hidden" id="vaccination_time_display" name="vaccination_time_display" value="{{ request.form.get('vaccination_time', '6 months ago') }}">
+      <input type="hidden" name="x_meters" id="x_meters" value="">
+      <!-- Hidden and predefined inputs -->
+      <input type="hidden" name="C0" id="C0" value="0.065">
+      <input type="hidden" name="p" id="p" value="0.08">
+      <!-- Added hidden inputs -->
+      <input type="hidden" name="f_i" id="f_i" value="1">
+      <input type="hidden" name="f_e" id="f_e" value="1">
+      <input type="hidden" name="omicron" id="omicron" value="3.3">
+      <!-- Immune susceptibility is now calculated automatically based on vaccination and infection history -->
+      <input type="hidden" name="immune" id="immune" value="1">
+      <input type="hidden" name="Q0" id="Q0" value="0.08">
+      
+      {# Duration is now in Other People partial #}
+      <input type="hidden" name="gamma" id="gamma" value="0.7">
+      <!-- Omicron multiplier is now hidden with a default value -->
+      <!-- Needed so the reset code does not throw an error -->
+      <input type="hidden" id="activity_choice" name="activity_choice" value="2">
+
+      <div style="display: flex; justify-content: flex-start; align-items: center; gap: 10px; margin-top: 15px;">
+        <button type="button" class="secondary-btn" id="toggleAdvancedBtn">Advanced</button>
+        <button type="reset" class="secondary-btn">Clear</button>
+      </div>
+
+      <div id="advancedFields" style="display: {% if request.form.get('advanced', '') == 'true' %}block{% else %}none{% endif %}; margin-top: 10px; margin-left: 30px;">
+        <div style="margin-bottom: 15px; padding: 10px; background-color: #f8f9fa; border-radius: 5px; border-left: 4px solid #00509e;">
+          <p style="margin: 0; font-size: 0.9em; color: #555;">
+            Values entered here will override those from your environment selection. Leave fields empty to use typical values from your selected environment.
+          </p>
+        </div>
+        <!-- Relative Humidity override (percent) -->
+        <div class="advanced-field-row">
+          <label for="relative_humidity" class="advanced-label">Relative Humidity (%) <span style="font-size: 0.9em; color: #777;">(optional)</span></label>
+          <input type="text" name="relative_humidity" id="relative_humidity" value="{{ request.form.get('relative_humidity', '') }}" class="advanced-input">
+        </div>
+        <!-- Temperature override (optional, °C or °F) -->
+        <div class="advanced-field-row">
+          <label for="temperature" class="advanced-label">Temperature <span style="font-size: 0.9em; color: #777;">(optional)</span></label>
+          <div class="advanced-input-group">
+            <input type="text" name="temperature" id="temperature" value="{{ request.form.get('temperature', '') }}" class="advanced-input">
+            <div class="select-wrapper">
+              <select name="temperature_unit" id="temperature_unit" class="unit-select">
+                <option value="C" {% if request.form.get('temperature_unit', 'C') == 'C' %}selected{% endif %}>°C</option>
+                <option value="F" {% if request.form.get('temperature_unit') == 'F' %}selected{% endif %}>°F</option>
+              </select>
+              <span class="validation-message">Please select a unit</span>
+            </div>
+          </div>
+        </div>
+        <!-- CO₂ concentration override (ppm) -->
+        <div class="advanced-field-row">
+          <label for="co2" class="advanced-label">CO₂ (ppm) <span style="font-size: 0.9em; color: #777;">(optional)</span></label>
+          <div class="advanced-input-wrapper">
+            <input type="text" name="co2" id="co2" value="{{ request.form.get('co2', '') }}" class="advanced-input">
+            <small style="color: #555; display: block; margin-top: 5px;">
+              This CO₂ value is only used for modeling viral infectivity decay, not for estimating ACH.
+            </small>
+          </div>
+        </div>
+        <div class="advanced-field-row">
+          <label for="custom_ACH" class="advanced-label">ACH (Air Changes per Hour) <span style="font-size: 0.9em; color: #777;">(optional)</span></label>
+          <input type="text" name="custom_ACH" id="custom_ACH" value="{{ request.form.get('custom_ACH', '') }}" class="advanced-input">
+        </div>
+        <div class="advanced-field-row">
+          <label for="room_volume" class="advanced-label">Room volume (m³) <span style="font-size: 0.9em; color: #777;">(optional)</span></label>
+          <input type="text" name="room_volume" id="room_volume" value="{{ request.form.get('room_volume', '') }}" class="advanced-input">
+        </div>
+        <div class="advanced-field-row">
+          <label for="covid_prevalence" class="advanced-label">Covid prevalence (%) <span style="font-size: 0.9em; color: #777;">(optional)</span></label>
+          <div class="advanced-input-wrapper">
+            <input type="text" name="covid_prevalence" id="covid_prevalence" value="{{ request.form.get('covid_prevalence', '') }}" class="advanced-input">
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: 30px; display: flex; justify-content: center;">
+        <button type="submit" class="primary-btn" onclick="analytics.trackButtonClick('calculate_exposure_risk', 'submit')" style="padding: 12px 24px; font-size: 1.1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">Calculate Probability of Infection <i class="fas fa-calculator"></i></button>
+      </div>
+      
+      <!-- Rate limit and calculation error messages (displayed below the button) -->
+      <div id="calculationErrorMessage" style="display: none; margin-top: 1rem; text-align: center;"></div>
+    </form>
+
+    </div>
+  </div>
+
+  <!-- Define uncertainty function globally, outside of result block -->
+  <script>
+  // Global uncertainty function - works with or without results
+  window.toggleUncertainty = function() {
+          console.log('🎯 toggleUncertainty called');
+          
+          const button = document.getElementById('uncertaintyToggleBtn');
+          const container = document.getElementById('uncertaintyAnalysisContainer');
+          const dataScript = document.getElementById('riskDistributionData');
+          
+          console.log('🔍 Elements found:', {
+              button: !!button,
+              container: !!container,
+              dataScript: !!dataScript
+          });
+          
+          if (!container) {
+              console.error('❌ Uncertainty container not found');
+              alert('Uncertainty container not found');
+              return;
+          }
+          
+          if (!button) {
+              console.error('❌ Uncertainty button not found');
+              return;
+          }
+          
+          if (container.style.display === 'none' || container.style.display === '') {
+              // Show
+              container.style.display = 'block';
+              button.innerHTML = '<i class="fas fa-eye-slash"></i> Hide uncertainty analysis';
+              button.setAttribute('aria-expanded', 'true');
+              
+              // Add content if not already loaded
+              if (!container.hasAttribute('data-loaded') && dataScript) {
+                  try {
+                      const data = JSON.parse(dataScript.textContent);
+                      console.log('📊 Parsed uncertainty data:', data);
+                      
+                      // Create comprehensive visualization container
+                      const visualizationHTML = 
+                          '<div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb;">' +
+                          '<h4 style="margin-top: 0; color: #374151;"><i class="fas fa-chart-bar" style="color: #4f46e5; margin-right: 8px;"></i>Risk Distribution Analysis</h4>' +
+                          '<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin: 15px 0; padding: 15px; background: #f9fafb; border-radius: 6px;">' +
+                          '<div style="text-align: center;"><div style="font-size: 0.85rem; color: #6b7280; margin-bottom: 4px;">Mean Risk</div><div style="font-size: 1.1rem; font-weight: 700; color: #374151;">' + (data.statistics.mean * 100).toFixed(2) + '%</div></div>' +
+                          '<div style="text-align: center;"><div style="font-size: 0.85rem; color: #6b7280; margin-bottom: 4px;">Median Risk</div><div style="font-size: 1.1rem; font-weight: 700; color: #374151;">' + (data.statistics.median * 100).toFixed(2) + '%</div></div>' +
+                          '<div style="text-align: center;"><div style="font-size: 0.85rem; color: #6b7280; margin-bottom: 4px;">Typical Range</div><div style="font-size: 1.1rem; font-weight: 700; color: #374151;">' + data.interpretation.typical_range + '</div></div>' +
+                          '</div>';
+                      
+                      // Add Chart.js visualization if available
+                      if (typeof Chart !== 'undefined' && data.histogram) {
+                          visualizationHTML += 
+                              '<div style="position: relative; height: 300px; margin: 20px 0;">' +
+                              '<canvas id="uncertaintyChart"></canvas>' +
+                              '</div>';
+                      }
+                      
+                      visualizationHTML += 
+                          '<p style="margin: 15px 0; color: #4b5563;"><strong>What this shows:</strong> ' + data.interpretation.summary + '</p>' +
+                          '<p style="margin: 0; font-size: 0.9rem; color: #6b7280; font-style: italic; background: #f8fafc; padding: 12px; border-radius: 6px;">This analysis represents ' + (data.statistics.simulation_count || 'thousands of') + ' Monte Carlo simulations accounting for biological variability and epidemiological uncertainty.</p>' +
+                          '</div>';
+                      
+                      container.innerHTML = visualizationHTML;
+                      
+                      // Create Chart.js visualization if available
+                      if (typeof Chart !== 'undefined' && data.histogram) {
+                          setTimeout(() => {
+                              createUncertaintyChart(data);
+                          }, 100);
+                      }
+                      
+                      container.setAttribute('data-loaded', 'true');
+                  } catch (e) {
+                      console.error('❌ Error parsing uncertainty data:', e);
+                      container.innerHTML = '<div style="color: #dc2626; padding: 20px;">Error loading uncertainty data: ' + e.message + '</div>';
+                  }
+              } else if (!container.hasAttribute('data-loaded')) {
+                  // No data available - show fallback message
+                  console.log('ℹ️ No uncertainty data available, showing fallback');
+                  container.innerHTML = 
+                      '<div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb;">' +
+                      '<h4 style="margin-top: 0; color: #374151;"><i class="fas fa-info-circle" style="color: #4f46e5; margin-right: 8px;"></i>Understanding Uncertainty</h4>' +
+                      '<p>No detailed uncertainty data is available for this calculation. This could be because:</p>' +
+                      '<ul style="margin: 1rem 0; padding-left: 2rem; line-height: 1.6;">' +
+                      '<li>The calculation is still being processed</li>' +
+                      '<li>Uncertainty analysis is not enabled for this scenario</li>' +
+                      '<li>You need to recalculate with updated settings</li>' +
+                      '</ul>' +
+                      '<p style="margin-bottom: 0; font-style: italic; color: #6b7280;">Try submitting a new calculation to see detailed uncertainty analysis.</p>' +
+                      '</div>';
+                  container.setAttribute('data-loaded', 'true');
+              }
+          } else {
+              // Hide
+              container.style.display = 'none';
+              button.innerHTML = '<i class="fas fa-chart-bar"></i> How certain is this result?';
+              button.setAttribute('aria-expanded', 'false');
+          }
+      };
+      
+      // Chart creation function
+      function createUncertaintyChart(data) {
+          const canvas = document.getElementById('uncertaintyChart');
+          if (!canvas) {
+              console.error('❌ Chart canvas not found');
+              return;
+          }
+          
+          const ctx = canvas.getContext('2d');
+          const { histogram, statistics } = data;
+          const { counts, edges } = histogram;
+          
+          // Prepare chart data
+          const labels = [];
+          const backgroundColors = [];
+          
+          for (let i = 0; i < counts.length; i++) {
+              const binMidpoint = (edges[i] + edges[i + 1]) / 2;
+              labels.push((binMidpoint * 100).toFixed(1));
+              
+              // Color based on percentiles
+              if (binMidpoint < statistics.p25) {
+                  backgroundColors.push('rgba(16, 185, 129, 0.7)'); // Green
+              } else if (binMidpoint < statistics.p75) {
+                  backgroundColors.push('rgba(96, 165, 250, 0.7)'); // Blue
+              } else {
+                  backgroundColors.push('rgba(239, 68, 68, 0.7)'); // Red
+              }
+          }
+          
+          // Create chart
+          new Chart(ctx, {
+              type: 'bar',
+              data: {
+                  labels: labels,
+                  datasets: [{
+                      label: 'Number of Scenarios',
+                      data: counts,
+                      backgroundColor: backgroundColors,
+                      borderColor: '#4f46e5',
+                      borderWidth: 1,
+                      borderRadius: 2
+                  }]
+              },
+              options: {
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                      title: {
+                          display: true,
+                          text: `Risk Distribution (${statistics.simulation_count || 'N'} simulations)`,
+                          font: { size: 14, weight: 'bold' },
+                          color: '#374151'
+                      },
+                      legend: { display: false },
+                      tooltip: {
+                          callbacks: {
+                              label: (context) => {
+                                  const scenarios = context.parsed.y;
+                                  const total = counts.reduce((a,b) => a+b, 0);
+                                  const percentage = ((scenarios / total) * 100).toFixed(1);
+                                  return `${scenarios} scenarios (${percentage}%)`;
+                              },
+                              title: (context) => `Risk: ${context[0].label}%`
+                          }
+                      }
+                  },
+                  scales: {
+                      x: {
+                          title: { 
+                              display: true, 
+                              text: 'Infection Risk (%)', 
+                              font: { weight: 'bold' }, 
+                              color: '#374151' 
+                          },
+                          grid: { display: false }
+                      },
+                      y: {
+                          title: { 
+                              display: true, 
+                              text: 'Number of Scenarios', 
+                              font: { weight: 'bold' }, 
+                              color: '#374151' 
+                          },
+                          grid: { color: 'rgba(0, 0, 0, 0.1)' },
+                          beginAtZero: true
+                      }
+                  }
+              }
+          });
+          
+          console.log('✅ Uncertainty chart created successfully');
+      }
+      
+      // Debug function availability immediately
+      console.log('🔧 Debug: window.toggleUncertainty defined:', typeof window.toggleUncertainty);
+      
+      // Global fallback function for uncertainty toggle
+      window.handleUncertaintyToggle = function(button) {
+          console.log('🎯 Global handleUncertaintyToggle called');
+          alert('Global uncertainty function called - checking if uncertainty component loaded properly');
+      };
+  </script>
+
+  <div class="container" id="result" style="{% if not result %}display: none;{% endif %}">
+    <div class="result-container">
+      {% if result %}
+      <script>console.log('✅ RESULT BLOCK IS RENDERING - Risk:', {{ result.risk }});</script>
+      <!-- Risk calculation methods section hidden but code preserved for future use -->
+      <!-- Comparison panel hidden by default; toggle by removing display:none -->
+      <div id="allRisks" style="display:none; margin-bottom: 15px; font-family: 'Poppins', sans-serif; font-size: 14px; background-color: #f9fafc; border-radius: 8px; padding: 12px; border-left: 3px solid var(--primary);">
+        <div style="font-weight: 600; color: #334155; margin-bottom: 8px;">Risk Calculation Methods:</div>
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <div>
+            Current MC method (multiplier): <span style="font-weight: 600; color: #334155; margin-left: 5px;">{{ result.mc_mean_old | percent }}</span>
+          </div>
+          <div>
+            New PF method (raised ID<sub>50</sub>): <span style="font-weight: 600; color: #334155; margin-left: 5px;">{{ result.mc_mean_pf | percent }}</span>
+          </div>
+          <div style="font-size: 13px; color:#475569; margin-left:10px;">
+            51% CrI: {{ result.mc_pf_ci_25 | percent }} – {{ result.mc_pf_ci_75 | percent }}<br>
+            99% CrI: {{ result.mc_pf_ci_0_5 | percent }} – {{ result.mc_pf_ci_99_5 | percent }}
+          </div>
+          <div>
+            Current MC method (multiplier): <span style="font-weight: 600; color: #334155; margin-left: 5px;">{{ result.mc_mean_old | percent }}</span>
+          </div>
+          <div style="font-size: 13px; color:#475569; margin-left:10px;">
+            51% CrI: {{ result.mc_old_ci_25 | percent }} – {{ result.mc_old_ci_75 | percent }}<br>
+            99% CrI: {{ result.mc_old_ci_0_5 | percent }} – {{ result.mc_old_ci_99_5 | percent }}
+          </div>
+        </div>
+      </div>
+        <script>
+          // Set the risk color with our utility function
+          var riskColor = getRiskColor({{ result.risk }});
+        </script>
+        <h2 id="riskMessage">The probability you were infected with Covid is: <span style="color: #334155;">
+          {{ result.risk | percent }}
+        </span></h2>
+        
+        {# 
+        {% if result.recalculated_immune_val %}
+        <p style="margin-top: 10px; font-size: 14px; color: #6c757d;">
+          <em>Immune susceptibility used in calculation: {{ "%.4f" | format(result.recalculated_immune_val) }}</em>
+        </p>
+        {% endif %}
+        #}
+        
+        {# 
+        {% if result.immunity_comparison %}
+        <div style="margin-top: 15px; padding: 15px; background-color: #f8f9fa; border-radius: 8px; border-left: 4px solid #007bff;">
+          <h4 style="margin: 0 0 10px 0; color: #495057;">Immunity Model Comparison</h4>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 10px;">
+            <div>
+              <strong>New Model (Chemaitelly 2025):</strong><br>
+              • Risk: {{ result.risk | percent }}<br>
+              • immune_val: {{ "%.4f" | format(result.immunity_comparison.new_immune_val) }}
+            </div>
+            <div>
+              <strong>Old Model (Legacy):</strong><br>
+              • Risk: {{ result.risk_with_old_immune_val | percent }}<br>
+              • immune_val: {{ "%.4f" | format(result.immunity_comparison.old_immune_val) }}
+            </div>
+          </div>
+          
+          {% if result.immunity_comparison.model_used == "chemaitelly" %}
+          <p style="margin: 5px 0; font-size: 13px; color: #28a745;">
+            ✓ <strong>Chemaitelly model active</strong> (recent infection detected)
+          </p>
+          {% else %}
+          <p style="margin: 5px 0; font-size: 13px; color: #6c757d;">
+            → Legacy model used (vaccination-only or no recent immunity)
+          </p>
+          {% endif %}
+          
+          {% if result.immunity_comparison.new_immune_val != result.immunity_comparison.old_immune_val %}
+          <p style="margin: 5px 0; font-size: 13px; color: #495057;">
+            <em>Risk difference: {{ ((result.risk - result.risk_with_old_immune_val) * 100) | round(3) }}pp</em>
+          </p>
+          {% endif %}
+        </div>
+        {% endif %}
+        #}
+        <script>
+          {% if is_development %}
+          console.log('=== RESULT PAGE SCRIPT RUNS - Risk:', {{ result.risk }});
+          {% endif %}
+          // Apply the risk color after the page loads
+          document.addEventListener('DOMContentLoaded', function() {
+            const riskElement = document.querySelector('#riskMessage span');
+            if (riskElement) {
+              riskElement.style.color = getRiskColor({{ result.risk }});
+            }
+            
+            // Track calculator result
+            if (typeof analytics !== 'undefined') {
+              const riskValue = {{ result.risk }};
+              let riskLevel = 'low';
+              if (riskValue > 0.1) riskLevel = 'high';
+              else if (riskValue > 0.01) riskLevel = 'medium';
+              
+              analytics.trackCalculatorResult('exposure', {
+                resultValue: riskValue,
+                riskLevel: riskLevel
+              });
+            }
+            
+            // Show distance warning if distance is very close (0.5 ft or 1 ft)
+            {% if result.inputs.x %}
+            const distanceInFeet = {{ result.inputs.x }};
+            const distanceWarning = document.getElementById('distanceWarning');
+            if (distanceWarning && (distanceInFeet <= 1)) {
+              distanceWarning.style.display = 'block';
+            }
+            {% endif %}
+          });
+        </script>
+        
+        <!-- Distance Warning for Very Close Proximity -->
+        <div id="distanceWarning" style="display: none; margin-top: 15px; padding: 15px; background-color: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 6px;">
+          <div style="display: flex; align-items: center; margin-bottom: 8px;">
+            <i class="fas fa-exclamation-triangle" style="color: #f59e0b; margin-right: 8px; font-size: 18px;"></i>
+            <strong style="color: #92400e; font-size: 16px;">Model Limitation Alert</strong>
+          </div>
+          <p style="margin: 0; color: #92400e; line-height: 1.5;">
+            At distances less than 1.5 feet, this calculator likely underestimates infection risk. 
+            See the <a href="{{ url_for('faq') }}#distance-limitations" style="color: #92400e; text-decoration: underline;">FAQ</a> for more info.
+          </p>
+        </div>
+        
+        <!-- Uncertainty Analysis Component - HIDDEN FOR NOW -->
+        <!-- TODO: Fix AJAX compatibility issues before re-enabling -->
+        {#
+        <script>console.log('🔍 About to include uncertainty analysis component');</script>
+        {% include 'components/uncertainty_analysis.html' %}
+        <script>console.log('✅ Uncertainty analysis component included');</script>
+        #}
+        
+        {% if result.risk < 1.0 %}
+        <div id="repeatedExposureContainer" style="margin-top: 15px;">
+          <!-- Static message about exposures needed for >50% risk -->
+          {# Only show repeated-exposure message for reasonably nonzero risks <50% #}
+          {% if result.risk >= 0.0001 and result.risk < 0.5 %}
+          <div id="repeatedExposureMessage" style="font-size: 16px; font-style: italic; color: #666; margin-bottom: 15px;">
+            If you had this same kind of exposure every day for the next <strong><span id="repeatNumber">...</span></strong> days, you would likely get infected.
+          </div>
+          <script>
+            // This will be handled by the main interactive calculator script below
+            // to avoid conflicts between multiple API calls
+          </script>
+          {% endif %}
+          
+          <!-- Interactive calculator will be inserted here by JS -->
+          <div id="interactiveCalculatorContainer" 
+               data-prevalence="{{ result.inputs.covid_prevalence if result else '' }}"
+               data-ach="{{ result.ACH if result else '' }}"
+               data-room-volume="{{ result.room_volume if result else '' }}"
+               data-advanced-enabled="{{ 'true' if request.form.get('advanced') == 'true' else 'false' }}"></div>
+          
+          <!-- Store complete calculation params in a script tag for safer JSON handling -->
+          <script type="application/json" id="calculationParams">{
+            {% if result %}
+            "C0": "{{ result.inputs.C0 if result else '' }}",
+            "Q0": "{{ result.inputs.Q0 if result else '' }}",
+            "p": "{{ result.inputs.p if result else '' }}",
+            "ACH": "{{ result.ACH if result else '' }}",
+            "room_volume": "{{ result.room_volume if result else '' }}",
+            "delta_t": "{{ result.inputs.delta_t if result else '' }}",
+            "x": "{{ result.inputs.x if result else '' }}",
+            "gamma": "{{ result.inputs.gamma if result else '' }}",
+            "f_e": "{{ result.inputs.f_e if result else '' }}",
+            "f_i": "{{ result.inputs.f_i if result else '' }}",
+            "omicron": "{{ result.inputs.omicron if result else '' }}",
+            "immune": "{{ result.inputs.immune if result else '' }}",
+            "N": "{{ result.inputs.N if result else '' }}",
+            "percentage_masked": "{{ result.inputs.percentage_masked if result else '' }}",
+            "user_physical_activity": "{{ request.form.get('user_physical_activity', 'standing') }}",
+            "others_physical_activity": "{{ request.form.get('others_physical_activity', 'standing') }}",
+            "others_vocal_activity": "{{ request.form.get('others_vocal_activity', 'speaking') }}",
+            "covid_prevalence": "{{ request.form.get('covid_prevalence', '') }}",
+            {% set rh_value = request.form.get('relative_humidity', '40') %}
+            "RH": {{ (rh_value|float / 100) if rh_value and request.form.get('advanced') == 'true' else 0.40 }},
+            {% set co2_value = request.form.get('co2', '800') %}
+            "CO2": {{ co2_value|float if co2_value and request.form.get('advanced') == 'true' else 800.0 }},
+            {% set temp_value = request.form.get('temperature', '20') %}
+            {% set temp_unit = request.form.get('temperature_unit', 'C') %}
+            {% if temp_value and request.form.get('advanced') == 'true' %}
+              {% if temp_unit == 'F' %}
+            "inside_temp": {{ ((temp_value|float - 32) * 5/9 + 273.15) }},
+              {% else %}
+            "inside_temp": {{ (temp_value|float + 273.15) }},
+              {% endif %}
+            {% else %}
+            "inside_temp": 293.15,
+            {% endif %}
+            "immunocompromised_status": "{{ 'severe' if request.form.get('immunocompromised_severity') == 'severe' else ('moderate' if request.form.get('immunocompromised_severity') == 'moderate' else 'normal') }}",
+            "recent_vaccination": "{{ request.form.get('recent_vaccination', 'No') }}",
+            "vaccination_time": "{{ request.form.get('vaccination_time', '') }}",
+            "recent_infection": "{{ request.form.get('recent_infection', 'No') }}",
+            "infection_time": "{{ request.form.get('infection_time', '') }}"
+            {% endif %}
+          }</script>
+          
+          <!-- Initialize the interactive calculator -->
+          <script>
+            document.addEventListener('DOMContentLoaded', function() {
+              console.log('=== THRESHOLD SCRIPT STARTING ===');
+              {% if result %}
+              console.log('Risk value:', {{ result.risk }});
+              {% else %}
+              console.log('No result object available');
+              return; // Exit early if no result
+              {% endif %}
+              
+              // Initialize the interactive calculator
+              const riskValue = {{ result.risk }};
+              // Use the actual prevalence from the calculation result
+              const prevalence = {{ result.inputs.covid_prevalence }};
+              console.log('Using actual prevalence from calculation:', prevalence);
+              
+              // Get region from exposure location
+              const exposureLocation = '{{ exposure_location | default("") }}';
+              let region = 'National';
+              if (exposureLocation) {
+                // Map state to region using REGION_MAP logic from backend
+                const stateRegionMap = {
+                  // Add key states for each region
+                  'IL': 'Midwest', 'IN': 'Midwest', 'IA': 'Midwest', 'KS': 'Midwest', 'MI': 'Midwest', 
+                  'MN': 'Midwest', 'MO': 'Midwest', 'NE': 'Midwest', 'ND': 'Midwest', 'OH': 'Midwest', 
+                  'SD': 'Midwest', 'WI': 'Midwest',
+                  'CT': 'Northeast', 'ME': 'Northeast', 'MA': 'Northeast', 'NH': 'Northeast', 'NJ': 'Northeast', 
+                  'NY': 'Northeast', 'PA': 'Northeast', 'RI': 'Northeast', 'VT': 'Northeast',
+                  'AL': 'South', 'AR': 'South', 'DE': 'South', 'FL': 'South', 'GA': 'South', 'KY': 'South', 
+                  'LA': 'South', 'MD': 'South', 'MS': 'South', 'NC': 'South', 'OK': 'South', 'SC': 'South', 
+                  'TN': 'South', 'TX': 'South', 'VA': 'South', 'WV': 'South',
+                  'AK': 'West', 'AZ': 'West', 'CA': 'West', 'CO': 'West', 'HI': 'West', 'ID': 'West', 
+                  'MT': 'West', 'NV': 'West', 'NM': 'West', 'OR': 'West', 'UT': 'West', 'WA': 'West', 'WY': 'West'
+                };
+                region = stateRegionMap[exposureLocation.toUpperCase()] || 'National';
+              }
+              
+              // Create calculation parameters object with vaccination/infection data from current form state
+              const calculationParams = {
+                recent_vaccination: document.querySelector('select[name="recent_vaccination"]')?.value || 'No',
+                vaccination_time: document.querySelector('input[name="vaccination_time"]')?.value || '',
+                recent_infection: document.querySelector('select[name="recent_infection"]')?.value || 'No',
+                infection_time: document.querySelector('input[name="infection_time"]')?.value || ''
+              };
+              
+              console.log('🔧 DEBUG: Frontend calculationParams from form state:', calculationParams);
+              
+              initRepeatedExposureCalculator(riskValue, 'interactiveCalculatorContainer', prevalence, region, calculationParams);
+              
+              // Update the threshold message using time-varying API
+              console.log('About to call updateThresholdMessage...');
+              updateThresholdMessage(riskValue, prevalence, region, calculationParams);
+              
+              async function updateThresholdMessage(baseRisk, basePrevalence, region, calcParams) {
+                console.log('Updating threshold message with:', {baseRisk, basePrevalence, region});
+                
+                try {
+                  const response = await fetch('/api/time-varying-risk', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                      base_risk: baseRisk,
+                      base_prevalence: basePrevalence,
+                      num_exposures: 1, // We only need the threshold
+                      region: region,
+                      calculation_params: calcParams // Include immunity parameters
+                    })
+                  });
+                  
+                  console.log('Threshold API response status:', response.status);
+                  
+                  if (response.ok) {
+                    const data = await response.json();
+                    console.log('Threshold API returned:', data.threshold);
+                    
+                    const thresholdElement = document.getElementById('repeatNumber');
+                    if (thresholdElement && data.threshold) {
+                      const formattedDays = data.threshold >= 1000 ? 
+                        data.threshold.toLocaleString('en-US') : data.threshold.toString();
+                      thresholdElement.textContent = formattedDays;
+                      console.log('Updated threshold message to:', formattedDays);
+                    }
+                  } else {
+                    console.warn('Threshold API failed');
+                    const thresholdElement = document.getElementById('repeatNumber');
+                    if (thresholdElement) {
+                      thresholdElement.textContent = 'Error';
+                    }
+                  }
+                } catch (error) {
+                  console.warn('Threshold API error:', error);
+                  const thresholdElement = document.getElementById('repeatNumber');
+                  if (thresholdElement) {
+                    thresholdElement.textContent = 'Error';
+                  }
+                }
+              }
+            });
+          </script>
+        </div>
+        {% endif %}
+        
+        
+        <!-- Test script to see if it runs at all -->
+        <script>
+          console.log('=== SIMPLE TEST SCRIPT RUNS ===');
+          {% if result %}
+          console.log('RESULT EXISTS - Risk:', {{ result.risk }});
+          
+          // Try immediate execution since DOM may already be loaded
+          setTimeout(function() {
+            console.log('TIMEOUT - about to look for threshold element');
+            const thresholdElement = document.getElementById('repeatNumber');
+            console.log('Threshold element found:', thresholdElement);
+            
+            if (thresholdElement) {
+              console.log('Setting threshold to 999 as test');
+              thresholdElement.textContent = '999';
+            }
+          }, 100);
+          {% else %}
+          console.log('NO RESULT EXISTS');
+          {% endif %}
+        </script>
+        
+        <!-- Uncertainty Button and Display (HIDDEN FOR NOW - may revisit later)
+        {% if result %}
+        <button id="toggleExposureUncertainty" type="button" onclick="toggleExposureUncertaintyDisplay()"
+                class="secondary-btn" style="margin-top: 15px;">How certain is this result?</button>
+        
+        <div id="exposureUncertaintyDisplay" style="display: none; margin-top: 15px;">
+          <div class="confidence-interval-section">
+            <h4>Uncertainty in Monte Carlo Risk Estimate</h4>
+            <div class="confidence-interval-explainer">
+              The Monte Carlo method (mean: <span class="mc-bound">{{ result.mc_mean | percent }}</span>, median: <span class="mc-bound">{{ result.mc_median | percent }}</span>) accounts for uncertainty in viral load, infectivity, and other biological factors. The Legacy and TVAD methods shown above are deterministic calculations without uncertainty ranges.
+            </div>
+            
+            <div style="margin-bottom: 15px;">
+              <strong>50% credible interval (interquartile range):</strong><br>
+              There's a 50% chance the true risk is between 
+              <span class="mc-bound">{{ result.mc_ci_25 | percent }}</span> and 
+              <span class="mc-bound">{{ result.mc_ci_75 | percent }}</span>
+            </div>
+            
+            <div>
+              <strong>99% credible interval for Monte Carlo method:</strong><br>
+              There's a 99% chance the true risk is between 
+              <span class="mc-bound">{{ result.mc_ci_0_5 | percent }}</span> and 
+              <span class="mc-bound">{{ result.mc_ci_99_5 | percent }}</span>
+            </div>
+            
+            <div style="margin-top: 15px; padding: 10px; background-color: #f0f9ff; border-radius: 6px; font-size: 0.9rem; color: #0f172a;">
+              <strong>Note:</strong> The primary result above ({{ result.risk | percent }}) uses the Legacy method for consistency, but the Monte Carlo method provides the most comprehensive uncertainty quantification.
+            </div>
+          </div>
+        </div>
+        {% endif %}
+        -->
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Form validation and info box toggles now in exposure-utils.js -->
+  
+  <script>
+    // Toggle exposure uncertainty display function
+    function toggleExposureUncertaintyDisplay() {
+      var uncertaintyDisplay = document.getElementById('exposureUncertaintyDisplay');
+      
+      if (uncertaintyDisplay) {
+        var currentDisplay = window.getComputedStyle(uncertaintyDisplay).display;
+        if (currentDisplay === 'none') {
+          uncertaintyDisplay.style.display = 'block';
+        } else {
+          uncertaintyDisplay.style.display = 'none';
+        }
+      }
+    }
+    
+    // Attach event listeners after the DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+      // Apply risk colors to Monte Carlo bounds
+      const mcBounds = document.querySelectorAll('.mc-bound');
+      mcBounds.forEach(bound => {
+        // Extract percentage value
+        const percentText = bound.textContent.trim();
+        const percentValue = parseFloat(percentText) / 100;
+
+        if (!isNaN(percentValue)) {
+          bound.style.color = getRiskColor(percentValue);
+        }
+      });
+      // Handle vaccination time slider
+      const vaccinationTimeSlider = document.getElementById('vaccination_time');
+      if (vaccinationTimeSlider) {
+        vaccinationTimeSlider.addEventListener('input', function() {
+          // Use the function in exposure-utils.js
+          updateVaccinationTimeLabel(this.value);
+        });
+      }
+      
+      // Handle infection time slider
+      const infectionTimeSlider = document.getElementById('infection_time');
+      if (infectionTimeSlider) {
+        infectionTimeSlider.addEventListener('input', function() {
+          // Use the function in exposure-utils.js
+          updateInfectionTimeLabel(this.value);
+        });
+      }
+      
+      // Handle masked percentage slider
+      const maskedPercentageSlider = document.getElementById('masked_percentage');
+      if (maskedPercentageSlider) {
+        maskedPercentageSlider.addEventListener('input', function() {
+          // Use the function in exposure-utils.js
+          updateMaskedPercentageLabel(this.value);
+        });
+      }
+      
+      // Set up info box toggle buttons
+      document.querySelectorAll('.info-toggle-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          const infoId = this.getAttribute('data-info-id');
+          if (infoId) {
+            // Call the toggle function from exposure-utils.js
+            toggleInfoBox(infoId);
+          }
+        });
+      });
+      
+      // Set up fit factor input event listeners
+      const fitFactorInput = document.getElementById('fit_factor_input');
+      if (fitFactorInput) {
+        fitFactorInput.addEventListener('change', updateFitFactorValue);
+        fitFactorInput.addEventListener('keyup', updateFitFactorValue);
+        fitFactorInput.addEventListener('blur', updateFitFactorValue);
+      }
+    });
+  </script>
+  
+  <footer style="margin-top: 30px; padding: 20px;">
+    <div style="margin: 0 auto; padding: 15px; background-color: #f8f9fa; border-radius: 8px; max-width: 900px; font-size: 14px; color: #475569; text-align: left;">
+      <p style="margin: 0;"><strong>Disclaimer:</strong> This site provides mathematical calculations for educational purposes only. It is not intended as medical advice, diagnosis, or treatment. Risk calculations draw from <a href="https://caimira.web.cern.ch/" target="_blank" rel="noopener">CERN's CAiMIRA aerosol physics framework</a> with various enhancements.</p>
+    </div>
+  </footer>
+</body>
+</html>
