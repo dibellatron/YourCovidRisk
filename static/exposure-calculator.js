@@ -13,7 +13,7 @@ import {
   positionPeopleSliderThumb
 } from "./js/sliders/peopleSlider.js";
 import { initializeSlider } from "./js/sliders/genericSlider.js";
-import { saveFormState, restoreFormState } from "./js/stateManager.js";
+import { saveFormState, restoreFormState, TAB_STORAGE_KEY } from "./js/stateManager.js";
 import { initFormHandler } from "./js/formHandler.js";
 // Alias distance display to our updateDistanceLabel for module event handling
 const updateDistanceDisplay = window.updateDistanceLabel;
@@ -771,9 +771,9 @@ document.addEventListener("DOMContentLoaded", function() {
             }
 
           // Also add it to our session storage for backup
-          const formState = JSON.parse(sessionStorage.getItem('covidRiskFormState') || '{}');
+          const formState = JSON.parse(sessionStorage.getItem(TAB_STORAGE_KEY) || '{}');
           formState.selected_environment_text = selectedOption.textContent;
-          sessionStorage.setItem('covidRiskFormState', JSON.stringify(formState));
+          sessionStorage.setItem(TAB_STORAGE_KEY, JSON.stringify(formState));
 
           console.log("Saved selected environment text:", selectedOption.textContent);
         }

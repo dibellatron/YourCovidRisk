@@ -1,6 +1,12 @@
-// stateManager.js — save and restore form state to sessionStorage
+// stateManager.js — save and restore form state to sessionStorage with tab isolation
+// Generate unique tab identifier to prevent cross-tab state interference
+if (!window.name) {
+  window.name = 'tab_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+}
+export const TAB_STORAGE_KEY = 'covidRiskFormState_' + window.name;
+
 /**
- * Save current form state (all inputs/selects) to sessionStorage under 'covidRiskFormState'.
+ * Save current form state (all inputs/selects) to sessionStorage under tab-specific key.
  */
 export function saveFormState() {
   const state = {};
@@ -17,14 +23,15 @@ export function saveFormState() {
   if (ach && ach.selectedIndex > -1) {
     state.selected_environment_text = ach.options[ach.selectedIndex].textContent;
   }
-  sessionStorage.setItem('covidRiskFormState', JSON.stringify(state));
+  sessionStorage.setItem(TAB_STORAGE_KEY, JSON.stringify(state));
 }
 
 /**
  * Restore form state from sessionStorage (if available), merging with server-provided defaults.
+ * Uses tab-specific storage key to prevent cross-tab interference.
  */
 export function restoreFormState() {
-  const stored = sessionStorage.getItem('covidRiskFormState');
+  const stored = sessionStorage.getItem(TAB_STORAGE_KEY);
   if (!stored) return;
   const state = JSON.parse(stored);
   // Restore environment text separately
