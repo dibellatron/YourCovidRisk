@@ -989,6 +989,7 @@ nav a i {
   h2 {
     font-size: 1.6rem;
   }
+  
 }
 
 @media only screen and (max-width: 375px) {
@@ -1046,5 +1047,10 @@ nav a i {
 
   h2 {
     font-size: 1.6rem;
+  }
+  
+  /* Make immunocompromised card title smaller on very small screens to prevent word breaking */
+  .faq-card-title {
+    font-size: 1.2rem !important;
   }
 }
