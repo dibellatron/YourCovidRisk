@@ -1,6 +1,6 @@
 # YourCovidRisk.com - COVID Risk Calculators
 
-*Last updated: July 12, 2025*
+*Last updated: July 28, 2025*
 
 **Comprehensive Flask web application for rigorous COVID-19 risk assessment**
 
@@ -152,6 +152,9 @@ For automated data updates on Heroku:
 # Add Heroku Scheduler
 heroku addons:create scheduler:standard
 
+# Add Tesseract OCR support (required for PMC scripts)
+heroku buildpacks:add --index 1 https://github.com/heroku/heroku-buildpack-apt
+
 # Set environment variables
 heroku config:set FLASK_ENV=production
 
@@ -159,6 +162,8 @@ heroku config:set FLASK_ENV=production
 # - Weekly: "python Walgreens/update_walgreens_monitored.py"
 # - Weekly: "python PMC/pull_prevalence_monitored.py"
 ```
+
+**Note**: The `Aptfile` in the project root specifies Tesseract OCR system dependencies required for PMC image analysis.
 
 ## Testing
 

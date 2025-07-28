@@ -1,6 +1,6 @@
 # COVID Risk Calculator - Technical Architecture Documentation
 
-*Last updated: July 12, 2025*
+*Last updated: July 28, 2025*
 
 ## Overview
 
@@ -533,25 +533,26 @@ Risk Calculations
 86. `requirements.txt` - Python dependencies
 87. `Procfile` - Heroku deployment
 88. `runtime.txt` - Python version
-89. `package.json` - Node dependencies (for testing)
-90. `babel.config.js` - Babel configuration
-91. `jest.config.cjs` - Jest configuration
-92. `mypy.ini` - Type checking config
-93. `pyproject.toml` - Python project metadata
+89. `Aptfile` - System dependencies (Tesseract OCR for PMC scripts)
+90. `package.json` - Node dependencies (for testing)
+91. `babel.config.js` - Babel configuration
+92. `jest.config.cjs` - Jest configuration
+93. `mypy.ini` - Type checking config
+94. `pyproject.toml` - Python project metadata
 
 #### Test Files
-94. `tests/test_calculators.py`
-95. `tests/test_endpoints.py`
-96. `tests/test_monte_carlo.py`
-97. `tests/test_validators.py`
-98. `tests/js/calculations/environment.test.js`
-99. `tests/js/calculations/exhalation.test.js`
-100. `tests/js/calculations/immuneSusceptibility.test.js`
-101. `tests/js/calculations/maskFilter.test.js`
-102. `tests/js/slider-labels.test.js`
-103. `tests/js/stateManager.test.js`
+95. `tests/test_calculators.py`
+96. `tests/test_endpoints.py`
+97. `tests/test_monte_carlo.py`
+98. `tests/test_validators.py`
+99. `tests/js/calculations/environment.test.js`
+100. `tests/js/calculations/exhalation.test.js`
+101. `tests/js/calculations/immuneSusceptibility.test.js`
+102. `tests/js/calculations/maskFilter.test.js`
+103. `tests/js/slider-labels.test.js`
+104. `tests/js/stateManager.test.js`
 
-**TOTAL: 103 files that are ACTUALLY USED by the running application**
+**TOTAL: 104 files that are ACTUALLY USED by the running application**
 
 
 ## Development Workflow
