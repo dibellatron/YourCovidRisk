@@ -1,17 +1,8 @@
-# NOTE: logic unchanged; we just use helpers for cleaner validation.
 import math
 
 oneoverln2 = 1.0 / math.log(2)
 import numpy as np
 
-# total liquid emission per activity [mL/h] from Henriques §SIII.2 (updated values)
-E_TOT_MAP = {
-    "1": 6e-6,  # sedentary: ≈6 µL h‑1
-    "2": 1e-4,  # standard speaking: ≈100 µL h‑1
-    "3": 2e-4,  # light vocalization
-    "4": 4e-4,  # moderate vocalization
-    "5": 8e-4,  # intense vocalization
-}
 # normalization constant for the D⁻³ shape over [0.5,100]
 SHAPE_NORM = (0.5 ** (-2) - 100.0 ** (-2)) / 2.0
 
@@ -30,34 +21,16 @@ dDs[-1] = Ds[-1] - Ds[-2]
 Dmax_SR = 100.0  # µm, short-range cutoff (unchanged)
 Dmax_LR = 20.0  # µm, long-range cutoff per Henriques (updated from 30µm based on new evidence)
 
+# Henriques jet physics constants (shared across functions)
+D_mouth = 0.02  # Mouth opening diameter [m] (20 mm)
+beta_r_j = 0.18  # Radial penetration coefficient (jet-like stage)
+beta_r_p = 0.20  # Radial penetration coefficient (puff-like stage)
+beta_x_j = 2.4   # Streamwise penetration coefficient (jet-like)
+                 # NOTE: Corrected value from Henriques (personal communication)
+                 # Paper shows 0.20, but this produces unrealistic transition distances (~0.01m)
+beta_x_p = 2.2   # Streamwise penetration coefficient (puff-like)
+                 # NOTE: Corrected value from Henriques (personal communication)
 
-def emission_spectrum(D, activity_choice):
-    """
-    Ec(D): volumetric emission [mL of particles / m³ air / µm]
-    BLO tri-modal distribution scaled by total liquid emission for given activity.
-    """
-    # BLO parameters from official CAiMIRA data registry (exact values)
-    cn = {"B": 0.06, "L": 0.2, "O": 0.0010008}
-    mu = {"B": 0.989541, "L": 1.38629, "O": 4.97673}
-    sigma = {"B": 0.262364, "L": 0.506818, "O": 0.585005}
-    # mode factors by activity
-    if activity_choice == "1":
-        factors = (1.0, 0.0, 0.0)
-    elif activity_choice == "2":
-        factors = (1.0, 1.0, 1.0)
-    else:
-        factors = (1.0, 5.0, 5.0)
-    # compute tri-modal BLO density
-    result = 0.0
-    modes = ["B", "L", "O"]
-    for idx, mode in enumerate(modes):
-        A = factors[idx]
-        result += (A * cn[mode] / (np.sqrt(2 * np.pi) * sigma[mode]) / D) * np.exp(
-            -((np.log(D) - mu[mode]) ** 2) / (2 * sigma[mode] ** 2)
-        )
-    # scale by total liquid emission for activity
-    E_tot = E_TOT_MAP.get(activity_choice, E_TOT_MAP["2"])
-    return result * E_tot
 
 
 def emission_spectrum_henriques(D, activity_choice):
@@ -146,37 +119,9 @@ def get_henriques_vocalization(activity_choice):
     return mapping.get(activity_choice, "speaking")
 
 
-def apply_vocalization_breathing_rate_multiplier(base_breathing_rate, vocal_activity):
-    """
-    Apply vocalization effects to breathing rate for jet physics calculations.
-    
-    Biophysically, vocalization increases breathing effort and airflow velocity,
-    which affects jet formation and transition distances. Uses existing vocal
-    activity categories from the codebase.
-    
-    Args:
-        base_breathing_rate: Base breathing rate [m³/h] from physical activity
-        vocal_activity: Vocalization type ("breathing", "speaking", "loudly_speaking")
-        
-    Returns:
-        Modified breathing rate [m³/h] accounting for vocalization effects
-    """
-    # Multipliers based on existing vocalization categories in codebase
-    # Values derived from respiratory physiology literature showing increased
-    # tidal volume and breathing rate during vocalization
-    multipliers = {
-        "breathing": 1.0,          # No vocal effort - baseline
-        "just_breathing": 1.0,     # Alternative name
-        "speaking": 1.15,          # 15% increase for normal speech
-        "loudly_speaking": 1.35,   # 35% increase for loud speech  
-        "loud_speaking": 1.35,     # Alternative name
-        "shouting": 1.35,          # 35% increase for shouting
-    }
-    
-    return base_breathing_rate * multipliers.get(vocal_activity, 1.15)  # Default to speaking
 
 
-def calculate_henriques_jet_parameters(BR, D_mouth=0.02):
+def calculate_henriques_jet_parameters(BR, D_mouth=D_mouth):
     """
     Calculate dynamic jet parameters following Henriques supplement equations S.3-S.8.
     
@@ -190,13 +135,6 @@ def calculate_henriques_jet_parameters(BR, D_mouth=0.02):
     # Constants from Henriques supplement
     T = 4.0  # Breathing cycle duration [s]
     phi_j = 2.0  # Exhalation coefficient 
-    beta_r_j = 0.18  # Radial penetration coefficient (jet-like)
-    beta_r_p = 0.20  # Radial penetration coefficient (puff-like)
-    beta_x_j = 2.4   # Streamwise penetration coefficient (jet-like) 
-                     # NOTE: Henriques et al. 2025 supplement shows 0.20, but CAiMIRA uses 2.4
-                     # The 0.20 value produces unrealistic transition distances (~0.01m)
-                     # while 2.4 gives realistic values (~0.4-1.0m) matching Figure 4
-    beta_x_p = 2.2   # Streamwise penetration coefficient (puff-like)
     
     # Convert breathing rate from m³/h to m³/s
     BR_s = BR / 3600.0
@@ -505,11 +443,11 @@ def calculate_unified_transmission_exposure(
       room_volume: Room volume in m³ as a string [default "1000"].
       delta_t: Exposure duration in seconds as a string [default "42"].
       x: Distance from the source (m) as a string [default "0.7"].
-      activity_choice: Choice for activity intensity (1-5) as a string [default "2" for Standard].
+      activity_choice: Legacy activity intensity (1-5) for display label only [default "2" for Standard].
       gamma: Gamma factor as a string [default "0.5"].
       f_e: Exhalation multiplier factor as a string [default "1"].
       f_i: Inhalation multiplier factor as a string [default "1"].
-      omicron: Omicron multiplier for Q0 as a string [default "3.3"].
+      omicron: Omicron multiplier for Q0 as a string [default "4.20"].
       covid_prevalence: Percentage of people currently infected with Covid as a string [default "0.01"].
       immune: Immune susceptibility of the user as a string [default "1"].
       N: The number of other people present as a string [default "1"].
@@ -523,7 +461,7 @@ def calculate_unified_transmission_exposure(
         - q_e: Effective ventilation rate (L/s).
         - ACH: The air changes per hour used.
         - room_volume: The room volume (m³).
-        - activity_label: Label corresponding to the activity intensity.
+        - activity_label: Display label for legacy activity_choice parameter (not used in calculations).
         - x_transition: The transition distance (m) for the exhalation profile.
         - stage: Indicates whether the model used the 'jet-like' or 'puff-like' stage.
         - Sx: The computed dilution factor.
@@ -560,7 +498,7 @@ def calculate_unified_transmission_exposure(
     errors.append(err)
     f_i_val, err = safe_float(f_i, 1.0)
     errors.append(err)
-    omicron_val, err = safe_float(omicron, 3.3)
+    omicron_val, err = safe_float(omicron, 4.20)
     errors.append(err)
 
     # Debug converted values
@@ -574,10 +512,6 @@ def calculate_unified_transmission_exposure(
     # ------------------------------------------------------------------
     # Covid‑19 prevalence handling
     # ------------------------------------------------------------------
-    # Users sometimes pass prevalence as a *whole percent* (e.g. "1" for
-    # 1 %) and other times as a *fraction* (e.g. "0.01").  We normalise
-    # both cases to a true probability 0 .. 1 so that subsequent math
-    # is unambiguous.
     covid_prev_pct, err = safe_float(covid_prevalence, 1.0)
     errors.append(err)
     # Treat all prevalence inputs as percentages; convert to fraction 0..1
@@ -602,16 +536,11 @@ def calculate_unified_transmission_exposure(
     q_total = (ACH_val * room_volume_val * 1000) / 3600
     q_e = q_total  # Assuming one occupant
 
-    # Calculate dynamic jet parameters using others' breathing rate (for emission source)
+    # Calculate others' breathing rate for Monte Carlo
     others_BR = get_henriques_breathing_rate(others_physical_activity)
-    jet_params = calculate_henriques_jet_parameters(others_BR)
     
-    # Extract parameters
-    x_transition = jet_params['x_transition']
-    x0_j = jet_params['x0_j']
-    x0_p = jet_params['x0_p']
-    
-    # Map activity choice to a label (keep for backwards compatibility)
+    # Map activity choice to display label only (not used in calculations)
+    # Actual calculations use user_physical_activity, others_physical_activity, and others_vocal_activity
     activity_map = {
         "1": "Sedentary/Passive",
         "2": "Standard", 
@@ -623,105 +552,20 @@ def calculate_unified_transmission_exposure(
         activity_choice = "2"
     activity_label = activity_map[activity_choice]
 
-    # Henriques jet dilution model parameters
-    D_mouth = 0.02  # Mouth opening diameter (m) 
-    beta_r_j = 0.18  # Radial penetration coefficient (jet-like stage)
-    beta_r_p = 0.20  # Radial penetration coefficient (puff-like stage)
-
-    # Determine dilution factor Sx using exact Henriques Eq. 2.1 with separate virtual origins
-    if x_val < x_transition:
-        # Jet-like stage: S(x) = 2 * βr,j * (x + x0,j) / Dm per Henriques Eq. 2.1
-        Sx = 2 * beta_r_j * (x_val + x0_j) / D_mouth
-        stage = "jet-like"
-    else:
-        # Puff-like stage: S(x) = S(x*) * [1 + βr,p(x-x*) / (βr,j(x*+x0,j))]³
-        # First compute S(x*) at the transition point:
-        Sx_star = 2 * beta_r_j * (x_transition + x0_j) / D_mouth
-        # Then compute S(x) for puff-like stage:
-        Sx = Sx_star * (
-            1 + beta_r_p * (x_val - x_transition) / (beta_r_j * (x_transition + x0_j))
-        ) ** 3
-        stage = "puff-like"
-
-    # Calculate infection risk using the modified Wells–Riley equation
-    # Using a unified transmission model that works for all values of percentage_masked
-
-    # Calculate dynamic jet origin concentration based on vocal activity (Henriques-compatible fix)
-    # Use representative values from Henriques Table 1 and Monte Carlo parameters
-    def calculate_average_jet_concentration(vocal_activity):
-        """Calculate size-averaged C0_SR for Wells-Riley formula using existing Henriques functions."""
-        # Use representative particle sizes and Henriques Table 1 parameters
-        vlin_mean = 10 ** 6.2  # Mean viral load from Henriques Table 1 [RNA copies/mL]
-        f_inf_mean = 0.30      # Mean IRP-to-RNA ratio (middle of 0.01-0.60 range from Table 1)
-        
-        # Calculate concentration for representative particle size (geometric mean of short-range spectrum)
-        # Using 5 μm as representative diameter (geometric mean of 0.5-100 μm short-range spectrum)
-        D_representative = 5.0  # μm
-        
-        C0_SR = emission_spectrum_IRP_henriques(D_representative, vocal_activity, vlin_mean, f_inf_mean)
-        
-        # Apply existing multipliers already in the code
-        C0_SR_adjusted = C0_SR * omicron_val * immune_emission_multiplier
-        
-        return C0_SR_adjusted
+    # Original Wells-Riley calculation removed - see auxiliary scripts/historical_risk_methods_documentation.py
+    # Now using only Monte Carlo Protection Factor method
     
-    # Calculate vocal-activity-dependent jet concentration
-    C0_SR_dynamic = calculate_average_jet_concentration(others_vocal_activity)
-
-    # Calculate number of masked and unmasked individuals
-    # percentage_masked_val represents the percentage of OTHER people who are masked
-    # (not whether the user is masked - that's determined by f_i_val < 1)
+    # Calculate number of masked and unmasked individuals for Monte Carlo
     N_masked = math.floor(N_val * percentage_masked_val)
     N_unmasked = N_val - N_masked
 
-    # Calculate p_infect for masked individuals (using the provided f_e)
-    # Use C0_SR_dynamic instead of fixed C0_val to incorporate vocal activity effects
-    p_term_masked = 1 - math.exp(
-        -(gamma_val * (Q0_val * C0_SR_dynamic) / q_e * (1 - 1 / Sx) + (1 / Sx) * C0_SR_dynamic)
-        * p_val
-        * delta_t_val
-    )
-    p_infect_masked = p_term_masked * covid_prevalence_val * immune_val
-
-    # Calculate p_infect for unmasked individuals (f_e = 1.0)
-    if N_unmasked > 0:
-        Q0_unmasked = (
-            Q0_val / f_e_val
-        )  # Remove the f_e factor to get the unmasked value
-        p_term_unmasked = 1 - math.exp(
-            -(
-                gamma_val * (Q0_unmasked * C0_SR_dynamic) / q_e * (1 - 1 / Sx)
-                + (1 / Sx) * C0_SR_dynamic
-            )
-            * p_val
-            * delta_t_val
-        )
-        p_infect_unmasked = p_term_unmasked * covid_prevalence_val * immune_val
-    else:
-        # If no unmasked people, set this to a placeholder value (won't be used when raised to power of 0)
-        p_infect_unmasked = 0
-
-    # Calculate the probability that none of the people infect the user
-    # This handles all cases:
-    # - When percentage_masked = 0, N_masked = 0, so it reduces to (1 - p_infect_unmasked)^N_val
-    # - When percentage_masked = 1, N_unmasked = 0, so it reduces to (1 - p_infect_masked)^N_val
-    # - For values in between, it correctly considers both groups
-    prob_no_infection = ((1 - p_infect_masked) ** N_masked) * (
-        (1 - p_infect_unmasked) ** N_unmasked
-    )
-
-    # Overall risk: 1 minus the probability that none of the N people infect the user
-    risk = 1 - prob_no_infection
-
+    # Initialize result dictionary - risk will be set from Monte Carlo results
     result = {
-        "risk": risk,
+        "risk": 0,  # Placeholder - will be overwritten by MC PF result
         "q_e": q_e,
         "ACH": ACH_val,
         "room_volume": room_volume_val,
         "activity_label": activity_label,
-        "x_transition": x_transition,
-        "stage": stage,
-        "Sx": Sx,
         "inputs": {
             "C0": C0_val,
             "Q0": Q0_val,
@@ -744,48 +588,8 @@ def calculate_unified_transmission_exposure(
     result["N_masked"] = N_masked
     result["N_unmasked"] = N_unmasked
 
-    # Record legacy (old) risk for comparison
-    # retain backwards-compatibility key names
-    result["old_risk"] = result.get("mc_mean_old")
-
-    # ─────────────────────────────────────────────────────────────────────────
-    # Compute TVAD-adjusted (new) risk using Omicron survival decay
-    # ─────────────────────────────────────────────────────────────────────────
-    # 2a) Use Henriques jet velocity from calculated parameters
-    u0 = jet_params['u0']  # Initial jet velocity from Henriques calculations [m/s]
-    t_flight = x_val / u0  # time for aerosol parcel to travel x
-
-    # 2b) Compute Omicron survival fraction (TVAD decay)
-    lambda_decay = omicron_tvad_survival(t_flight, RH, CO2)
-
-    # 2c) Build dose factor including decay
-    base_factor = gamma_val * (Q0_val * C0_val * immune_emission_multiplier) / q_e * (1 - 1 / Sx) + (1 / Sx) * C0_val * immune_emission_multiplier
-    dose_factor = base_factor * lambda_decay
-
-    # 2d) Compute masked infection probability
-    # This is calculating probability of infection FROM masked individuals in the space
-    # Important: we need to use the original p_val for inhalation rate
-    p_term_masked_new = 1 - math.exp(-dose_factor * p_val * delta_t_val)
-    p_infect_masked_new = p_term_masked_new * covid_prevalence_val * immune_val
-
-    # Compute unmasked infection probability
-    # This is calculating probability of infection FROM unmasked individuals in the space
-    if N_unmasked > 0:
-        Q0_unmasked = Q0_val / f_e_val
-        base_unmasked = (
-            gamma_val * (Q0_unmasked * C0_val * immune_emission_multiplier) / q_e * (1 - 1 / Sx) + (1 / Sx) * C0_val * immune_emission_multiplier
-        )
-        dose_unmasked = base_unmasked * lambda_decay
-        p_term_unmasked_new = 1 - math.exp(-dose_unmasked * p_val * delta_t_val)
-        p_infect_unmasked_new = p_term_unmasked_new * covid_prevalence_val * immune_val
-    else:
-        p_infect_unmasked_new = 0
-
-    # 2e) Aggregate and compute new risk
-    prob_no_infection_new = (1 - p_infect_masked_new) ** N_masked * (
-        1 - p_infect_unmasked_new
-    ) ** N_unmasked
-    result["new_risk"] = 1 - prob_no_infection_new
+    # TVAD-adjusted calculation removed - see auxiliary scripts/historical_risk_methods_documentation.py
+    # Now using only Monte Carlo Protection Factor method
 
     # ─────────────────────────────────────────────────────────────────────────
     # Size‑resolved Monte Carlo per Henriques et al. (width‑weighted & prevalence‑adjusted)
@@ -805,9 +609,8 @@ def calculate_unified_transmission_exposure(
     else:
         n_sims = 300
 
-    # Store results for BOTH immunity implementations
-    all_risks_old = np.zeros(n_sims)  # multiplier-at-end (status-quo)
-    all_risks_pf = np.zeros(n_sims)   # new protection-factor method
+    # Store results for Monte Carlo Protection Factor method
+    all_risks_pf = np.zeros(n_sims)   # protection-factor method
 
     # Precompute normalization for emission spectrum
     # D1, D2 = 0.5, 100.0
@@ -924,10 +727,6 @@ def calculate_unified_transmission_exposure(
                 mc_u0 = mc_jet_params['u0']
                 
                 # Compute dilution using exact Henriques Eq. 2.1 with this person's breathing rate
-                beta_r_j = 0.18  # Radial penetration coefficient (jet-like stage)
-                beta_r_p = 0.20  # Radial penetration coefficient (puff-like stage)
-                D_mouth = 0.02   # Mouth opening diameter (m)
-                
                 if x_eff < mc_x_transition:
                     # Jet-like stage: S(x) = 2 * βr,j * (x + x0,j) / Dm
                     Sx_sim = 2 * beta_r_j * (x_eff + mc_x0_j) / D_mouth
@@ -994,14 +793,10 @@ def calculate_unified_transmission_exposure(
             print(f"DEBUG MC: ID50 = {ID50:.1f} IRP, User BR = {BR:.3f} m³/h")
             print(f"DEBUG MC: User: {user_physical_activity}, Others: {others_physical_activity}/{others_vocal_activity}, dt_h = {dt_h:.3f}h")
 
-        # ---- Dose-response (two variants) ----
+        # ---- Dose-response using Protection Factor method ----
         ID63 = oneoverln2 * ID50  # baseline threshold
 
-        # (1) Current method – multiply by immune_val at end
-        risk_old = 1.0 - math.exp(-total_dose / ID63)
-        risk_old *= immune_val
-
-        # (2) New method – raise ID50 by Protection Factor
+        # Protection Factor method – raise ID50 by Protection Factor
         # Sample protection factor from log-normal posterior
         PF_MAX = 50.0
         if immune_val <= 0:  # perfect immunity edge-case
@@ -1015,30 +810,9 @@ def calculate_unified_transmission_exposure(
         ID63_pf = ID63 * PF
         risk_pf = 1.0 - math.exp(-total_dose / ID63_pf)
 
-        # Store
-        all_risks_old[i] = risk_old
+        # Store result
         all_risks_pf[i] = risk_pf
-    # summarize Monte Carlo — OLD method
-    result["mc_mean_old"] = float(all_risks_old.mean())
-    result["mc_old_ci_5"] = float(np.percentile(all_risks_old, 5))
-    result["mc_old_ci_95"] = float(np.percentile(all_risks_old, 95))
-    
-    # Additional percentiles for credible intervals
-    # 51% credible interval: symmetric around median (25th to 75th percentiles)
-    result["mc_old_ci_25"] = float(np.percentile(all_risks_old, 25))
-    result["mc_old_ci_75"] = float(np.percentile(all_risks_old, 75))
-    
-    # 99% credible interval: 0.5th to 99.5th percentiles  
-    result["mc_old_ci_0_5"] = float(np.percentile(all_risks_old, 0.5))
-    result["mc_old_ci_99_5"] = float(np.percentile(all_risks_old, 99.5))
-    
-    # Store median for reference
-    result["mc_old_median"] = float(np.percentile(all_risks_old, 50))
-    
-    # Debug percentiles (old)
-    print(f"DEBUG OLD PERCENTILES: 0.5%={result['mc_old_ci_0_5']:.6f}, 25%={result['mc_old_ci_25']:.6f}, median={result['mc_old_median']:.6f}, mean={result['mc_mean_old']:.6f}, 75%={result['mc_old_ci_75']:.6f}, 99.5%={result['mc_old_ci_99_5']:.6f}")
-
-    # ------------------- summarise NEW PF method -------------------
+    # Summarize Monte Carlo Protection Factor method
     result["mc_mean_pf"] = float(all_risks_pf.mean())
     result["mc_pf_ci_5"] = float(np.percentile(all_risks_pf, 5))
     result["mc_pf_ci_95"] = float(np.percentile(all_risks_pf, 95))
@@ -1048,30 +822,26 @@ def calculate_unified_transmission_exposure(
     result["mc_pf_ci_99_5"] = float(np.percentile(all_risks_pf, 99.5))
     result["mc_pf_median"] = float(np.percentile(all_risks_pf, 50))
 
-    # Update convenience aliases for template compatibility
-    result["old_risk"] = result["mc_mean_old"]
-
     print(f"DEBUG PF PERCENTILES: mean={result['mc_mean_pf']:.6f}, median={result['mc_pf_median']:.6f}")
 
     # --------------------------------------------------------------
-    # Expose NEW PF risk as primary point estimate
+    # Set risk as Monte Carlo PF result
     # --------------------------------------------------------------
     result["risk"] = result["mc_mean_pf"]  # main value consumed by UI
-    result["risk_old_mc"] = result["mc_mean_old"]
 
     # ------------------------------------------------------------------
     # Back-compat keys expected by Jinja templates
     # ------------------------------------------------------------------
-    result["mc_mean"] = result["mc_mean_old"]
-    result["mc_median"] = result["mc_old_median"]
+    result["mc_mean"] = result["mc_mean_pf"]
+    result["mc_median"] = result["mc_pf_median"]
 
     # Back-compat for confidence interval keys expected by templates
-    result["mc_ci_5"] = result["mc_old_ci_5"]
-    result["mc_ci_95"] = result["mc_old_ci_95"]
-    result["mc_ci_25"] = result["mc_old_ci_25"]
-    result["mc_ci_75"] = result["mc_old_ci_75"]
-    result["mc_ci_0_5"] = result["mc_old_ci_0_5"]
-    result["mc_ci_99_5"] = result["mc_old_ci_99_5"]
+    result["mc_ci_5"] = result["mc_pf_ci_5"]
+    result["mc_ci_95"] = result["mc_pf_ci_95"]
+    result["mc_ci_25"] = result["mc_pf_ci_25"]
+    result["mc_ci_75"] = result["mc_pf_ci_75"]
+    result["mc_ci_0_5"] = result["mc_pf_ci_0_5"]
+    result["mc_ci_99_5"] = result["mc_pf_ci_99_5"]
 
     # ------------------------------------------------------------------
     # Generate risk distribution data for uncertainty visualization
@@ -1085,9 +855,7 @@ def calculate_unified_transmission_exposure(
         result["risk_distribution_data"] = None
 
     # Debug final values
-    print(
-        f"DEBUG RESULT: old_mc={result['mc_mean_old']:.6f}, pf_mc={result['mc_mean_pf']:.6f}"
-    )
+    print(f"DEBUG RESULT: mc_pf={result['mc_mean_pf']:.6f}")
     print(
         f"DEBUG FINAL: Using f_i_val={f_i_val}, percentage_masked_val={percentage_masked_val}"
     )

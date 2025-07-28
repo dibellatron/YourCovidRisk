@@ -57,39 +57,6 @@ const covidRiskData = {
     label: (i+1) === 1 ? "1 month ago" : `${i+1} months ago`
   })),
 
-  // Activity levels with their multiplier values
-  activityLevels: [
-    { value: "1", label: "Sitting" },
-    { value: "1.2", label: "Standing" },
-    { value: "2.7", label: "Light exercise" },
-    { value: "5.8", label: "Moderate exercise" },
-    { value: "11", label: "Intense exercise" }
-  ],
-
-  // Physical intensity options
-  physicalIntensityLevels: [
-    { value: "Resting", label: "Sitting" },
-    { value: "Standing", label: "Standing" },
-    { value: "Light exercise", label: "Light exercise" },
-    { value: "Moderate exercise", label: "Moderate exercise" },
-    { value: "Heavy exercise", label: "Intense exercise" }
-  ],
-
-  // Vocalization options
-  vocalizationTypes: [
-    { value: "Just breathing", label: "Just breathing" },
-    { value: "Speaking", label: "Normal speaking" },
-    { value: "Loud speaking", label: "Loud speaking" }
-  ],
-
-  // Relative quanta emission rate factors
-  multipliers: {
-    "Resting": {"Just breathing": 1, "Speaking": 4.7, "Loud speaking": 30.3},
-    "Standing": {"Just breathing": 1.2, "Speaking": 5.7, "Loud speaking": 32.6},
-    "Light exercise": {"Just breathing": 2.8, "Speaking": 13.2, "Loud speaking": 85},
-    "Moderate exercise": {"Just breathing": 4.3, "Speaking": 20.4, "Loud speaking": 132},
-    "Heavy exercise": {"Just breathing": 6.8, "Speaking": 31.6, "Loud speaking": 204}
-  },
 
   // Number of people options
   peopleNumbers: [
@@ -200,7 +167,8 @@ const covidRiskData = {
         { value: "2.2", label: "Gym", volume: 1300, range: "2.2-2.2" },
         { value: "2.09", label: "Sports arena", volume: 4000, range: "0.58-3.6" },
         { value: "2.18", label: "Museum/Gallery", volume: 1500, range: "0.66-3.7" },
-        { value: "2.50", label: "Library", volume: 800, range: "1.0-4.0" }
+        { value: "2.50", label: "Library", volume: 800, range: "1.0-4.0" },
+        { value: "3.0", label: "Movie theater (auditorium)", volume: 2500, range: "1.5-6.0" }
       ]
     },
     {

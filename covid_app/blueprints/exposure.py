@@ -44,7 +44,7 @@ def exposure_calculator():
         # Extract form data for prior risk calculation
         f_e = request.form.get("f_e", "1")
         f_i = request.form.get("f_i", "1")
-        omicron = request.form.get("omicron", "3.3")
+        omicron = request.form.get("omicron", "4.20")
         C0 = request.form.get("C0", "")
         Q0 = request.form.get("Q0", "")
         p = request.form.get("p", "")

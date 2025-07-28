@@ -598,14 +598,7 @@ document.addEventListener("DOMContentLoaded", function() {
     populateSelect(formElements.vaccinationTime, covidRiskData.timePeriods);
     populateSelect(formElements.infectionTime, covidRiskData.timePeriods);
 
-    // Populate activity levels
-    populateSelect(document.getElementById('activity_level'), covidRiskData.activityLevels);
-
-    // Populate physical intensity
-    populateSelect(document.getElementById('physical_intensity'), covidRiskData.physicalIntensityLevels);
-
-    // Populate vocalization options
-    populateSelect(document.getElementById('vocalization'), covidRiskData.vocalizationTypes);
+    // Note: activity_level, physical_intensity, and vocalization all use sliders, not select elements - no population needed
 
     // Populate number of people
     populateNumberSelect(document.getElementById('N'), covidRiskData.peopleNumbers);

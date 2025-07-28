@@ -96,7 +96,7 @@
       <!-- Added hidden inputs -->
       <input type="hidden" name="f_i" id="f_i" value="1">
       <input type="hidden" name="f_e" id="f_e" value="1">
-      <input type="hidden" name="omicron" id="omicron" value="3.3">
+      <input type="hidden" name="omicron" id="omicron" value="4.20">
       <!-- Immune susceptibility is now calculated automatically based on vaccination and infection history -->
       <input type="hidden" name="immune" id="immune" value="1">
       <input type="hidden" name="Q0" id="Q0" value="0.08">
@@ -388,21 +388,14 @@
         <div style="font-weight: 600; color: #334155; margin-bottom: 8px;">Risk Calculation Methods:</div>
         <div style="display: flex; flex-direction: column; gap: 6px;">
           <div>
-            Current MC method (multiplier): <span style="font-weight: 600; color: #334155; margin-left: 5px;">{{ result.mc_mean_old | percent }}</span>
-          </div>
-          <div>
-            New PF method (raised ID<sub>50</sub>): <span style="font-weight: 600; color: #334155; margin-left: 5px;">{{ result.mc_mean_pf | percent }}</span>
+            Monte Carlo method (Protection Factor): <span style="font-weight: 600; color: #334155; margin-left: 5px;">{{ result.mc_mean_pf | percent }}</span>
           </div>
           <div style="font-size: 13px; color:#475569; margin-left:10px;">
             51% CrI: {{ result.mc_pf_ci_25 | percent }} – {{ result.mc_pf_ci_75 | percent }}<br>
             99% CrI: {{ result.mc_pf_ci_0_5 | percent }} – {{ result.mc_pf_ci_99_5 | percent }}
           </div>
-          <div>
-            Current MC method (multiplier): <span style="font-weight: 600; color: #334155; margin-left: 5px;">{{ result.mc_mean_old | percent }}</span>
-          </div>
           <div style="font-size: 13px; color:#475569; margin-left:10px;">
-            51% CrI: {{ result.mc_old_ci_25 | percent }} – {{ result.mc_old_ci_75 | percent }}<br>
-            99% CrI: {{ result.mc_old_ci_0_5 | percent }} – {{ result.mc_old_ci_99_5 | percent }}
+            Protection Factor approach models immunity by raising ID<sub>50</sub> threshold
           </div>
         </div>
       </div>
