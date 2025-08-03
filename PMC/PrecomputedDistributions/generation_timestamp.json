@@ -1,11 +1,11 @@
 {
-  "date": "2025-07-14",
-  "generated_at": "2025-07-15T05:52:37.456687+00:00",
+  "date": "2025-07-28",
+  "generated_at": "2025-08-03T02:35:43.782133+00:00",
   "prevalence_data": {
-    "National": "0.7%",
-    "Northeast": "0.5%",
-    "Midwest": "0.5%",
-    "South": "0.9%",
-    "West": "1.0%"
+    "National": "0.8%",
+    "Northeast": "0.7%",
+    "Midwest": "0.6%",
+    "South": "1.0%",
+    "West": "1.2%"
   }
 }
