@@ -109,10 +109,26 @@ def exposure_calculator():
         if advanced_enabled and raw_prev:
             covid_prevalence = raw_prev
         else:
-            # Lookup prevalence from PMC CSV
-            region = REGION_MAP.get(exposure_location.upper(), "National") if exposure_location else "National"
+            # Lookup prevalence from CDC wastewater CSV
+            # Use state name if provided, otherwise use National
+            lookup_state = None
+            if exposure_location:
+                # Convert state code to full state name
+                state_name = US_STATES.get(exposure_location.upper())
+                # Special case: North Dakota has no data, use South Dakota instead
+                if state_name == "North Dakota":
+                    lookup_state = "South Dakota"
+                    if debug_mode:
+                        print(f"DEBUG: North Dakota selected, using South Dakota data instead")
+                else:
+                    lookup_state = state_name
+            
+            if not lookup_state:
+                lookup_state = "National"
+                
             if debug_mode:
-                print(f"DEBUG: region determined as '{region}'")
+                print(f"DEBUG: looking up prevalence for '{lookup_state}'")
+            
             prev_val = None
             try:
                 import csv
@@ -122,48 +138,37 @@ def exposure_calculator():
                     os.path.join(os.path.dirname(__file__), "..", "..")
                 )
                 csv_path = os.path.join(
-                    root, "PMC", "Prevalence", "prevalence_current.csv"
+                    root, "wastewater", "data", "cdc_wastewater_current.csv"
                 )
                 with open(csv_path, newline="", encoding="utf-8") as f:
                     reader = csv.DictReader(f)
-                    row = next(reader, None)
+                    for row in reader:
+                        if row.get("State", "").strip() == lookup_state:
+                            prev_val = row.get("Prevalence", "").strip()
+                            if debug_mode:
+                                print(f"DEBUG: found prevalence for {lookup_state}: '{prev_val}'")
+                            break
+                    
+                if not prev_val and lookup_state != "National":
+                    # Fall back to National if state-specific lookup failed
                     if debug_mode:
-                        print(f"DEBUG: PMC row data: {row}")
-                    if row and region in row:
-                        val = row.get(region, "").strip()
-                        if val.endswith("%"):
-                            val = val[:-1]
-                        prev_val = val
-                        if debug_mode:
-                            print(f"DEBUG: extracted prevalence value: '{val}'")
+                        print(f"DEBUG: {lookup_state} not found, falling back to National")
+                    f.seek(0)  # Reset file pointer
+                    reader = csv.DictReader(f)
+                    for row in reader:
+                        if row.get("State", "").strip() == "National":
+                            prev_val = row.get("Prevalence", "").strip()
+                            if debug_mode:
+                                print(f"DEBUG: fallback National prevalence: '{prev_val}'")
+                            break
+                            
             except Exception as e:
                 if debug_mode:
-                    print(f"DEBUG: PMC lookup failed: {e}")
+                    print(f"DEBUG: CDC wastewater lookup failed: {e}")
                 prev_val = None
-            # Fall back to national if region lookup failed
-            if not prev_val and region != "National":
-                try:
-                    import csv
-                    import os
-
-                    root = os.path.abspath(
-                        os.path.join(os.path.dirname(__file__), "..", "..")
-                    )
-                    csv_path = os.path.join(
-                        root, "PMC", "Prevalence", "prevalence_current.csv"
-                    )
-                    with open(csv_path, newline="", encoding="utf-8") as f:
-                        reader = csv.DictReader(f)
-                        row = next(reader, None)
-                        if row and "National" in row:
-                            val = row.get("National", "").strip()
-                            if val.endswith("%"):
-                                val = val[:-1]
-                            prev_val = val
-                except Exception:
-                    prev_val = None
-            # Use lookup or default to 1 if nothing found
-            covid_prevalence = prev_val if prev_val else "1"
+            
+            # Use lookup or default to 0.01 if nothing found (as proportion, not percentage)
+            covid_prevalence = prev_val if prev_val else "0.01"
             if debug_mode:
                 print(f"DEBUG: final covid_prevalence = '{covid_prevalence}'")
         

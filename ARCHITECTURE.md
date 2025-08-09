@@ -1,6 +1,6 @@
 # COVID Risk Calculator - Technical Architecture Documentation
 
-*Last updated: July 12, 2025*
+*Last updated: August 9, 2025*
 
 ## Overview
 
@@ -274,19 +274,19 @@ The application uses advanced Monte Carlo simulations, Bayesian statistics, and 
 ### 6. Data Sources & Processing
 
 #### Primary Data Files
-- `PMC/Prevalence/prevalence_current.csv` - Current COVID prevalence by region
-- `Walgreens/walgreens_clean/covid_current.csv` - Current positivity rates by state
-- `wastewater/data/cdc_weekly_prevalence_2023_2025.csv` - CDC weekly prevalence data
+- `wastewater/data/cdc_wastewater_current.csv` - Current state-specific prevalence data (Exposure Calculator)
+- `PMC/Prevalence/prevalence_current.csv` - Current COVID prevalence by region (Test Calculator)
+- `Walgreens/walgreens_clean/covid_current.csv` - Current positivity rates by state (Test Calculator)
+- `wastewater/data/cdc_weekly_prevalence_2023_2025.csv` - CDC weekly prevalence data (time-varying calculations)
 - `data/quanta_emission_rates.csv` - Quanta emission rates for risk calculations
 
 #### Data Processing Scripts
-- `PMC/generate_distributions_manual.py` - Generate prevalence distributions (manual execution)
-- `PMC/pull_prevalence.py` - Pull PMC prevalence data (manual execution)
-- `PMC/pull_prevalence_monitored.py` - Pull PMC prevalence data (automated with monitoring)
-- `Walgreens/update_walgreens.py` - Update Walgreens positivity data (manual execution)
-- `Walgreens/update_walgreens_monitored.py` - Update Walgreens positivity data (automated with monitoring)
+- `wastewater/pull_cdc_wastewater.py` - Pull current CDC wastewater surveillance data
+- `PMC/generate_distributions_manual.py` - Generate prevalence distributions
+- `PMC/pull_prevalence.py` - Pull PMC prevalence data
+- `Walgreens/update_walgreens.py` - Update Walgreens positivity data
 - `scripts/daily_repeated_exposure.py` - Daily exposure calculations
-- `shared/job_utils.py` - Utility functions for data processing jobs and monitoring
+- `shared/job_utils.py` - Utility functions for data processing jobs
 
 #### Wastewater Analysis System
 - `wastewater/estimate_prevalence.py` - Main prevalence estimation
@@ -458,100 +458,103 @@ Risk Calculations
 25. `scripts/__init__.py`
 26. `scripts/daily_repeated_exposure.py`
 27. `shared/job_utils.py`
+28. `wastewater/pull_cdc_wastewater.py` - CDC wastewater data fetching script
 
 #### HTML Templates
-28. `templates/base_analytics.html` - Analytics base
-29. `templates/index.html` - Homepage
-30. `templates/faq.html` - FAQ page
-31. `templates/exposure_calculator.html` - Exposure calculator main
-32. `templates/exposure_hero.html` - Exposure header
-33. `templates/exposure_about_you.html` - User info section
-34. `templates/exposure_other_people.html` - Other people section
-35. `templates/exposure_activity_levels.html` - Activity section
-36. `templates/exposure_environment.html` - Environment section
-37. `templates/components/uncertainty_analysis.html` - Uncertainty component
-38. `templates/macros/exposure_controls.html` - Form control macros
-39. `templates/test_calculator.html` - Test calculator main
-40. `templates/macros/calculation_display.html` - Calculation display macro
-41. `templates/rate_limit.html` - Rate limit error
-42. `templates/faq_general.html` - General FAQ include
-43. `templates/faq_exposure_calculator.html` - Exposure FAQ include
-44. `templates/faq_test_calculator.html` - Test FAQ include
+29. `templates/base_analytics.html` - Analytics base
+30. `templates/index.html` - Homepage
+31. `templates/faq.html` - FAQ page
+32. `templates/exposure_calculator.html` - Exposure calculator main
+33. `templates/exposure_hero.html` - Exposure header
+34. `templates/exposure_about_you.html` - User info section
+35. `templates/exposure_other_people.html` - Other people section
+36. `templates/exposure_activity_levels.html` - Activity section
+37. `templates/exposure_environment.html` - Environment section
+38. `templates/components/uncertainty_analysis.html` - Uncertainty component
+39. `templates/macros/exposure_controls.html` - Form control macros
+40. `templates/test_calculator.html` - Test calculator main
+41. `templates/macros/calculation_display.html` - Calculation display macro
+42. `templates/rate_limit.html` - Rate limit error
+43. `templates/faq_general.html` - General FAQ include
+44. `templates/faq_exposure_calculator.html` - Exposure FAQ include
+45. `templates/faq_test_calculator.html` - Test FAQ include
 
 #### CSS Files
-45. `static/styles.css` - Global styles
-46. `static/exposure-calculator.css` - Exposure calculator styles
-47. `static/test-calculator.css` - Test calculator styles (empty but referenced)
-48. `static/css/risk-distribution.css` - Risk visualization styles
+46. `static/styles.css` - Global styles
+47. `static/exposure-calculator.css` - Exposure calculator styles
+48. `static/test-calculator.css` - Test calculator styles (empty but referenced)
+49. `static/css/risk-distribution.css` - Risk visualization styles
 
 #### JavaScript Files
-49. `static/data.js` - Global data definitions
-50. `static/exposure-calculator.js` - Exposure calculator main logic
-51. `static/test-calculator.js` - Test calculator main logic
-52. `static/js/exposure-utils.js` - Exposure utilities
-53. `static/js/formHandler.js` - Form handling
-54. `static/js/stateManager.js` - State management
-55. `static/js/slider-init.js` - Slider initialization
-56. `static/js/slider-labels.js` - Slider label handling
-57. `static/js/calculations/environment.js` - Environment calculations
-58. `static/js/calculations/exhalation.js` - Exhalation calculations
-59. `static/js/calculations/immuneSusceptibility.js` - Immune calculations
-60. `static/js/calculations/maskFilter.js` - Mask calculations
-61. `static/js/calculations/repeatedExposureRisk.js` - Repeated exposure
-62. `static/js/calculations/calculationDisplay.js` - Calculation display
-63. `static/js/sliders/bindSliders.js` - Slider binding
-64. `static/js/sliders/genericSlider.js` - Generic slider logic
-65. `static/js/sliders/peopleSlider.js` - People slider
-66. `static/js/data/sliderData.js` - Slider configuration
-67. `static/js/uncertainty/riskDistribution.js` - Risk distribution viz
-68. `static/js/utils/analytics.js` - Analytics tracking
-69. `static/js/utils/debug.js` - Debug utilities
-70. `static/js/utils/riskColorScale.js` - Risk color mapping
+50. `static/data.js` - Global data definitions
+51. `static/exposure-calculator.js` - Exposure calculator main logic
+52. `static/test-calculator.js` - Test calculator main logic
+53. `static/js/exposure-utils.js` - Exposure utilities
+54. `static/js/formHandler.js` - Form handling
+55. `static/js/stateManager.js` - State management
+56. `static/js/slider-init.js` - Slider initialization
+57. `static/js/slider-labels.js` - Slider label handling
+58. `static/js/calculations/environment.js` - Environment calculations
+59. `static/js/calculations/exhalation.js` - Exhalation calculations
+60. `static/js/calculations/immuneSusceptibility.js` - Immune calculations
+61. `static/js/calculations/maskFilter.js` - Mask calculations
+62. `static/js/calculations/repeatedExposureRisk.js` - Repeated exposure
+63. `static/js/calculations/calculationDisplay.js` - Calculation display
+64. `static/js/sliders/bindSliders.js` - Slider binding
+65. `static/js/sliders/genericSlider.js` - Generic slider logic
+66. `static/js/sliders/peopleSlider.js` - People slider
+67. `static/js/data/sliderData.js` - Slider configuration
+68. `static/js/uncertainty/riskDistribution.js` - Risk distribution viz
+69. `static/js/utils/analytics.js` - Analytics tracking
+70. `static/js/utils/debug.js` - Debug utilities
+71. `static/js/utils/riskColorScale.js` - Risk color mapping
 
 #### Static Assets
-71. `static/favicon.svg`
-72. `static/favicon.ico`
-73. `static/favicon-16x16.png`
-74. `static/favicon-32x32.png`
-75. `static/apple-touch-icon.png`
+72. `static/favicon.svg`
+73. `static/favicon.ico`
+74. `static/favicon-16x16.png`
+75. `static/favicon-32x32.png`
+76. `static/apple-touch-icon.png`
 
 #### FontAwesome
-76. `static/fontawesome/css/all.min.css` - Main CSS
-77. `static/fontawesome/webfonts/fa-solid-900.woff2` - Solid icons
-78. `static/fontawesome/webfonts/fa-regular-400.woff2` - Regular icons
-79. `static/fontawesome/webfonts/fa-brands-400.woff2` - Brand icons
+77. `static/fontawesome/css/all.min.css` - Main CSS
+78. `static/fontawesome/webfonts/fa-solid-900.woff2` - Solid icons
+79. `static/fontawesome/webfonts/fa-regular-400.woff2` - Regular icons
+80. `static/fontawesome/webfonts/fa-brands-400.woff2` - Brand icons
 
 #### Data Files
-80. `PMC/Prevalence/prevalence_current.csv` - Current prevalence
-81. `PMC/PrecomputedDistributions/generation_timestamp.json` - Timestamp
-82. `Walgreens/walgreens_clean/covid_current.csv` - Current positivity
-83. `Walgreens/walgreens_clean/covid_history_national.csv` - Historical national
-84. `Walgreens/walgreens_clean/covid_history_states.csv` - Historical states
-85. `wastewater/data/cdc_weekly_prevalence_2023_2025.csv` - CDC weekly prevalence data
+81. `PMC/Prevalence/prevalence_current.csv` - Current prevalence
+82. `PMC/PrecomputedDistributions/generation_timestamp.json` - Timestamp
+83. `Walgreens/walgreens_clean/covid_current.csv` - Current positivity
+84. `Walgreens/walgreens_clean/covid_history_national.csv` - Historical national
+85. `Walgreens/walgreens_clean/covid_history_states.csv` - Historical states
+86. `wastewater/data/cdc_weekly_prevalence_2023_2025.csv` - CDC weekly prevalence data
+87. `wastewater/data/cdc_wastewater_current.csv` - Current CDC wastewater data (Exposure Calculator)
+88. `wastewater/data/cdc_wastewater_[date].csv` - Dated CDC wastewater snapshots
 
 #### Configuration Files
-86. `requirements.txt` - Python dependencies
-87. `Procfile` - Heroku deployment
-88. `runtime.txt` - Python version
-89. `package.json` - Node dependencies (for testing)
-90. `babel.config.js` - Babel configuration
-91. `jest.config.cjs` - Jest configuration
-92. `mypy.ini` - Type checking config
-93. `pyproject.toml` - Python project metadata
+89. `requirements.txt` - Python dependencies
+90. `Procfile` - Heroku deployment
+91. `.python-version` - Python version specification
+92. `package.json` - Node dependencies (for testing)
+93. `babel.config.js` - Babel configuration
+94. `jest.config.cjs` - Jest configuration
+95. `mypy.ini` - Type checking config
+96. `pyproject.toml` - Python project metadata
 
 #### Test Files
-94. `tests/test_calculators.py`
-95. `tests/test_endpoints.py`
-96. `tests/test_monte_carlo.py`
-97. `tests/test_validators.py`
-98. `tests/js/calculations/environment.test.js`
-99. `tests/js/calculations/exhalation.test.js`
-100. `tests/js/calculations/immuneSusceptibility.test.js`
-101. `tests/js/calculations/maskFilter.test.js`
-102. `tests/js/slider-labels.test.js`
-103. `tests/js/stateManager.test.js`
+97. `tests/test_calculators.py`
+98. `tests/test_endpoints.py`
+99. `tests/test_monte_carlo.py`
+100. `tests/test_validators.py`
+101. `tests/js/calculations/environment.test.js`
+102. `tests/js/calculations/exhalation.test.js`
+103. `tests/js/calculations/immuneSusceptibility.test.js`
+104. `tests/js/calculations/maskFilter.test.js`
+105. `tests/js/slider-labels.test.js`
+106. `tests/js/stateManager.test.js`
 
-**TOTAL: 103 files that are ACTUALLY USED by the running application**
+**TOTAL: 106 files that are ACTUALLY USED by the running application**
 
 
 ## Development Workflow

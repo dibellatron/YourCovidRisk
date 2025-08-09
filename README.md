@@ -1,6 +1,6 @@
 # YourCovidRisk.com - COVID Risk Calculators
 
-*Last updated: July 12, 2025*
+*Last updated: August 9, 2025*
 
 **Comprehensive Flask web application for rigorous COVID-19 risk assessment**
 
@@ -12,7 +12,7 @@ Architecture: [ARCHITECTURE.md](ARCHITECTURE.md)
 ### 🦠 Exposure Risk Calculator
 - **Advanced aerosol physics modeling** using the Henriques et al. integrated transmission model
 - **Monte Carlo uncertainty analysis** with confidence intervals and risk distributions
-- **Real-time prevalence data** integration from CDC wastewater surveillance, PMC modeling, and Walgreens positivity rates
+- **Real-time prevalence data** integration from CDC wastewater surveillance (state-specific) and PMC modeling
 - **Comprehensive environmental factors**: ventilation (ACH), humidity, CO2 levels, temperature effects
 - **Activity-based emission modeling**: breathing, speaking, singing, shouting with distance sensitivity
 - **Immunity decay modeling** based on Chemaitelly et al. research for vaccination and infection protection
@@ -46,8 +46,8 @@ Architecture: [ARCHITECTURE.md](ARCHITECTURE.md)
 
 ### Installation
 ```bash
-git clone https://github.com/dibellatron/YourCovidRisk.git
-cd YourCovidRisk
+git clone https://github.com/dibellatron/CovidRisk.git
+cd CovidRisk
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
@@ -87,9 +87,11 @@ Open http://127.0.0.1:5000 in your browser.
 ├── templates/               # Jinja2 HTML templates
 ├── static/                  # CSS, JavaScript, and static assets
 ├── tests/                   # Python and JavaScript test suites
-├── PMC/                     # Prevalence data processing
+├── PMC/                     # PMC prevalence data processing
 ├── Walgreens/              # Test positivity data processing
-└── wastewater/             # CDC wastewater data integration
+└── wastewater/             # CDC wastewater surveillance integration
+    ├── data/                # CDC wastewater data files
+    └── pull_cdc_wastewater.py # Current CDC wastewater data fetching
 ```
 
 ### Development Setup
@@ -133,17 +135,21 @@ The application integrates real-time COVID data from multiple sources:
 ### Automated Data Updates
 1. **Weekly Walgreens Positivity Data**
    - Script: `Walgreens/update_walgreens.py`
-   - Updates state-level test positivity rates
+   - Updates state-level test positivity rates (used by Test Calculator only)
 
-2. **Weekly PMC Prevalence Data**
+2. **CDC Wastewater Surveillance Data**
+   - Script: `wastewater/pull_cdc_wastewater.py`
+   - Fetches current state-specific wastewater viral activity levels from CDC
+   - Converts WVAL to prevalence using calibrated multiplier (0.00293)
+   - Outputs: `wastewater/data/cdc_wastewater_current.csv` and dated files
+   - Used by Exposure Risk Calculator for state-specific prevalence
+
+3. **PMC Prevalence Data**
    - Script: `PMC/pull_prevalence_monitored.py` (production) or `PMC/pull_prevalence.py` (manual)
    - Uses Tesseract OCR to analyze PMC prevalence charts
    - Automatically generates prevalence distributions for uncertainty calculations
+   - Used by Test Calculator for regional prevalence estimates
    - Requires Tesseract OCR system installation
-
-3. **CDC Wastewater Data**
-   - File: `wastewater/data/cdc_weekly_prevalence_2023_2025.csv`
-   - Used for time-varying prevalence calculations
 
 ### Heroku Deployment
 For automated data updates on Heroku:
@@ -152,6 +158,10 @@ For automated data updates on Heroku:
 # Add Heroku Scheduler
 heroku addons:create scheduler:standard
 
+# Add Tesseract OCR support (required for PMC scripts)
+heroku buildpacks:add https://github.com/pathwaysmedical/heroku-buildpack-tesseract
+heroku buildpacks:add heroku/python
+
 # Set environment variables
 heroku config:set FLASK_ENV=production
 
@@ -159,6 +169,8 @@ heroku config:set FLASK_ENV=production
 # - Weekly: "python Walgreens/update_walgreens_monitored.py"
 # - Weekly: "python PMC/pull_prevalence_monitored.py"
 ```
+
+**Note**: The dedicated Tesseract buildpack handles OCR system dependencies required for PMC image analysis.
 
 ## Testing
 

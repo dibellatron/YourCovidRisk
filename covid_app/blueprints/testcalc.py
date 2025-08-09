@@ -57,6 +57,8 @@ US_STATES = {
     "WV": "West Virginia",
     "WI": "Wisconsin",
     "WY": "Wyoming",
+    "DC": "District of Columbia",
+    "GU": "Guam",
 }
 
 
