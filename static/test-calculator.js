@@ -22,8 +22,8 @@ function addTestBlock() {
             <option value="Flowflex Plus (Covid & Flu)">Flowflex Plus (Covid & Flu)</option>
             <option value="iHealth (Covid & Flu)">iHealth (Covid & Flu)</option>
             <option value="iHealth (Covid-only)">iHealth (Covid-only)</option>
-            <option value="Lucira">Lucira</option>
-            <option value="Metrix">Metrix</option>
+            <option value="Metrix (Covid-only)">Metrix (Covid-only)</option>
+            <option value="Metrix (Covid & Flu)">Metrix (Covid & Flu)</option>
             <option value="OSOM (Covid & Flu)">OSOM (Covid & Flu)</option>
             <option value="Other RAT (Rapid Antigen Test)">Other RAT (Rapid Antigen Test)</option>
             <option value="Pluslife">Pluslife</option>
@@ -96,8 +96,8 @@ function clearDashboard() {
               <option value="Flowflex Plus (Covid & Flu)">Flowflex Plus (Covid & Flu)</option>
               <option value="iHealth (Covid & Flu)">iHealth (Covid & Flu)</option>
               <option value="iHealth (Covid-only)">iHealth (Covid-only)</option>
-              <option value="Lucira">Lucira</option>
-              <option value="Metrix">Metrix</option>
+              <option value="Metrix (Covid-only)">Metrix (Covid-only)</option>
+              <option value="Metrix (Covid & Flu)">Metrix (Covid & Flu)</option>
               <option value="OSOM (Covid & Flu)">OSOM (Covid & Flu)</option>
               <option value="Other RAT (Rapid Antigen Test)">Other RAT (Rapid Antigen Test)</option>
               <option value="Pluslife">Pluslife</option>

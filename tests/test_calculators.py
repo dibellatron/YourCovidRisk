@@ -7,10 +7,10 @@ def approx(a, b, tol=1e-12):
 
 
 def test_calculate_test_risk_simple():
-    # Symptomatic user, Metrix negative
+    # Symptomatic user, Metrix (Covid-only) negative
     result = calculate_test_risk(
         symptoms="yes",
-        test_types=["Metrix"],
+        test_types=["Metrix (Covid-only)"],
         test_results=["negative"],
         covid_cautious="Moderately",
         covid_prevalence_input="",

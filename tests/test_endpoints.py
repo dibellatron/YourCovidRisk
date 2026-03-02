@@ -41,7 +41,7 @@ def test_post_test_calculator(client):
     # Minimal valid form data for test calculator
     data = {
         'symptoms': 'yes',
-        'test_type': 'Metrix',
+        'test_type': 'Metrix (Covid-only)',
         'test_result': 'negative',
         'covid_cautious': 'Moderately',
         'covid_cautious_level': 'Moderately',

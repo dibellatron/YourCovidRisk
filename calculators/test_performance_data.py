@@ -5,7 +5,7 @@ that refactoring the algorithm does *not* alter results.  Keeping the numbers
 in one place avoids future inconsistencies and makes updates simpler.
 
 LIMIT OF DETECTION (LoD) UNITS:
-- Lucira, Metrix, Pluslife: genome equivalents/mL (ge/mL)
+- Lucira, Metrix (Covid-only), Metrix (Covid & Flu), Pluslife: genome equivalents/mL (ge/mL)
 - All other tests: TCID₅₀/mL (50% tissue culture infectious dose per mL)
 
 Note: LoD values represent the 95% limit of detection (concentration at which
@@ -17,7 +17,7 @@ the test detects 95% of positive samples).
 # Each test entry will include a "lod_95" field for the 95% limit of detection.
 
 TEST_PERFORMANCE: dict = {
-    "Metrix": {
+    "Metrix (Covid-only)": {
         "lod_95": 667,  # LoD in genome equivalents/mL (ge/mL)
         "yes": {
             "sens": 0.95,
@@ -56,6 +56,42 @@ TEST_PERFORMANCE: dict = {
 
 
             "spec_n": 261,  # sample size for specificity measurement
+        },
+    },
+    "Metrix (Covid & Flu)": {
+        "lod_95": 667,  # LoD in genome equivalents/mL (ge/mL) - assumed same as Covid-only version
+        "yes": {
+            "sens": 0.955,
+            "spec": 0.996,
+            "sens_low": 0.889,
+            "sens_high": 0.982,
+            "spec_low": 0.985,
+            "spec_high": 0.999,
+
+            "sens_k": 84,  # number of successes for sensitivity measurement
+
+            "sens_n": 88,  # sample size for sensitivity measurement
+
+            "spec_k": 466,  # number of successes for specificity measurement
+
+            "spec_n": 468,  # sample size for specificity measurement
+        },
+        "no": {
+            # No asymptomatic-specific data available; using Metrix (Covid-only) values.
+            "sens": 0.94,
+            "spec": 0.992,
+            "sens_low": 0.845,
+            "sens_high": 1.0,
+            "spec_low": 0.972,
+            "spec_high": 0.998,
+
+            "sens_k": 21,  # from Metrix (Covid-only)
+
+            "sens_n": 21,  # from Metrix (Covid-only)
+
+            "spec_k": 259,  # from Metrix (Covid-only)
+
+            "spec_n": 261,  # from Metrix (Covid-only)
         },
     },
     "Other RAT (Rapid Antigen Test)": {

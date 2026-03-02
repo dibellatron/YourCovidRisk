@@ -408,7 +408,6 @@
   <nav>
     <a href="{{ url_for('index') }}"><i class="fas fa-home"></i> Home</a>
     <a href="{{ url_for('faq') }}"><i class="fas fa-book"></i> FAQ</a>
-    <a href="https://ko-fi.com/yourcovidrisk" target="_blank" rel="noopener"><i class="fas fa-heart"></i> Donate</a>
   </nav>
 
   <div class="container" style="max-width: 1200px;">
@@ -424,9 +423,6 @@
       </div>
     </div>
 
-    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.75rem 1.5rem; margin: 1.5rem auto; max-width: 600px; text-align: center; font-size: 0.9rem; color: #64748b;">
-      <a href="https://ko-fi.com/yourcovidrisk" target="_blank" rel="noopener" style="color: #4f46e5; text-decoration: none; font-weight: 500;">Donate to support this project →</a>
-    </div>
 
     <style>
     .hero-section {
@@ -663,8 +659,8 @@
               <option value="Flowflex Plus (Covid & Flu)" {% if test.test_type == 'Flowflex Plus (Covid & Flu)' %}selected{% endif %}>Flowflex Plus (Covid & Flu)</option>
               <option value="iHealth (Covid & Flu)" {% if test.test_type == 'iHealth (Covid & Flu)' %}selected{% endif %}>iHealth (Covid & Flu)</option>
               <option value="iHealth (Covid-only)" {% if test.test_type == 'iHealth (Covid-only)' %}selected{% endif %}>iHealth (Covid-only)</option>
-              <option value="Lucira" {% if test.test_type == 'Lucira' %}selected{% endif %}>Lucira</option>
-              <option value="Metrix" {% if test.test_type == 'Metrix' %}selected{% endif %}>Metrix</option>
+              <option value="Metrix (Covid-only)" {% if test.test_type == 'Metrix (Covid-only)' %}selected{% endif %}>Metrix (Covid-only)</option>
+              <option value="Metrix (Covid & Flu)" {% if test.test_type == 'Metrix (Covid & Flu)' %}selected{% endif %}>Metrix (Covid & Flu)</option>
               <option value="OSOM (Covid & Flu)" {% if test.test_type == 'OSOM (Covid & Flu)' %}selected{% endif %}>OSOM (Covid & Flu)</option>
               <option value="Other RAT (Rapid Antigen Test)" {% if test.test_type == 'Other RAT (Rapid Antigen Test)' %}selected{% endif %}>Other RAT (Rapid Antigen Test)</option>
               <option value="Pluslife" {% if test.test_type == 'Pluslife' %}selected{% endif %}>Pluslife</option>
@@ -702,8 +698,8 @@
                 <option value="Flowflex Plus (Covid & Flu)">Flowflex Plus (Covid & Flu)</option>
                 <option value="iHealth (Covid & Flu)">iHealth (Covid & Flu)</option>
                 <option value="iHealth (Covid-only)">iHealth (Covid-only)</option>
-                <option value="Lucira">Lucira</option>
-                <option value="Metrix">Metrix</option>
+                <option value="Metrix (Covid-only)">Metrix (Covid-only)</option>
+                <option value="Metrix (Covid & Flu)">Metrix (Covid & Flu)</option>
                 <option value="OSOM (Covid & Flu)">OSOM (Covid & Flu)</option>
                 <option value="Other RAT (Rapid Antigen Test)">Other RAT (Rapid Antigen Test)</option>
                 <option value="Pluslife">Pluslife</option>
