@@ -11,8 +11,8 @@
         <p>Your likelihood of a Covid infection is estimated by combining epidemiological data with your individual test results using principles from probability. Here’s how the calculation works in different scenarios:</p>
         <h4>1. Initial Risk Based on Symptoms and Local Conditions</h4>
         <ul>
-          <li><strong>For Symptomatic Users:</strong> If you report having symptoms, the app uses your local test positivity rate as the starting probability. This comes from the <a href="https://www.walgreens.com/healthcare-solutions/covid-19-index" target="_blank" rel="noopener">Walgreens Respiratory Index</a>, which provides state-level data. If you select a state, we use that state's rate; otherwise we use the national rate. If positivity data isn't available for your state, we fall back to the national rate.</li>
-          <li><strong>For Asymptomatic Users:</strong> When you don't have symptoms, we use a more complex calculation that combines regional Covid prevalence estimates from <a href="https://www.pmc19.com/data/index.php" target="_blank" rel="noopener">the PMC model</a> with local positivity rates. The calculation accounts for the fact that <a href="https://europepmc.org/article/PMC/PMC9321237" target="_blank" rel="noopener">about 32% of currently infected individuals are asymptomatic</a>. We derive the total number of symptomatic people in the population using the positivity rate, then calculate what fraction of asymptomatic people are likely infected. This gives a more accurate prior probability than simply using overall prevalence.</li>
+          <li><strong>For Symptomatic Users:</strong> If you report having symptoms, the calculator uses your local test positivity rate as the starting probability. The <a href="https://www.walgreens.com/healthcare-solutions/covid-19-index" target="_blank" rel="noopener">Walgreens Respiratory Index</a> published state-level COVID test positivity data from 2021 through summer 2025, when data collection was discontinued. Since this data is no longer being updated, the calculator uses a seasonal model I built from historical Walgreens testing data collected during 2023–2025. For each week of the year, the model computes a test-count-weighted average of historical positivity rates, capturing the consistent seasonal patterns in COVID test positivity (higher in winter and summer, lower in spring and fall). This provides a reasonable estimate of what positivity rates tend to be at any given time of year. If you select a state with available data, the calculator uses that state's seasonal estimate; otherwise it uses the national estimate. Data from 2021–2022 is excluded because testing behavior during that period—widespread asymptomatic screening—was fundamentally different from the symptomatic-only testing that now predominates in the "post-pandemic" (<em>sic</em>) era, making those positivity rates not comparable to current conditions.</li>
+          <li><strong>For Asymptomatic Users:</strong> When you don't have symptoms, the calculator uses a more complex calculation that combines regional Covid prevalence estimates from <a href="https://www.pmc19.com/data/index.php" target="_blank" rel="noopener">the PMC model</a> with the seasonal positivity rate estimates described above. The calculation accounts for the fact that <a href="https://europepmc.org/article/PMC/PMC9321237" target="_blank" rel="noopener">about 32% of currently infected individuals are asymptomatic</a>. It derives the total number of symptomatic people in the population using the positivity rate, then calculates what fraction of asymptomatic people are likely infected. This gives a more accurate prior probability than simply using overall prevalence.</li>
         </ul>
         <h4>2. Adjustment for Covid Exposure Level</h4>
         <p>Your recent behavior also influences your risk. The app asks you to rate your recent potential Covid exposure compared to the average person. This helps adjust your baseline risk based on your actual activities and exposure patterns.</p>
@@ -45,7 +45,7 @@
           </li>
         </ul>
         <h4>4. Advanced Settings: Manual Data Entry</h4>
-        <p>The advanced mode lets you manually enter local Covid prevalence and positivity rates, overriding the automatic data lookup from PMC and Walgreens. This is useful if you have more recent or specific data for your situation.
+        <p>The advanced mode lets you manually enter local Covid prevalence and positivity rates, overriding the automatic data lookup from PMC and the historical testing data. This is useful if you have more recent or specific data for your situation.
  You can also manually set your own prior probability, which will bypass all other calculations and use only your test results to update the risk using Bayes’ theorem.</p>
       </div>
     </div>
@@ -57,7 +57,7 @@
       <div class="faq-answer">
         <p>This counterintuitive result illustrates a fundamental principle in medical testing: <strong>even excellent tests can't overcome very low baseline probabilities</strong>. Here's why this happens:</p>
         
-        <p><strong>Starting Point Matters:</strong> When you're asymptomatic, your starting probability of having COVID is much lower than if you had symptoms. For example, in the Spring—historically the lowest COVID activity period—an asymptomatic person in California starts with only about 0.3% probability of infection. Compare this to a symptomatic person who starts with about 25% probability (the current positivity rate in California as of May 24, 2025).</p>
+        <p><strong>Starting Point Matters:</strong> When you're asymptomatic, your starting probability of having COVID is much lower than if you had symptoms. For example, in the Spring—historically the lowest COVID activity period—an asymptomatic person in California starts with only about 0.3% probability of infection. Compare this to a symptomatic person who starts with about 25% probability (based on the typical positivity rate in California for that time of year).</p>
         
         <p><strong>Exposure Level Effects:</strong> Your exposure level dramatically affects these calculations. COVID-cautious people who select "much less" or "somewhat less" exposure will have even lower infection probabilities with a positive test. The calculator accounts for how your behavior compares to the average person.</p>
         
@@ -235,8 +235,8 @@
               <td>99.2% <br>(97.2%–99.8%)</td>
               <td>
                 <ul>
-                  <li><a href=”https://www.fda.gov/media/162403/download?attachment=”>FDA testing data</a></li>
-                  <li>Although Metrix (Covid-only) had a measured sensitivity of 100% among asymptomatic people in its FDA study, that study only involved 21 infected asymptomatic people. So, on purely statistical grounds, it is very unlikely that Metrix (Covid-only)’s sensitivity for asymptomatic people is actually 100%. Moreover, there is evidence that the viral load in asymptomatic people tends to be lower than in symptomatic people. So, theoretically, infections should be more difficult to detect in asymptomatic people than in symptomatic people. For this reason, I am somewhat artificially using 94% as my point estimate of Metrix (Covid-only)’s sensitivity for asymptomatic people. However, you can explore the full range of plausible estimates by clicking the “How certain is this result?” button after calculating probability of infection.</li>
+                  <li><a href="https://www.fda.gov/media/162403/download?attachment=">FDA testing data</a></li>
+                  <li>Although Metrix (Covid-only) had a measured sensitivity of 100% among asymptomatic people in its FDA study, that study only involved 21 infected asymptomatic people. So, on purely statistical grounds, it is very unlikely that Metrix (Covid-only)'s sensitivity for asymptomatic people is actually 100%. Moreover, there is evidence that the viral load in asymptomatic people tends to be lower than in symptomatic people. So, theoretically, infections should be more difficult to detect in asymptomatic people than in symptomatic people. For this reason, I am somewhat artificially using 94% as my point estimate of Metrix (Covid-only)'s sensitivity for asymptomatic people. However, you can explore the full range of plausible estimates by clicking the "How certain is this result?" button after calculating probability of infection.</li>
                 </ul>
               </td>
             </tr>
@@ -248,7 +248,7 @@
               <td>99.2% <br>(97.2%–99.8%)</td>
               <td>
                 <ul>
-                  <li><a href=”https://www.fda.gov/media/185663/download?attachment”>FDA symptomatic testing data</a></li>
+                  <li><a href="https://www.fda.gov/media/185663/download?attachment">FDA symptomatic testing data</a></li>
                   <li>Asymptomatic sensitivity and specificity assumed same as Metrix (Covid-only); see note above.</li>
                 </ul>
               </td>

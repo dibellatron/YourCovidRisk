@@ -68,7 +68,7 @@ test_bp = Blueprint("testcalc", __name__)
 
 
 def get_national_positivity_rate():
-    """Helper function to get the current national positivity rate from Walgreens data"""
+    """Helper function to get the national positivity rate estimate from the seasonal model"""
     try:
         root_dir = os.path.abspath(
             os.path.join(os.path.dirname(__file__), "..", "..")

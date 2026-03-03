@@ -765,10 +765,10 @@ def calculate_test_risk(
         else:
             # Default behavior using Walgreens data
             base = (
-                "For symptomatic individuals, we use the local test positivity rate from "
-                'the <a href="https://www.walgreens.com/healthcare-solutions/covid-19-index" '
-                'target="_blank" rel="noopener">Walgreens Respiratory Index</a> '
-                "for the starting probability."
+                "For symptomatic individuals, we use the local test positivity rate as the starting probability. "
+                "This estimate is based on a seasonal model of historical Walgreens testing data from 2023–2025, "
+                "weighted by test volume "
+                '(see the <a href="/faq#test-how-calculated">FAQ</a> for details).'
             )
             if not state:
                 state_note = f" Since no state was selected, we use the national positivity rate of {p_prior}."
@@ -778,7 +778,7 @@ def calculate_test_risk(
                 )
             else:
                 state_note = (
-                    f" Positivity data is not currently available for {state}, so we use "
+                    f" Positivity data is not available for {state}, so we use "
                     f"the national positivity rate of {p_prior}."
                 )
             step1_detail = f"{base}{state_note}"
@@ -844,8 +844,8 @@ def calculate_test_risk(
                     f"Since {asymp_link}, the probability you have Covid <em>and</em> are asymptomatic is "
                     f"32% × {p_prev} = {prob_covid_and_asymp}. Further, 68% of people who have Covid <em>are</em> symptomatic, so the probability that you have Covid and are <em>not</em> asymptomatic is "
                     f"68% × {p_prev} = {prob_covid_and_symp}.<br><br>"
-                    f"Next, we use the national test positivity rate of {positivity_rate_display} from the "
-                    f'<a href="https://www.walgreens.com/healthcare-solutions/covid-19-index" target="_blank" rel="noopener">Walgreens Respiratory Index</a> '
+                    f"Next, we use the national test positivity rate of {positivity_rate_display}, estimated from a seasonal model of historical "
+                    f'Walgreens testing data (see the <a href="/faq#test-how-calculated">FAQ</a> for details), '
                     f"as an estimate of the proportion of people with Covid-like symptoms who actually have Covid. "
                     f"So, about {prob_covid_and_symp} ÷ {positivity_rate_display} = {total_symptomatic_display} of people are currently experiencing Covid-like symptoms. "
                     f"This means that 100% - {total_symptomatic_display} = {total_asymptomatic_display} of people are asymptomatic. "
@@ -867,8 +867,8 @@ def calculate_test_risk(
                         f"Since {asymp_link}, the probability you have Covid <em>and</em> are asymptomatic is "
                         f"32% × {p_prev} = {prob_covid_and_asymp}. Further, 68% of people who have Covid <em>are</em> symptomatic, so the probability that you have Covid and are <em>not</em> asymptomatic is "
                         f"68% × {p_prev} = {prob_covid_and_symp}.<br><br>"
-                        f"Next, we use the national test positivity rate of {positivity_rate_display} from the "
-                        f'<a href="https://www.walgreens.com/healthcare-solutions/covid-19-index" target="_blank" rel="noopener">Walgreens Respiratory Index</a> '
+                        f"Next, we use the national test positivity rate of {positivity_rate_display}, estimated from a seasonal model of historical "
+                        f'Walgreens testing data (see the <a href="/faq#test-how-calculated">FAQ</a> for details), '
                         f"as an estimate of the proportion of people with Covid-like symptoms who actually have Covid. "
                         f"So, about {prob_covid_and_symp} ÷ {positivity_rate_display} = {total_symptomatic_display} of people are currently experiencing Covid-like symptoms. "
                         f"This means that 100% - {total_symptomatic_display} = {total_asymptomatic_display} of people are asymptomatic. "
@@ -896,8 +896,8 @@ def calculate_test_risk(
                         f"for the {region}. Since {asymp_link}, the probability you have Covid <em>and</em> are asymptomatic is "
                         f"32% × {p_prev} = {prob_covid_and_asymp}. Further, 68% of people who have Covid <em>are</em> symptomatic, so the probability that you have Covid and are <em>not</em> asymptomatic is "
                         f"68% × {p_prev} = {prob_covid_and_symp}.<br><br>"
-                        f"Next, the local test positivity rate of {positivity_rate_display} from the "
-                        f'<a href="https://www.walgreens.com/healthcare-solutions/covid-19-index" target="_blank" rel="noopener">Walgreens Respiratory Index</a> '
+                        f"Next, the local test positivity rate of {positivity_rate_display} for {state}, estimated from a seasonal model of historical "
+                        f'Walgreens testing data (see the <a href="/faq#test-how-calculated">FAQ</a> for details), '
                         f"provides an estimate of the proportion of people in {state} with Covid-like symptoms who actually have Covid. "
                         f"So, about {prob_covid_and_symp} ÷ {positivity_rate_display} = {total_symptomatic_display} of people in {state} are currently experiencing Covid-like symptoms. "
                         f"This means that 100% - {total_symptomatic_display} = {total_asymptomatic_display} of people in {state} are asymptomatic. "
@@ -910,8 +910,8 @@ def calculate_test_risk(
                         f"for the {region}. Since {asymp_link}, the probability you have Covid <em>and</em> are asymptomatic is "
                         f"32% × {p_prev} = {prob_covid_and_asymp}. Further, 68% of people who have Covid <em>are</em> symptomatic, so the probability that you have Covid and are <em>not</em> asymptomatic is "
                         f"68% × {p_prev} = {prob_covid_and_symp}.<br><br>"
-                        f"Positivity data is not currently available for {state}, so we use the national positivity rate of {positivity_rate_display} from the "
-                        f'<a href="https://www.walgreens.com/healthcare-solutions/covid-19-index" target="_blank" rel="noopener">Walgreens Respiratory Index</a> '
+                        f"Positivity data is not available for {state}, so we use the national test positivity rate of {positivity_rate_display}, estimated from a seasonal model of historical "
+                        f'Walgreens testing data (see the <a href="/faq#test-how-calculated">FAQ</a> for details), '
                         f"as an estimate of the proportion of people with Covid-like symptoms who actually have Covid. "
                         f"So, about {prob_covid_and_symp} ÷ {positivity_rate_display} = {total_symptomatic_display} of people are currently experiencing Covid-like symptoms. "
                         f"This means that 100% - {total_symptomatic_display} = {total_asymptomatic_display} of people are asymptomatic. "
